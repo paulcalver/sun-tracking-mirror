@@ -1,0 +1,18 @@
+5-joint run. Scale 0.65; reach about 297 mm (shoulder 99 mm high). Posture swings [45. 25. 30.] deg, periods [72. 40. 60.] min.
+
+winter solstice  aim error max 0.000 deg | posture off preference max 11 deg | lowest point 84 mm | closest links 83 mm | min |sin q5| 0.72
+                 joint range (deg) J1  -306.. 126  J2  -104.. -54  J3  -123.. -60  J4  -120..  52  J5    46.. 134  J6     0..   0
+                 net change over the day J1 -364.1  J2   -0.3  J3    4.5  J4   -4.3  J5    2.3  J6    0.0
+                 fastest joint (deg per minute) J1 4.34  J2 3.81  J3 3.52  J4 6.59  J5 3.78  J6 0.00
+
+spring equinox   aim error max 0.002 deg | posture off preference max 44 deg | lowest point 59 mm | closest links 78 mm | min |sin q5| 0.71
+                 joint range (deg) J1  -305.. 132  J2  -104.. -40  J3  -122.. -44  J4    82.. 175  J5  -134.. -45  J6     0..   0
+                 net change over the day J1 -366.2  J2   -0.2  J3    4.6  J4   -4.2  J5   -5.0  J6    0.0
+                 fastest joint (deg per minute) J1 4.22  J2 3.83  J3 3.58  J4 6.34  J5 3.82  J6 0.00
+
+summer solstice  aim error max 0.000 deg | posture off preference max 11 deg | lowest point 99 mm | closest links 83 mm | min |sin q5| 0.72
+                 joint range (deg) J1  -309.. 130  J2  -105.. -54  J3  -122.. -60  J4   -73.. 100  J5    46.. 134  J6     0..   0
+                 net change over the day J1 -367.4  J2   -0.4  J3    4.4  J4   -4.1  J5    7.5  J6    0.0
+                 fastest joint (deg per minute) J1 4.49  J2 3.84  J3 3.52  J4 6.54  J5 3.79  J6 0.00
+
+Wrote /home/user/nasa-research/sun-arm/sim/output6-five

@@ -1,0 +1,17 @@
+item,qty,unit_gbp,total_gbp,confidence,source_or_note
+"NEMA 17 stepper motor 42x34 mm, 1.5 A",5,11.00,55.00,sourced,"The Pi Hut listing, VAT wording unclear in snippet: https://thepihut.com/products/nema-17-stepper-motor-42mm-x-34mm"
+TMC2209 driver (StepStick format),5,4.45,22.25,sourced (low end),Kunkune range 3.25 to 4.45; generic modules vary in quality: https://kunkune.co.uk/shop/servo-motors-and-shields/stepper-motor-driver-tmc2208-tmc2209/
+"ESP32 dev board (3-pack, 2 spare)",1,16.73,16.73,sourced,Typecat 3-pack via OnBuy per PriceRunner: https://www.pricerunner.com/pl/10012-3537668758/Single-Board-Computers/Typecat-ESP32-DevKitC-Core-Board-Compare-Prices
+Slip ring 12 wire 2 A (power across base),1,20.64,20.64,sourced,Robot Shop UK: https://uk.robotshop.com/products/sparkfun-slip-ring-12-wire-2a
+24 V 5 A power supply (C5 inlet),1,18.88,18.88,sourced,eBay UK listing; Ooznest had one at 10.80 but out of stock: https://ooznest.co.uk/product/24v-120w-dc-laptop-power-supply-adaptor/
+"Turntable (lazy Susan) bearing 100 mm, base yaw",1,5.70,5.70,sourced,BEP: https://bepltd.com/collections/lazy-suzan-bearing-supplier-uk ; wobble and load rating to be checked
+"GT2 20T pulley, 6 mm belt (motor side)",5,6.50,32.50,"sourced (high, packs likely cheaper)",123-3D: https://www.123-3d.co.uk/123-3D-Black-GT2-timing-belt-pulley-20-teeth-6mm-belt-5mm-bore-GT2-20T-W6-B5-400211009-i2547.html
+"GT2 closed belt loops, 6 mm (about 8, lengths to be set by CAD)",8,3.50,28.00,sourced (280 mm size only),123-3D: https://123-3d.co.uk/123-3D-GT2-closed-timing-belt-6mm-280mm-i2749-t3046.html
+PETG filament 1 kg (two spools for iterations),2,15.30,30.60,sourced,The Pi Hut: https://thepihut.com/collections/all/products/milk-white-petg-filament-1-75mm-1kg
+AS5600 magnetic encoder module (4 joints + 1 spare),5,3.50,17.50,estimate,"No UK price found; EUR 3.00 at Tinytronics, 4-pack GBP 13.90 on eBay Germany"
+"Hall sensors and small magnets (homing, yaw index)",1,6.00,6.00,estimate,No UK price found
+"Bearings, 608 and 6800 series assortment",1,15.00,15.00,estimate,No UK price found
+"Fasteners, heat-set inserts, shafts",1,12.00,12.00,estimate,
+"Wire, connectors, fuse, switch, capacitors",1,15.00,15.00,estimate,
+Springs and misc counterbalance parts,1,5.00,5.00,estimate,
+TOTAL,,,300.80,,"sourced 230.30, estimated 70.50"

@@ -1,0 +1,17 @@
+Arm: L1 160.0, L2 160.0, pointer 90.0, wrist out 200.0, shoulder height 60.0 mm
+
+winter solstice  branch A: elevation  -61.9 to  15.1 | yaw travel  359.3 | shoulder  51.3.. 64.8 | elbow -102.6.. -99.3 | wrist  -27.5..  66.4 | unreachable minutes 0
+                          lowest tip  35.0 mm, elbow 184.9 mm, wrist  60.0 mm | fastest joint step per minute: yaw 0.49, shoulder 0.06, elbow 0.01, wrist 0.22 deg
+spring equinox   branch A: elevation  -39.1 to  38.0 | yaw travel  359.8 | shoulder  51.3.. 59.8 | elbow -102.6..-101.5 | wrist    2.5..  89.4 | unreachable minutes 0
+                          lowest tip  35.0 mm, elbow 184.9 mm, wrist  60.0 mm | fastest joint step per minute: yaw 0.32, shoulder 0.06, elbow 0.01, wrist 0.21 deg
+summer solstice  branch A: elevation  -15.0 to  61.9 | yaw travel  359.7 | shoulder  51.3.. 51.3 | elbow -102.6..-102.6 | wrist   36.3.. 113.3 | unreachable minutes 0
+                          lowest tip  36.6 mm, elbow 184.9 mm, wrist  60.0 mm | fastest joint step per minute: yaw 0.49, shoulder 0.00, elbow 0.00, wrist 0.16 deg
+
+winter solstice  branch B: elevation  -61.9 to  15.1 | yaw travel  359.3 | shoulder  51.3.. 64.8 | elbow -102.6.. -99.3 | wrist  216.2.. 276.3 | unreachable minutes 0
+                          lowest tip  35.0 mm, elbow 184.9 mm, wrist  60.0 mm | fastest joint step per minute: yaw 0.49, shoulder 0.06, elbow 0.01, wrist 0.15 deg
+spring equinox   branch B: elevation  -39.1 to  38.0 | yaw travel  359.8 | shoulder  51.3.. 59.8 | elbow -102.6..-101.5 | wrist  193.3.. 260.8 | unreachable minutes 0
+                          lowest tip  35.0 mm, elbow 184.9 mm, wrist  60.0 mm | fastest joint step per minute: yaw 0.32, shoulder 0.06, elbow 0.01, wrist 0.16 deg
+summer solstice  branch B: elevation  -15.0 to  61.9 | yaw travel  359.7 | shoulder  51.3.. 51.3 | elbow -102.6..-102.6 | wrist  169.4.. 246.4 | unreachable minutes 0
+                          lowest tip  36.6 mm, elbow 184.9 mm, wrist  60.0 mm | fastest joint step per minute: yaw 0.49, shoulder 0.00, elbow 0.00, wrist 0.16 deg
+
+Wrote /home/user/nasa-research/sun-arm/sim/output

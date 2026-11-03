@@ -1,0 +1,50 @@
+# Off-the-shelf parts for the v3 hinged mirror (sourcing pass, 2026-11-03)
+
+Purpose: pick real parts first, then draw the printed parts around them. Status column: **found** = a listing or datasheet gave the figure; **unverified** = only a search snippet or my own arithmetic; **blocked** = page would not load (rate limited), retry. Prices were not re-checked except where stated. Nothing here has been ordered or measured.
+
+## Parts that set the printed-part geometry
+
+| Part | Candidate | Key figures | Source | Status | What it changes in the CAD |
+|---|---|---|---|---|---|
+| Turntable bearing | Lazy Susan, **9 inch** (Bearing King) | ID 114.3, OD 228.6, height 8.33, 750 lb (340 kg) | [Bearing King 9 inch](https://bearing-king.co.uk/products/9-inch-lazy-susan-turntable-bearing-round), figures via search snippet | found (hole pattern and price blocked) | Replaces the 250 mm ring in the model. The 114 mm bore can hold the fixed hub pulley (about 101 mm across) and the slip ring. The drum floor becomes a printed or cut disc bolted to the top race. Hole pitch circles still needed. |
+| Turntable bearing, rejected | 12 inch | OD 304.88 | [Bearing King 12 inch](https://www.bearing-king.co.uk/bearing/lazy-susan-turntable-bearing-round-12-inch/6092) | found | Too wide for the 300 mm plinth. |
+| Slip ring | 22 mm, 12 wire, 2 A, flange version (SenRing SNM022A-12 class) | body 22 dia, length 26 to 26.5 (sources differ), flange 44.5 dia, 28 AWG wires, about 250 to 300 rpm | [SparkFun listing](https://www.sparkfun.com/slip-ring-12-wire-2a.html), [Pi Hut flange version](https://thepihut.com/products/slip-ring-with-flange-22mm-diameter-12-wires-max-240v-2a), [datasheet PDF](https://cdn.sparkfun.com/datasheets/Robotics/SNM022A-12%20updated.pdf) (drawing is an image, not read) | found, drawing unread | Model has 22 x 32; real length is about 26.5. Flange 44.5 needs a seat. Which side turns, flange hole pattern and wire length still to read from the drawing. |
+| Azimuth belt | GT2, 6 mm, closed loop, **380 mm (190 teeth)** | my arithmetic: with a 16T pulley the loop at 90 mm centres is 380 mm | [eBay.de 380 mm](https://www.ebay.de/itm/285525641166) | found, but no UK shop seen; 400 mm is common ([Tinytronics](https://www.tinytronics.nl/en/3d-printing/parts/timing-belts)) | Set the centre distance from a stock loop: 380 mm or 400 mm. |
+| Azimuth motor pulley | GT2 **20T**, 5 mm bore, 6 mm belt (123-3D, already in the old BOM) or 16T (E3D £4.35, sold out when seen) | 20T pitch diameter 12.73 mm | [123-3D 20T](https://www.123-3d.co.uk/123-3D-Black-GT2-timing-belt-pulley-20-teeth-6mm-belt-5mm-bore-GT2-20T-W6-B5-400211009-i2547.html) (from the earlier BOM, not rechecked) | found | **Suggest 20T over 16T** (my arithmetic, check): ratio 8:1 instead of 10:1, wrap rises from about 119 to about 121 degrees but with 6 to 7 teeth instead of 5, a 380 mm loop fits at about 89 mm centres, and it is a UK-sourced part. Cost: 0.0141 deg per microstep instead of 0.0112, still fine. |
+| Hub pulley | **Printed**, GT2 160T, 101.9 pitch dia | no off-the-shelf 160T found | n/a | n/a | Printed in PETG; teeth must be tuned on a test print. Could be split in two for bed size (about 102 mm fits most beds whole). |
+| Tilt motor and azimuth motor | NEMA 17, 42 x 42 x 34 mm | not rechecked | [Pi Hut NEMA 17 42x34](https://thepihut.com/products/nema-17-stepper-motor-42mm-x-34mm) (from the earlier BOM, page blocked today) | blocked | Shaft length and pilot boss size drive the motor mounts. |
+| Lead screw and nut | **TR8x2, single start, 2 mm lead** | the common cheap screw is T8x8 (4 starts, 8 mm lead) | [Tinytronics TR8x2 screws](https://www.tinytronics.nl/en/mechanics-and-actuators/parts/lead-screws), [TR8x2 nut](https://www.tinytronics.nl/en/mechanics-and-actuators/parts/lead-screws/tr8x2-leadscrew-nut), [anti-backlash TR8x2 nut](https://www.bitsandparts.nl/en/leadscrew-spindle-nut-anti-backlash-tr8x2-p1911953) | found, but **no UK supplier found** | **Do not buy the usual T8x8.** With an 8 mm lead the same load needs about 4 times the motor torque (my arithmetic: about 0.25 N.m at 70 deg against a 0.28 N.m holding motor) and the screw will not hold the mirror when unpowered. Needs a lead-2 screw (Netherlands) or a gearbox. Nut flange size not given in the results. |
+| Hinge and screw bearings | 685ZZ (5 x 11 x 5) for the hinge stubs, 688ZZ (8 x 16 x 5) for the screw end | standard sizes | [RS 685ZZ](https://uk.rs-online.com/web/p/ball-bearings/0644237) (bulk pack of 80, out of stock), [RS 688ZZ](https://uk.rs-online.com/web/p/ball-bearings/0644241); small packs on eBay | found | Fine as drawn. Buy small packs from a marketplace. |
+| Encoder | AS5600 module with a 6 x 2.5 mm diametric magnet | board about 23 x 23 mm | [Tinytronics](https://www.tinytronics.nl/shop/en/sensors/magnetic-field/as5600-magnetic-angle-sensor-encoder-module), no UK stock seen | found | **Problem:** I modelled a 10 x 10 board in an 18 mm housing. The usual 23 x 23 module does not fit. Options: a bare AS5600 chip on a small custom PCB (about 10 x 10), a different small module, or mount the module below the plate on an extension of the hinge stub. Decide before drawing the housing. |
+| Mirror | 6 mm silvered float glass, polished edge, 200 x 267 mm | UK made-to-measure | [Mirrorworld](https://mirrorworld.co.uk/Made-to-Measure-Mirrors-Plain.asp), [BuyGlass](https://buyglass.co/glass/large-rectangle-6mm-silvered-mirror-800x1850mm/) (minimum charge 0.3 m2 per panel), eBay from about 31 pounds | found, no quote | Ask for 6 mm, polished edge, and say the edge is exposed. Check the minimum charge. |
+
+## Not yet looked up (use standard sizes until sourced)
+TMC2209 StepStick (about 20 x 15), ESP32 DevKitC (about 51 x 28), buck converter, 6 x 2 mm magnets, M3 and M4 screws and heat-set inserts, 24 V supply, brass or bronze nut flange, couplers 5 to 8 mm.
+
+## Retry list (pages that returned 429)
+Bearing King 9 inch (hole pattern, price), Pi Hut slip ring (price, stock), Pi Hut NEMA 17 (shaft, boss), then the SenRing drawing.
+
+## Retry results (2026-11-03)
+- [9 inch lazy Susan](https://bearing-king.co.uk/products/9-inch-lazy-susan-turntable-bearing-round): £10.61 inc. VAT, in stock, ID 114.3, OD 228.6, thickness 8.33 (5/16 inch). **Mounting holes not stated**: measure the part when it arrives, or design the bolt patterns after buying one.
+- [Pi Hut slip ring with flange](https://thepihut.com/products/slip-ring-with-flange-22mm-diameter-12-wires-max-240v-2a): £17.40 inc. VAT, in stock, 22 mm body, 44 mm flange (earlier source said 44.5), wires 6 inches, up to 300 rpm. Body length and flange hole pattern not stated (earlier sources say about 26 to 26.5 mm).
+- [Pi Hut NEMA 17](https://thepihut.com/products/nema-17-stepper-motor-42mm-x-34mm): £11 inc. VAT, in stock, 42 x 34 mm, 1.5 A, 0.22 kg, **holding torque 2.6 kg.cm (about 0.255 N.m, lower than the 0.28 I used)**, D shaft. Shaft length and pilot boss not stated: assume the usual 5 mm D shaft and 22 mm boss until a datasheet is found.
+
+## Laser cutter and service access (2026-11-03)
+- Cutter (Hatch Labs fusion pro): bed 1219 x 914 mm, **maximum 6 mm thick**, acrylic and plywood, air assist. Every panel must be 6 mm or thinner, or built from stacked layers. Floor and frame 6 mm, wall panels 3 to 6 mm.
+- Service access: no service port. The Pico sits near the top of the drum with its USB socket facing up. The top plate with the mirror lifts off as a lid to reach it.
+
+## Changes made while drawing v4 (2026-11-03)
+- The 160T hub (8:1) could not stay: the 9 inch bearing's balls sit between radii 57 and 114 mm, so a motor shaft at the old 90 mm radius would pass through the bearing. The hub is now a printed fixed **80T** (4:1) and the 20T pulley, belt and motor all sit inside the 114 mm bore, with a stock **200 mm (100 tooth) loop** at about 46 mm centres. Resolution 0.028 deg per 1/16 microstep, still far finer than needed.
+- The bearing rests on six printed posts above the belt band; the drum floor sits on the bearing.
+- Overall height rose from 345 to 356 mm because the bearing, belt band and 6 mm laser-cut floor stack up.
+
+## Decisions
+- **Lead screw: TR8x2 (2 mm lead) from the Netherlands. Decided 2026-11-03.** No gearbox, so the tilt layout is unchanged.
+- No custom PCBs (decided 2026-11-03). My proposal: drop the AS5600 and home the tilt with a Hall sensor board on the drum floor and a magnet in the crank arm tip, as azimuth does, with end stops at 70 deg. Not yet confirmed.
+- **Decided 2026-11-03:** 9 inch lazy Susan as the turntable bearing; 20T motor pulley (8:1).
+- **Decided 2026-11-03:** I2C compass for azimuth self-check (unit is indoors, so no sun sensor). Still proposed: no Wi-Fi, so an RP2040 Pico plus a DS3231 clock in the drum with a serial service port through the slip ring to a USB-serial module in the base; Hall-sensor homing for tilt. The compass stays level because the drum only turns about Z, so no tilt compensation is needed. Expect indoor field errors of several degrees, so use it as a coarse check only, and avoid steel in the drum.
+- **Build method (2026-11-03):** print as much as possible on a Bambu P1S (256 x 256 mm bed); laser-cut wood or perspex (no metal) for large flat panels; metal only for off-the-shelf drive parts (motors, bearings, slip ring, screw, nut, pulleys, belt, hinge rods, fasteners).
+- **Decided 2026-11-03:** plain NEMA 17 on both axes. The geared steppers in `HANDOVER.md` (27:1 NEMA 11, FIT0349, MG17-G10) were for the old worm and chain design; the TR8x2 screw replaces any gearbox.
+- **Decided 2026-11-03:** the controller plate is printed (tray with four legs) so it can carry M3 and M2 heat-set inserts; no laser-cut controller plate.
+- **Decided 2026-11-03:** laser parts in black acrylic (6 mm and 3 mm); engraved pockets and tenons for glue joints; cover base standing on the table with a loose floor; mirror back black.
+- **Supplier search:** `bom-for-suppliers.md` is the plain list to hand to a search (UK suppliers). Still no UK source for the TR8x2 screw and nut or the 200 mm belt; hole patterns of the bearing and slip ring unknown.

@@ -114,7 +114,7 @@ def sun_dir(alpha, phi):
 
 # ------------------------------------------------------------------ static parts
 BASE_CFG = dict(Z_T=16.0, Z_PL0=41.0, Z_PL1=48.0, XL=-330.0, XR=330.0, ZM=17.1)
-WAVE_CFG = dict(Z_T=27.2, Z_PL0=52.0, Z_PL1=60.0, XL=-412.0, XR=330.0, ZM=24.15)
+WAVE_CFG = dict(Z_T=27.2, Z_PL0=52.0, Z_PL1=60.0, XL=-412.0, XR=412.0, ZM=24.15)
 
 
 def configure(variant):

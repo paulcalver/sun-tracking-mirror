@@ -16,3 +16,7 @@ media/    pictures and video, in subfolders:
 Scripts for the current design: `hinge_mirror.py` (model, STEP, DXF, previews, `--check`), `make_bom.py` (BOM from the model), `animate.py` and `sun_day.py` (GIFs), `sun_seasons.py` (MP4s). The rest in `src/` are earlier concepts.
 
 Current design: `src/hinge_mirror.py` writes `out/assembly/hinge-mirror-assembly.step`. Earlier layouts (goal post, pedestal, exposed-hinge v1, test rig) are kept for reference. Needs `pip install cadquery matplotlib`. Details: `../docs/cad-brief.md`.
+
+Wall mirror concept (2026-11-04): `src/wall_mirror_nema11.py` writes `out/wall-mirror/wall-mirror-nema11.step` and renders to `media/previews/wall-mirror/`; notes in `../docs/wall-mirror-nema11.md`.
+
+Line of 7 wall mirrors, passive and wedge versions (2026-11-04): `src/line_mirrors.py` writes `out/line-mirrors/*.step` and renders to `media/previews/line-mirrors/`; `--check` runs clash and Sun-view ray checks; notes in `../docs/line-mirrors.md`.

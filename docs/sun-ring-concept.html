@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sun ring concept</title>
+<style>
+  :root { --bg:#f4f2ee; --ink:#26282b; --mute:#6b6f75; --card:#ffffff; --line:#d9d5cc; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.45 -apple-system, "Helvetica Neue", Arial, sans-serif; }
+  main { max-width:1100px; margin:0 auto; padding:16px; }
+  h1 { font-size:18px; margin:0 0 2px; font-weight:600; }
+  p.sub { margin:0 0 10px; color:var(--mute); }
+  #stage { background:var(--card); border:1px solid var(--line); border-radius:10px; position:relative; }
+  canvas { display:block; width:100%; height:520px; touch-action:none; cursor:grab; }
+  #read { position:absolute; left:12px; top:10px; background:rgba(255,255,255,.88); border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:12.5px; min-width:250px; }
+  #read b { font-weight:600; }
+  #read .row { display:flex; justify-content:space-between; gap:14px; }
+  #legend { position:absolute; right:12px; top:10px; background:rgba(255,255,255,.88); border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:12.5px; }
+  #legend i { display:inline-block; width:22px; height:0; vertical-align:middle; margin-right:6px; border-top:3px solid; }
+  .controls { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:10px 18px; margin-top:12px; }
+  .controls label { display:block; font-size:12.5px; color:var(--mute); }
+  .controls label span { color:var(--ink); font-weight:600; float:right; }
+  input[type=range] { width:100%; }
+  .btns { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; align-items:center; }
+  button { background:var(--card); border:1px solid var(--line); border-radius:7px; padding:6px 11px; font:inherit; cursor:pointer; color:var(--ink); }
+  button.on { background:#26282b; color:#fff; border-color:#26282b; }
+  .note { margin-top:12px; color:var(--mute); font-size:12.5px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Sun ring on a wall arm: a ring with a dot for the Sun</h1>
+  <p class="sub">The ring (or, in wire mode, just the Sun on wires) is carried out from the wall on an arm. The arm tip stands for you. The Sun orbits through the day and shifts along the pole through the year. Drag to orbit the view.</p>
+  <div id="stage">
+    <canvas id="c"></canvas>
+    <div id="read"></div>
+    <div id="legend">
+      <div><i style="border-color:#2b6cb0"></i>ring, day half</div>
+      <div><i style="border-color:#1b2a49"></i>ring, night half</div>
+      <div><i style="border-color:#e08a3c;border-top-style:dashed"></i>real Sun directions today</div>
+      <div><i style="border-color:#9aa0a6;border-top-style:dashed"></i>pole axis (lean model)</div>
+      <div><i style="border-color:#26282b"></i>east-west hinge (lean model only)</div>
+      <div><i style="border-color:#26282b;border-top-width:5px"></i>pointer rod, light on it (pointer mode)</div>
+      <div><i style="border-color:#1d9e75"></i>wire, taut (wire mode)</div>
+      <div><i style="border-color:#d9a21b"></i>wire, nearly slack</div>
+      <div><i style="border-color:#d6483a;border-top-style:dashed"></i>wire, slack: sun would swing</div>
+    </div>
+  </div>
+  <div class="controls">
+    <label>Date <span id="vDate"></span><input id="date" type="range" min="1" max="365" step="1"></label>
+    <label>Hour (solar time) <span id="vHour"></span><input id="hour" type="range" min="0" max="24" step="0.05"></label>
+    <label>Latitude <span id="vLat"></span><input id="lat" type="range" min="0" max="75" step="0.5"></label>
+    <label>Wall faces (bearing) <span id="vBear"></span><input id="bearing" type="range" min="0" max="359" step="1"></label>
+    <label>Arm length <span id="vArm"></span><input id="arm" type="range" min="1.1" max="3" step="0.05"></label>
+    <label>Wire anchor spread (circumradius) <span id="vSpread"></span><input id="spread" type="range" min="1" max="4" step="0.05"></label>
+    <label>Wire anchor height above the pole tip <span id="vAh"></span><input id="aheight" type="range" min="1.5" max="5" step="0.05"></label>
+    <label>Pointer length (pointer mode) <span id="vPlen"></span><input id="plen" type="range" min="0.6" max="2" step="0.05"></label>
+    <label>Real size of R (pointer mode) <span id="vRcm"></span><input id="rcm" type="range" min="10" max="60" step="1"></label>
+  </div>
+  <div class="btns">
+    <button id="kRing" class="on">Support: ring</button>
+    <button id="kWires">Support: wires</button>
+    <button id="kPointer">Support: pointer</button>
+    <button id="w3" class="on">3 wires</button>
+    <button id="w4">4 wires</button>
+    <span style="width:14px"></span>
+    <button id="bDay">Play day</button>
+    <button id="bYear">Play year</button>
+    <span style="width:14px"></span>
+    <button id="kSlide" class="on">Ring slides along pole (lines up)</button>
+    <button id="kLean">Ring leans (great circle)</button>
+    <span style="width:14px"></span>
+    <button id="mBoth" class="on">Both</button>
+    <button id="mRing">Ring only</button>
+    <button id="mReal">Real Sun only</button>
+    <span style="width:14px"></span>
+    <button id="vFront">Front</button>
+    <button id="v34">3/4</button>
+    <button id="vSide">Side</button>
+    <button id="vTop">Top</button>
+    <span style="width:14px"></span>
+    <button id="bFollow" class="on">Camera follows wall</button>
+  </div>
+  <p class="note">Bearing: 0 = wall faces north, 90 = east, 180 = south, 270 = west. The compass letters stay fixed; the wall turns. The green disc is the horizon through the ring centre, the dark half of the ring is below it (night).
+  Wire mode: the Sun hangs from wires that run to anchors on an overhead frame; the orbit is only implied (dotted). Wires turn red when a tension would go negative, meaning the Sun would swing instead of hanging there. Anchors on the wall alone cannot work: gravity would swing the Sun back against the wall. Tensions are in units of the Sun's weight; with 4 wires the tensions are not unique, so the page shows the spread that keeps the slackest wire as tight as possible.
+  Pointer mode: a stiff rod hinged at the pole tip (a two-axis gimbal in the bead) points at the Sun. It spins once a day about the pole axis and tilts by the declination through the year, so its tip is on the exact daily circle. The tip never touches anything; the page reports the clearance to the wall and the drop below the pole, and the sag of a 3 mm carbon rod against a 3 mm light fibre.
+  Ring models: "slides along pole" keeps the ring in the equator plane and moves it along the pole axis by tan(declination) each day, so from the joint the ring dot is exactly on the real Sun. "Leans" is the great-circle ring, which only matches at the equinoxes. With "Camera follows wall" on you always look at the wall head-on, as a viewer would.</p>
+</main>
+<script>
+const D2R = Math.PI / 180;
+const S = { yaw: -28, pitch: 16, day: 172, hour: 12, lat: 51.5, bear: 180, arm: 1.6, mode: 'both', model: 'slide', support: 'ring', plen: 1.3, rcm: 30, nw: 3, spread: 2.4, aheight: 2.5, follow: true, playDay: false, playYear: false };
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+const el = id => document.getElementById(id);
+const NAMES = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+const bearName = b => NAMES[Math.round(b / 45) % 8];
+
+const decl = d => -23.44 * Math.cos(2 * Math.PI * (d + 10) / 365) * D2R;
+// compass world coords: x = east, y = up, z = south.  (north is -z)
+function sunReal(H, dl, phi) {
+  const E = -Math.cos(dl) * Math.sin(H);
+  const N = Math.sin(dl) * Math.cos(phi) - Math.cos(dl) * Math.cos(H) * Math.sin(phi);
+  const U = Math.sin(dl) * Math.sin(phi) + Math.cos(dl) * Math.cos(H) * Math.cos(phi);
+  return [E, U, -N];
+}
+function ringQ(dl, phi) { const a = phi - dl; return [0, Math.cos(a), Math.sin(a)]; }   // noon direction
+function sunRing(H, dl, phi) { const q = ringQ(dl, phi); return [-Math.sin(H), Math.cos(H) * q[1], Math.cos(H) * q[2]]; }
+const wallNormal = () => [Math.sin(S.bear * D2R), 0, -Math.cos(S.bear * D2R)];   // direction the wall faces
+const wallTangent = () => [Math.cos(S.bear * D2R), 0, Math.sin(S.bear * D2R)];
+const add = (a, b, k) => [a[0] + b[0] * k, a[1] + b[1] * k, a[2] + b[2] * k];
+
+
+// ---- wire support: anchors, tensions (units of the Sun's weight), year scan
+const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+const dot3 = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+function solve3(a, b, c, r) { const D = dot3(a, cross(b, c)); return [dot3(r, cross(b, c)) / D, dot3(a, cross(r, c)) / D, dot3(a, cross(b, r)) / D]; }
+function anchorsFor(t, n) {
+  const pts = S.nw === 3 ? [[0, -1], [0.866, 0.5], [-0.866, 0.5]] : [[0.707, -0.707], [0.707, 0.707], [-0.707, 0.707], [-0.707, -0.707]];
+  return pts.map(([u, v]) => [S.spread * (u * t[0] + v * n[0]), S.aheight, S.spread * (u * t[2] + v * n[2])]);
+}
+function wireState(Sp, A) {
+  const U = A.map(a => { const v = [a[0] - Sp[0], a[1] - Sp[1], a[2] - Sp[2]], l = Math.hypot(v[0], v[1], v[2]); return { u: [v[0] / l, v[1] / l, v[2] / l], l }; });
+  const up = [0, 1, 0];
+  let tn;
+  if (A.length === 3) tn = solve3(U[0].u, U[1].u, U[2].u, up);
+  else {
+    const t0 = solve3(U[0].u, U[1].u, U[2].u, up), x = solve3(U[0].u, U[1].u, U[2].u, [-U[3].u[0], -U[3].u[1], -U[3].u[2]]);
+    const nv = [x[0], x[1], x[2], 1], tt = [t0[0], t0[1], t0[2], 0];
+    const f = lam => Math.min(...tt.map((v, i) => v + lam * nv[i]));
+    let lo = -300, hi = 300;
+    for (let i = 0; i < 70; i++) { const m1 = lo + (hi - lo) / 3, m2 = hi - (hi - lo) / 3; if (f(m1) < f(m2)) lo = m1; else hi = m2; }
+    const lam = (lo + hi) / 2; tn = tt.map((v, i) => v + lam * nv[i]);
+  }
+  return { t: tn, l: U.map(o => o.l), min: Math.min(...tn) };
+}
+function sunCyl(H, dl, phi) { const r = sunReal(H, dl, phi), inv = 1 / Math.cos(dl); return [r[0] * inv, r[1] * inv, r[2] * inv]; }
+let scanKey = '', scanVal = null;
+function yearScan(A, phi) {
+  const key = [S.nw, S.spread, S.aheight, S.lat, S.bear].join('|');
+  if (key === scanKey) return scanVal;
+  let worst = 1e9; const lo = A.map(() => 1e9), hi = A.map(() => -1e9);
+  for (let dd = -23.44; dd <= 23.45; dd += 3.9) for (let h = 0; h < 360; h += 6) {
+    const w = wireState(sunCyl(h * D2R, dd * D2R, phi), A);
+    worst = Math.min(worst, w.min); w.l.forEach((l, i) => { lo[i] = Math.min(lo[i], l); hi[i] = Math.max(hi[i], l); });
+  }
+  scanKey = key; scanVal = { worst, stroke: lo.map((v, i) => hi[i] - v) };
+  return scanVal;
+}
+
+let pKey = '', pVal = null;
+function pointerScan(phi, n, arm) {
+  const key = [S.lat, S.bear, S.plen, arm].join('|');
+  if (key === pKey) return pVal;
+  let minY = 1e9, minWall = 1e9;
+  for (let dd = -23.44; dd <= 23.45; dd += 3.9) for (let h = 0; h < 360; h += 6) {
+    const s = sunReal(h * D2R, dd * D2R, phi), tip = [s[0] * S.plen, s[1] * S.plen, s[2] * S.plen];
+    minY = Math.min(minY, tip[1]); minWall = Math.min(minWall, arm + dot3(n, tip));
+  }
+  pKey = key; pVal = { minY, minWall };
+  return pVal;
+}
+
+let W = 0, Hh = 0, dpr = 1;
+function resize() {
+  dpr = window.devicePixelRatio || 1;
+  const r = cv.getBoundingClientRect();
+  W = r.width; Hh = r.height;
+  cv.width = Math.round(W * dpr); cv.height = Math.round(Hh * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener('resize', resize);
+
+function camYaw() { return S.yaw + (S.follow ? S.bear - 180 : 0); }
+function P(p) {
+  const Y = camYaw() * D2R, cy = Math.cos(Y), sy = Math.sin(Y), cp = Math.cos(S.pitch * D2R), sp = Math.sin(S.pitch * D2R);
+  const xr = p[0] * cy + p[2] * sy, zr = -p[0] * sy + p[2] * cy;
+  const yr = p[1] * cp - zr * sp, z2 = p[1] * sp + zr * cp;
+  const wm = S.support === 'wires';
+  const sc = Math.min(W * 0.23, Hh * 0.33) * (wm ? Math.min(1, 2.15 / Math.max(S.aheight + 0.7, S.spread + 0.5)) : 1);
+  return [W * 0.5 + sc * xr, Hh * (wm ? 0.74 : 0.55) - sc * yr, z2];
+}
+function poly(pts, close) {
+  ctx.beginPath();
+  pts.forEach((p, i) => { const q = P(p); i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); });
+  if (close) ctx.closePath();
+}
+let items = [];
+const prim = (pts, fn) => items.push({ z: pts.reduce((a, p) => a + P(p)[2], 0) / pts.length, fn });
+function line(a, b, color, w, alpha, dash) {
+  prim([a, b], () => { ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = w; ctx.globalAlpha = alpha == null ? 1 : alpha; if (dash) ctx.setLineDash(dash); poly([a, b], false); ctx.stroke(); ctx.restore(); });
+}
+function dot(p, r, fill, stroke, alpha) {
+  prim([p], () => { const q = P(p); ctx.save(); ctx.globalAlpha = alpha == null ? 1 : alpha; ctx.beginPath(); ctx.arc(q[0], q[1], r, 0, 7); ctx.fillStyle = fill; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = stroke; ctx.stroke(); ctx.restore(); });
+}
+function label(t, p, dx, dy, col, size) {
+  const q = P(p); ctx.save(); ctx.fillStyle = col || '#4b4f55'; ctx.font = (size || 12) + 'px -apple-system, Helvetica, Arial';
+  ctx.fillText(t, q[0] + (dx || 0), q[1] + (dy || 0)); ctx.restore();
+}
+
+function frame() {
+  const phi = S.lat * D2R, dl = decl(S.day), H = (S.hour - 12) * 15 * D2R;
+  ctx.clearRect(0, 0, W, Hh);
+  const wires = S.support === 'wires', pointer = S.support === 'pointer';
+  const showRing = !wires && !pointer && S.mode !== 'real', showReal = S.mode !== 'ring';
+  const slide = wires || pointer || S.model === 'slide';
+  const q = ringQ(dl, phi), q0 = ringQ(0, phi), n = wallNormal(), t = wallTangent();
+  const arm = pointer ? Math.max(S.arm, S.plen + 0.35, 1.5) : slide ? Math.max(S.arm, 1.5) : S.arm;
+  const A = wires ? anchorsFor(t, n) : [];
+  const Cw = add([0, 0, 0], n, -arm);                         // where the arm meets the wall
+  const sx = sunReal(H, dl, phi);
+  const pole = [0, Math.sin(phi), -Math.cos(phi)];
+  const k = Math.tan(dl), cexp = [pole[0] * k, pole[1] * k, pole[2] * k];   // slide model: ring centre moves along the pole by tan(dec)
+  const inv = 1 / Math.cos(dl);
+  const sr = pointer ? [sx[0] * S.plen, sx[1] * S.plen, sx[2] * S.plen] : slide ? [sx[0] * inv, sx[1] * inv, sx[2] * inv] : sunRing(H, dl, phi);
+  const m = [0, -Math.sin(phi - dl), Math.cos(phi - dl)];       // lean model: ring axis (leans through the year)
+
+  // ---- wall and horizon first (they sit behind everything else)
+  const corners = [[-1.9, -1.3], [1.9, -1.3], [1.9, 1.9], [-1.9, 1.9]].map(([u, v]) => add(add(Cw, t, u), [0, 1, 0], v));
+  ctx.save(); ctx.fillStyle = 'rgba(214,210,200,.95)'; ctx.strokeStyle = '#a9a496'; ctx.lineWidth = 1.2; poly(corners, true); ctx.fill(); ctx.stroke(); ctx.restore();
+  const hz = []; for (let i = 0; i <= 64; i++) { const a = 2 * Math.PI * i / 64; hz.push([1.5 * Math.sin(a), 0, 1.5 * Math.cos(a)]); }
+  ctx.save(); ctx.fillStyle = 'rgba(110,150,100,.16)'; ctx.strokeStyle = 'rgba(80,120,70,.55)'; ctx.lineWidth = 1; poly(hz, true); ctx.fill(); ctx.stroke(); ctx.restore();
+  label('N', [0, 0, -1.65], -4, 4, '#26282b', 13); label('S', [0, 0, 1.65], -4, 4, '#26282b', 13);
+  label('E', [1.65, 0, 0], -4, 4, '#26282b', 13); label('W', [-1.65, 0, 0], -4, 4, '#26282b', 13);
+  label(`wall faces ${S.bear}\u00b0 ${bearName(S.bear)}`, add(add(Cw, [0, 1, 0], 1.72), t, 1.8), 6, 0, '#6b6f75');
+
+  // ---- depth-sorted primitives
+  items = [];
+  line(Cw, [0, 0, 0], '#4b4f55', 5, 1);                         // arm
+  dot(Cw, 6, '#4b4f55', '#26282b');                              // wall boss
+  if (wires || pointer) {
+    line(add([0, 0, 0], pole, -1.1), add([0, 0, 0], pole, 1.7), '#9aa0a6', 1, .7, [3, 5]);
+  } else if (slide) {
+    line(add([0, 0, 0], pole, -1.1), add([0, 0, 0], pole, 1.9), '#2b6cb0', 1.4, .75, [5, 4]);          // ring axis = pole axis
+    line(add([0, 0, 0], pole, -0.434), add([0, 0, 0], pole, 0.434), '#e08a3c', 5, .9);                  // slide travel over the year
+  } else {
+    line(add([0, 0, 0], pole, -1.0), add([0, 0, 0], pole, 1.9), '#9aa0a6', 1.3, 1, [4, 5]);
+    line(add([0, 0, 0], m, -1.25), add([0, 0, 0], m, 1.25), '#2b6cb0', 1.6, .8);
+    line([-1.2, 0, 0], [1.2, 0, 0], '#26282b', 2.2, 1);              // east-west hinge
+  }
+  const NS = 180;
+  const ring = [], path = [];
+  for (let i = 0; i <= NS; i++) {
+    const a = i / NS * 2 * Math.PI;
+    if (slide) {
+      ring.push([cexp[0] + Math.sin(a), cexp[1] + Math.cos(a) * q0[1], cexp[2] + Math.cos(a) * q0[2]]);
+      const r = sunReal(-Math.PI + a, dl, phi), pm = pointer ? S.plen : inv; path.push([r[0] * pm, r[1] * pm, r[2] * pm]);
+    } else {
+      ring.push([Math.sin(a), Math.cos(a) * q[1], Math.cos(a) * q[2]]);
+      path.push(sunReal(-Math.PI + a, dl, phi));
+    }
+  }
+  if (showRing) for (let i = 0; i < NS; i++) {
+    const a = ring[i], b = ring[i + 1], day = (a[1] + b[1]) / 2 >= 0;
+    line(a, b, day ? '#2b6cb0' : '#1b2a49', 3.2, 1);
+  }
+  if (showReal) for (let i = 0; i < NS; i++) {
+    if (Math.floor(i / 3) % 2) continue;
+    const a = path[i], b = path[i + 1], up = (a[1] + b[1]) / 2 >= 0;
+    line(a, b, '#e08a3c', up ? 2.6 : 1.4, up ? 1 : .45);
+  }
+  let ws = null;
+  if (wires) {
+    ws = wireState(sr, A);
+    A.forEach((a, i) => { const b = A[(i + 1) % A.length]; line(a, b, '#6b6f75', 1.2, .8); dot(a, 4, '#4b4f55', '#26282b'); });
+    A.forEach((a, i) => { const tv = ws.t[i]; line(a, sr, tv <= 0.02 ? '#d6483a' : tv < 0.15 ? '#d9a21b' : '#1d9e75', 1.8, 1, tv <= 0.02 ? [5, 4] : null); });
+  }
+  if (showReal && !wires && !pointer) line([0, 0, 0], slide ? sr : sx, '#e08a3c', 1.3, .7);
+  if (pointer) { line([0, 0, 0], sr, 'rgba(245,179,1,.4)', 10, 1); line([0, 0, 0], sr, '#26282b', 3, 1); }
+  if (showRing && !slide) line([0, 0, 0], sr, '#2b6cb0', 1.3, .7);
+  dot([0, 0, 0], 6, '#26282b', '#26282b');
+  if (showRing && !slide) dot(sr, 7, sr[1] >= 0 ? '#fff' : '#9aa6bd', '#2b6cb0');
+  if (showReal || slide) dot(slide ? sr : sx, wires || pointer ? 10 : 8, sx[1] >= 0 ? '#f5b301' : '#d9c28a', '#b07d00', sx[1] >= 0 ? 1 : .6);
+  items.sort((a, b) => a.z - b.z).forEach(it => it.fn());
+  if (wires) { label('overhead frame (anchors)', A[0], 8, -6, '#4b4f55'); label('viewer (pole tip)', [0, 0, 0], 10, 18, '#26282b'); label('Sun, hung on wires', slide ? sr : sx, 14, -12, '#b07d00'); }
+  else if (pointer) { label('pointer tip = the Sun', sr, 14, -12, '#b07d00'); label('gimbal in the bead (you)', [0, 0, 0], -158, 4, '#26282b'); label('pole axis (spin)', add([0, 0, 0], pole, 1.75), 6, -4, '#7a7f86'); }
+  else {
+    label(slide ? 'ring axis = pole' : 'pole', add([0, 0, 0], pole, 1.95), 6, -4, '#7a7f86');
+    if (slide) label('ring slides along here', add([0, 0, 0], pole, -0.45), 6, 14, '#b4651e');
+    else label('hinge', [1.22, 0, 0], 4, -6, '#26282b');
+    label('centre of the ring = you', [0, 0, 0], 10, 18, '#26282b');
+  }
+
+  // ---- readouts
+  const alt = Math.asin(sx[1]) / D2R; let az = Math.atan2(sx[0], -sx[2]) / D2R; if (az < 0) az += 360;
+  const sn = Math.hypot(sr[0], sr[1], sr[2]);
+  const err = Math.acos(Math.max(-1, Math.min(1, (sx[0] * sr[0] + sx[1] * sr[1] + sx[2] * sr[2]) / sn))) / D2R;
+  const tilt = 90 - S.lat + dl / D2R;
+  const c0 = -Math.tan(phi) * Math.tan(dl); const dayLen = c0 >= 1 ? 0 : c0 <= -1 ? 24 : 2 * Math.acos(c0) / D2R / 15;
+  const off = Math.acos(Math.max(-1, Math.min(1, sx[0] * n[0] + sx[1] * n[1] + sx[2] * n[2]))) / D2R;
+  const vis = sx[1] > 0 && off < 90 ? `lit, ${off.toFixed(0)}\u00b0 off the wall normal` : sx[1] > 0 ? 'behind the wall (wall is in shade)' : 'below the horizon';
+  const fmt = v => v.toFixed(2);
+  let rows;
+  if (pointer) {
+    const ps = pointerScan(phi, n, arm), Lm = S.plen * S.rcm / 100, k4 = Math.pow(Lm / 0.4, 4);
+    rows = `<div class="row"><span>Sun declination = rod tilt</span><b>${(dl / D2R).toFixed(1)}&deg;</b></div>` +
+      `<div class="row"><span>Spin from noon (one turn a day)</span><b>${((S.hour - 12) * 15).toFixed(0)}&deg;</b></div>` +
+      `<div class="row"><span>Rod length</span><b>${S.plen.toFixed(2)} R = ${(S.plen * S.rcm).toFixed(0)} cm</b></div>` +
+      `<div class="row"><span>Lowest tip below the pole tip</span><b>${(-ps.minY * S.rcm).toFixed(0)} cm</b></div>` +
+      `<div class="row"><span>Closest tip to the wall</span><b>${(ps.minWall * S.rcm).toFixed(0)} cm</b></div>` +
+      `<div class="row"><span>Sag: 3 mm carbon rod / 3 mm fibre</span><b>${(0.9 * k4).toFixed(1)} mm / ${(22 * k4).toFixed(0)} mm</b></div>` +
+      `<div class="row"><span>The wall sees the Sun</span><b>${vis}</b></div>`;
+  } else if (wires) {
+    const sc = yearScan(A, phi), taut = sc.worst > 0.02;
+    rows = `<div class="row"><span>Sun declination</span><b>${(dl / D2R).toFixed(1)}&deg;</b></div>` +
+      `<div class="row"><span>Real Sun altitude / azimuth</span><b>${alt.toFixed(0)}&deg; / ${az.toFixed(0)}&deg;</b></div>` +
+      `<div class="row"><span>Wire tension now (x weight)</span><b>${ws.t.map(fmt).join(' / ')}</b></div>` +
+      `<div class="row"><span>Wire lengths now (x R)</span><b>${ws.l.map(fmt).join(' / ')}</b></div>` +
+      `<div class="row"><span>Worst tension all year</span><b style="color:${taut ? '#1d7a5a' : '#d6483a'}">${fmt(sc.worst)} ${taut ? '(always taut)' : '(slack somewhere)'}</b></div>` +
+      `<div class="row"><span>Wire stroke over a year (x R)</span><b>${sc.stroke.map(fmt).join(' / ')}</b></div>` +
+      `<div class="row"><span>The wall sees the Sun</span><b>${vis}</b></div>`;
+  } else {
+    rows = `<div class="row"><span>Sun declination</span><b>${(dl / D2R).toFixed(1)}&deg;</b></div>` +
+      (slide ? `<div class="row"><span>Ring lean (fixed) / shift along pole</span><b>${(90 - S.lat).toFixed(1)}&deg; / ${k.toFixed(2)} R</b></div>` : `<div class="row"><span>Ring lean from horizontal</span><b>${tilt.toFixed(1)}&deg;</b></div>`) +
+      `<div class="row"><span>Real Sun altitude / azimuth</span><b>${alt.toFixed(0)}&deg; / ${az.toFixed(0)}&deg;</b></div>` +
+      `<div class="row"><span>Ring dot vs real Sun (seen from the joint)</span><b>${err.toFixed(1)}&deg; apart</b></div>` +
+      `<div class="row"><span>Day length: real / ring</span><b>${dayLen.toFixed(1)} h / ${slide ? dayLen.toFixed(1) : '12'} h</b></div>` +
+      `<div class="row"><span>The wall sees the Sun</span><b>${vis}</b></div>`;
+  }
+  el('read').innerHTML = rows;
+  el('vDate').textContent = new Date(2025, 0, Math.round(S.day)).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  const hh = Math.floor(S.hour), mm = Math.floor((S.hour - hh) * 60);
+  el('vHour').textContent = `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
+  el('vLat').textContent = S.lat.toFixed(1) + '\u00b0';
+  el('vBear').textContent = `${S.bear}\u00b0 ${bearName(S.bear)}`;
+  el('vArm').textContent = arm.toFixed(2) + ' x ring radius';
+  el('vSpread').textContent = S.spread.toFixed(2) + ' R';
+  el('vPlen').textContent = S.plen.toFixed(2) + ' R';
+  el('vRcm').textContent = S.rcm + ' cm';
+  el('vAh').textContent = S.aheight.toFixed(2) + ' R';
+}
+
+let last = performance.now();
+function loop(tm) {
+  const dt = Math.min(0.1, (tm - last) / 1000); last = tm;
+  if (S.playDay) { S.hour = (S.hour + dt * 1.6) % 24; el('hour').value = S.hour; }
+  if (S.playYear) { S.day = ((S.day - 1 + dt * 30) % 365) + 1; el('date').value = S.day; }
+  frame(); requestAnimationFrame(loop);
+}
+
+// ---- controls
+el('date').value = S.day; el('hour').value = S.hour; el('lat').value = S.lat; el('bearing').value = S.bear; el('arm').value = S.arm; el('spread').value = S.spread; el('plen').value = S.plen; el('rcm').value = S.rcm; el('aheight').value = S.aheight;
+el('date').oninput = e => S.day = +e.target.value; el('hour').oninput = e => S.hour = +e.target.value; el('lat').oninput = e => S.lat = +e.target.value;
+el('bearing').oninput = e => S.bear = +e.target.value; el('arm').oninput = e => S.arm = +e.target.value;
+el('plen').oninput = e => S.plen = +e.target.value; el('rcm').oninput = e => S.rcm = +e.target.value;
+el('spread').oninput = e => S.spread = +e.target.value; el('aheight').oninput = e => S.aheight = +e.target.value;
+[['kRing', 'ring'], ['kWires', 'wires'], ['kPointer', 'pointer']].forEach(([id, v]) => el(id).onclick = () => { S.support = v; ['kRing', 'kWires', 'kPointer'].forEach(i => el(i).classList.toggle('on', i === id)); });
+[['w3', 3], ['w4', 4]].forEach(([id, v]) => el(id).onclick = () => { S.nw = v; ['w3', 'w4'].forEach(i => el(i).classList.toggle('on', i === id)); });
+const tog = (id, key) => el(id).onclick = () => { S[key] = !S[key]; el(id).classList.toggle('on', S[key]); };
+tog('bDay', 'playDay'); tog('bYear', 'playYear'); tog('bFollow', 'follow');
+[['mBoth', 'both'], ['mRing', 'ring'], ['mReal', 'real']].forEach(([id, mo]) => el(id).onclick = () => { S.mode = mo; ['mBoth', 'mRing', 'mReal'].forEach(i => el(i).classList.toggle('on', i === id)); });
+[['kSlide', 'slide'], ['kLean', 'lean']].forEach(([id, mo]) => el(id).onclick = () => { S.model = mo; ['kSlide', 'kLean'].forEach(i => el(i).classList.toggle('on', i === id)); });
+const view = (id, y, p) => el(id).onclick = () => { S.yaw = y; S.pitch = p; };
+view('vFront', 0, 3); view('v34', -28, 16); view('vSide', 80, 6); view('vTop', 0, 72);
+let drag = null;
+cv.addEventListener('pointerdown', e => { drag = [e.clientX, e.clientY, S.yaw, S.pitch]; cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; });
+cv.addEventListener('pointermove', e => { if (!drag) return; S.yaw = drag[2] + (e.clientX - drag[0]) * 0.4; S.pitch = Math.max(-15, Math.min(85, drag[3] + (e.clientY - drag[1]) * 0.4)); if (S.follow) S.yaw = Math.max(-85, Math.min(85, S.yaw)); });
+cv.addEventListener('pointerup', () => { drag = null; cv.style.cursor = 'grab'; });
+resize(); requestAnimationFrame(loop);
+</script>
+</body>
+</html>

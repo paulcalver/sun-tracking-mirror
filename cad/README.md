@@ -20,3 +20,5 @@ Current design: `src/hinge_mirror.py` writes `out/assembly/hinge-mirror-assembly
 Wall mirror concept (2026-11-04): `src/wall_mirror_nema11.py` writes `out/wall-mirror/wall-mirror-nema11.step` and renders to `media/previews/wall-mirror/`; notes in `../docs/wall-mirror-nema11.md`.
 
 Line of 7 wall mirrors, passive and wedge versions (2026-11-04): `src/line_mirrors.py` writes `out/line-mirrors/*.step` and renders to `media/previews/line-mirrors/`; `--check` runs clash and Sun-view ray checks; notes in `../docs/line-mirrors.md`.
+
+Sun pointer bead (2026-11-12): `src/sun_pointer_bead.py` writes `out/sun-pointer/sun-pointer-bead.step` and renders to `media/previews/sun-pointer/`; `--check` tests the tip against the sun formulas and sweeps spin and tilt for clashes; notes in `../docs/sun-pointer-bead.md`; the interactive concept is `../docs/sun-ring-concept.html`.

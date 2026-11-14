@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spinning mirror gimbal</title>
+<style>
+  :root { --bg:#f4f2ee; --ink:#26282b; --mute:#6b6f75; --card:#ffffff; --line:#d9d5cc; --acc:#c4572b; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.5 -apple-system, "Helvetica Neue", Arial, sans-serif; }
+  main { max-width:1100px; margin:0 auto; padding:16px; }
+  h1 { font-size:18px; margin:0 0 2px; font-weight:600; }
+  h2 { font-size:15px; margin:22px 0 6px; font-weight:600; }
+  p.sub { margin:0 0 10px; color:var(--mute); }
+  #stage { background:#fff; border:1px solid var(--line); border-radius:10px; position:relative; overflow:hidden; }
+  canvas#c { display:block; width:100%; height:560px; touch-action:none; cursor:grab; }
+  .lab { position:absolute; font-size:11.5px; line-height:1.2; background:rgba(255,255,255,.9); border:1px solid var(--line); border-radius:5px; padding:2px 6px; pointer-events:none; white-space:nowrap; transform:translate(8px,-50%); }
+  #read { position:absolute; left:10px; top:10px; background:rgba(255,255,255,.9); border:1px solid var(--line); border-radius:8px; padding:7px 10px; font-size:12px; min-width:190px; }
+  #read .row { display:flex; justify-content:space-between; gap:14px; }
+  #read b { font-weight:600; }
+  .controls { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:10px 18px; margin-top:12px; }
+  .controls label { display:block; font-size:12.5px; color:var(--mute); }
+  .controls label span { color:var(--ink); font-weight:600; float:right; }
+  input[type=range] { width:100%; }
+  .btns { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; align-items:center; }
+  .btns .grp { color:var(--mute); font-size:12.5px; margin-left:6px; }
+  button { background:#fff; border:1px solid var(--line); border-radius:7px; padding:6px 11px; font:inherit; cursor:pointer; color:var(--ink); }
+  button.on { background:#26282b; color:#fff; border-color:#26282b; }
+  .cols { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:12px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:10px; padding:10px 14px; }
+  .card h3 { margin:0 0 4px; font-size:13.5px; }
+  .card p { margin:4px 0; font-size:13px; }
+  table { border-collapse:collapse; width:100%; font-size:13px; background:#fff; border:1px solid var(--line); border-radius:10px; }
+  th, td { text-align:left; padding:6px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { color:var(--mute); font-weight:500; }
+  .note { color:var(--mute); font-size:12.5px; margin-top:10px; }
+  ul { margin:4px 0 4px 18px; padding:0; }
+</style>
+</head>
+<body>
+<main>
+<h1>Spinning mirror gimbal</h1>
+<p class="sub">Concept only, nothing built. A round mirror inside a ring, the ring on a vertical shaft: two axes, both fast. Drag to orbit, scroll to zoom.</p>
+
+<div id="stage">
+  <canvas id="c"></canvas>
+  <div id="read"></div>
+</div>
+
+<div class="btns">
+  <span class="grp">Tilt drive:</span>
+  <button data-opt="1" class="on">A  motor on the ring</button>
+  <button data-opt="2">B  single motor, fixed crown gear</button>
+  <button data-opt="3">C  air-driven, offset plates</button>
+  <button data-opt="4">D  random: free mirror, jittery motor</button>
+  <span class="grp">Mirror:</span>
+  <button id="dbl" class="on">both sides silvered</button>
+  <button id="clr">clear wall</button>
+</div>
+
+<div class="controls">
+  <label>Frame spin (vertical axis) <span id="vAz"></span><input id="sAz" type="range" min="-600" max="600" step="5" value="180"></label>
+  <label id="lTilt">Mirror spin (horizontal hinge) <span id="vTilt"></span><input id="sTilt" type="range" min="-600" max="600" step="5" value="110"></label>
+  <label id="lRatio" style="display:none"><em id="tRatio" style="font-style:normal">Tilt : spin gear ratio</em> <span id="vRatio"></span><input id="sRatio" type="range" min="-5" max="5" step="0.05" value="1.6"></label>
+  <label id="lJit" style="display:none">Motor speed jitter (random) <span id="vJit"></span><input id="sJit" type="range" min="0" max="80" step="1" value="45"></label>
+  <label id="lFric" style="display:none">Hinge friction <span id="vFric"></span><input id="sFric" type="range" min="0" max="5" step="0.05" value="0.3"></label>
+  <label id="lWt" style="display:none">Weight on the mirror edge <span id="vWt"></span><input id="sWt" type="range" min="0" max="30" step="1" value="4"></label>
+  <label>Time scale (1 = real speed) <span id="vTs"></span><input id="sTs" type="range" min="0.01" max="1" step="0.01" value="0.08"></label>
+  <label>Trail persistence <span id="vPer"></span><input id="sPer" type="range" min="0.05" max="4" step="0.05" value="1"></label>
+</div>
+<p class="note">At low time scale you can follow the mechanism; push it to 1 and the wall pattern is what the eye would see (the screen here is capped at 60 fps, a real wall would blur even more). The wall is a dark screen at 520 mm, the Sun a fixed direction from the upper left; the beam only appears while the mirror faces the Sun.</p>
+
+<h2>What is being proposed</h2>
+<div class="cols">
+  <div class="card"><h3>Outer frame</h3><p>A 160 mm ring on a vertical shaft, turned by one motor underneath the table. It carries everything above it.</p></div>
+  <div class="card"><h3>Inner mirror</h3><p>A 130 mm disc on an axle through its diameter, fixed across the ring. The axle is horizontal and turns with the ring, so the mirror makes a second, independent rotation.</p></div>
+  <div class="card"><h3>The catch</h3><p>The frame spins, so the hinge axle spins around with it. Whatever drives the mirror has to ride along or reach through the shaft. That is the main design decision, shown as A and B above.</p></div>
+</div>
+
+<h2>Ways to drive the second axis</h2>
+<table>
+  <tr><th></th><th>A  motor on the ring</th><th>B  fixed crown gear</th><th>C  concentric shafts</th></tr>
+  <tr><th>How</th><td>Small brushless motor on the axle end, counterweight opposite. Power through a slip ring on the shaft.</td><td>Stationary crown gear on the base. A bevel pinion on the ring rolls on it and a shaft carries the turn up to the hinge. One motor total.</td><td>Hollow tube turns the ring, an inner rod runs up inside and turns the hinge through a mitre pair (as in the finger pointer). Two motors underneath.</td></tr>
+  <tr><th>Speeds</th><td>Fully independent, any ratio, any direction</td><td>Locked ratio. Changing it means changing gears</td><td>Independent. Tilt = rod minus tube</td></tr>
+  <tr><th>Fast?</th><td>Yes, limited by the slip ring (about 1000 to 2000 rpm is easy)</td><td>Yes, but gear noise and wear rise quickly</td><td>Belts and mitre gears get loud and need good bearings</td></tr>
+  <tr><th>Risk</th><td>Rotating mass up high, slip ring noise. Easiest to build and change.</td><td>Backlash rattle, many parts in the ring</td><td>Most parts, hardest to print</td></tr>
+</table>
+
+<h2>Option C: let the air drive it</h2>
+<div class="cols">
+  <div class="card"><h3>What the view shows</h3><p>The mirror is cut into four quarter plates, each shifted a few millimetres along its normal: an S on one side of the shaft and a reversed S on the other, tied by a thin spine along the axle. The blue arrows are the air as the frame sees it.</p></div>
+  <div class="card"><h3>Why four, not two</h3><p>The air flows opposite ways on the two sides of the shaft, because the ring moves one way there and the other way on the far side. Two offset halves would get opposite pushes that cancel. Mirror-image staggers on the two sides make the pushes add.</p></div>
+  <div class="card"><h3>What the simulation does</h3><p>Nothing here is computed aerodynamics. The tilt speed is set by the ratio slider and slowly wanders, to show a loose coupling that never repeats exactly. Whether flat staggered plates make any useful torque is a bench test: print one and spin it on a drill. A curved Savonius profile would do better than flat.</p></div>
+</div>
+
+<h2>Option D: real randomness</h2>
+<div class="cols">
+  <div class="card"><h3>The idea</h3><p>Nothing drives the mirror. It hangs on a free hinge, an optional small weight on its edge, and the single motor's speed jitters at random. At steady speed the mirror just settles flat. With the speed wobbling it gets pumped, swings, then tumbles over the top in random bursts and reverses.</p></div>
+  <div class="card"><h3>Is it chaos or noise?</h3><p>Both help. The mirror's own equation is nonlinear, so small differences grow, and the motor's jitter adds true randomness. Lower friction and more jitter give more tumbling. Below about 20 to 30 percent jitter it mostly swings; at 45 and up it tumbles in runs of several turns either way.</p></div>
+  <div class="card"><h3>How to make the jitter</h3><p>Drive the motor from a microcontroller that sets its speed from a slow random walk, or just feed it a noisy supply. No sensors or extra motors. The physics is the equation for a hinged disc in a spinning frame, with the weight and friction you set. Real bearings add their own stick and slip.</p></div>
+</div>
+
+<h2>Things that matter once it is fast</h2>
+<div class="cols">
+  <div class="card"><h3>Motors</h3><p>Steppers are the wrong tool here: a NEMA 17 loses torque above a few hundred rpm and the 28BYJ is about 15 rpm. A brushed DC or a brushless motor with an ESC reaches thousands of rpm cheaply. Speed control is then by PWM, with a Hall or optical sensor if you want the speed read back.</p></div>
+  <div class="card"><h3>Balance</h3><p>A round mirror on a diametral axle is balanced about the hinge by symmetry, so the thing to get right is the ring and its mounts. Imbalance force grows with speed squared. Design the ring symmetrical, add a counterweight for any motor, and trim with small screws.</p></div>
+  <div class="card"><h3>Loads</h3><p>Ring tip at 3000 rpm and 80 mm radius is about 25 m/s. A 130 mm, 3 mm acrylic mirror weighs about 47 g and has about 5e-5 kg m² about its hinge. With both axes near 300 rpm the gyroscopic torque on the hinge is about 0.05 N m, small, but it all lands on two bearings.</p></div>
+  <div class="card"><h3>Mirror material</h3><p>Use acrylic mirror, not glass. A glass disc that lets go at speed is dangerous. Back-to-back acrylic mirrors give two silvered faces, which makes the beam appear twice per turn.</p></div>
+  <div class="card"><h3>What you see</h3><p>A mirror turning by an angle sweeps the beam by twice that. A simple ratio such as 8:5 draws a closed rose on the wall, an irrational one slowly fills a band. Fast enough, persistence of vision turns it into a glowing patch that breathes.</p></div>
+  <div class="card"><h3>Safety</h3><p>Guard the ring (a clear cylinder works), keep fingers away from the gap at the shaft, and remember a reflected Sun beam sweeping across a room can dazzle. Fast sweeps help; a fixed one would not.</p></div>
+</div>
+
+<h2>Questions to settle before any CAD</h2>
+<ul>
+  <li>Target speeds: gentle (tens of rpm) or really fast (hundreds to thousands)? This picks motors and bearings.</li>
+  <li>Independent speeds (A or C) or one locked pattern (B)?</li>
+  <li>Is this stand-alone, or does the whole head go on the Sun-tracking base later?</li>
+  <li>Ring size: 160 mm here, with a 130 mm mirror. Print on the P1S, or turn it from aluminium?</li>
+  <li>Slip ring acceptable (A), or must it run without any wiring up the shaft (B, C)?</li>
+</ul>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const D2R = Math.PI / 180, TAU = Math.PI * 2;
+const $ = id => document.getElementById(id);
+const S = { opt: 1, dbl: true, az: 0, tilt: 0, tv: 0, ou: 0 };
+const gauss = () => Math.sqrt(-2 * Math.log(1 - Math.random())) * Math.cos(TAU * Math.random());
+
+// ---------------------------------------------------------------- scene
+const cv = $('c');
+const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xf4f2ee);
+const camera = new THREE.PerspectiveCamera(38, 1, 5, 6000);
+scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+const dl = new THREE.DirectionalLight(0xffffff, 0.8); dl.position.set(300, 700, 500); scene.add(dl);
+
+const CY = 270, RING_R = 75, MIR_R = 65, WALL_X = -520, WALL_W = 1100, WALL_H = 820;
+const SUN_D = new THREE.Vector3(1, -0.28, -0.3).normalize();   // direction the light travels
+
+function mk(geom, color, parent, pos, extra) {
+  const m = new THREE.Mesh(geom, new THREE.MeshPhongMaterial(Object.assign({ color, shininess: 40 }, extra || {})));
+  if (pos) m.position.set(pos[0], pos[1], pos[2]);
+  parent.add(m); return m;
+}
+const cylY = (r, h) => new THREE.CylinderGeometry(r, r, h, 40);
+const cylX = (r, h) => new THREE.CylinderGeometry(r, r, h, 40).rotateZ(Math.PI / 2);
+
+// static: table, motor
+const stat = new THREE.Group(); scene.add(stat);
+mk(new THREE.BoxGeometry(360, 12, 360), 0xd9d5cc, stat, [0, -6, 0]);
+mk(cylY(36, 90), 0x35383d, stat, [0, -57, 0]);
+mk(new THREE.BoxGeometry(110, 8, 110), 0x8d9096, stat, [0, -106, 0]);
+
+// wall + trails
+const wallMat = new THREE.MeshBasicMaterial({ color: 0x14161a });
+const wall = new THREE.Mesh(new THREE.PlaneGeometry(WALL_W, WALL_H).rotateY(Math.PI / 2), wallMat);
+wall.position.set(WALL_X, CY, 0); scene.add(wall);
+const tc = document.createElement('canvas'); tc.width = 1100; tc.height = 820;
+const tx = tc.getContext('2d');
+const tex = new THREE.CanvasTexture(tc);
+const trail = new THREE.Mesh(new THREE.PlaneGeometry(WALL_W, WALL_H).rotateY(Math.PI / 2),
+  new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false }));
+trail.position.set(WALL_X + 1, CY, 0); scene.add(trail);
+// sun window ring where the incident ray crosses the wall
+const sCross = WALL_X / SUN_D.x;                              // distance along d from origin (negative upstream)
+const winP = new THREE.Vector3(0, CY, 0).addScaledVector(SUN_D, sCross);
+const win = mk(new THREE.TorusGeometry(26, 2, 8, 40).rotateY(Math.PI / 2), 0xffd36b, scene, [WALL_X + 2, winP.y, winP.z]);
+const sun = mk(new THREE.SphereGeometry(34, 24, 16), 0xffd36b, scene, [0, CY, 0], { emissive: 0xffc233 });
+sun.position.set(0, CY, 0).addScaledVector(SUN_D, -1000);
+
+// spinning frame
+const spin = new THREE.Group(); scene.add(spin);
+mk(cylY(6, 192), 0x9aa0a8, spin, [0, 96, 0]);                           // shaft
+mk(cylY(12, 14), 0x5b6068, spin, [0, 190, 0]);                          // hub
+const ring = mk(new THREE.TorusGeometry(RING_R, 5, 16, 72), 0x3a3f47, spin, [0, CY, 0]);
+const mg = new THREE.Group(); mg.position.set(0, CY, 0); spin.add(mg);   // mirror group (turns about local x)
+mk(cylY(3, 2 * RING_R + 14).rotateZ(Math.PI / 2), 0xb8bcc2, mg, [0, 0, 0]);
+const mirFull = mk(new THREE.CylinderGeometry(MIR_R, MIR_R, 3, 64).rotateX(Math.PI / 2), 0xdfe8ee, mg, [0, 0, 0], { specular: 0xffffff, shininess: 160 });
+// option C: four quarter plates staggered in z (an S on the right, a reversed S on the left), tied to a thin spine
+const mirC = new THREE.Group(); mg.add(mirC);
+(function () {
+  const GAP = 4, OFF = 4, pts = [];
+  const a = Math.asin(GAP / MIR_R);
+  pts.push([Math.sqrt(MIR_R * MIR_R - GAP * GAP), GAP]);
+  for (let i = 1; i < 16; i++) { const t = a + (Math.PI / 2 - 2 * a) * i / 16; pts.push([MIR_R * Math.cos(t), MIR_R * Math.sin(t)]); }
+  pts.push([GAP, Math.sqrt(MIR_R * MIR_R - GAP * GAP)], [GAP, GAP]);
+  [[1, 1], [1, -1], [-1, 1], [-1, -1]].forEach(([sx, sy]) => {
+    const sh = new THREE.Shape(pts.map(q => new THREE.Vector2(q[0] * sx, q[1] * sy)));
+    const geo = new THREE.ExtrudeGeometry(sh, { depth: 3, bevelEnabled: false }).translate(0, 0, -1.5);
+    const m = mk(geo, 0xdfe8ee, mirC, [0, 0, OFF * sx * sy], { specular: 0xffffff, shininess: 160, side: THREE.DoubleSide });
+  });
+  mk(new THREE.BoxGeometry(2 * MIR_R - 6, 8, 3), 0x9aa0a8, mirC, [0, 0, 0]);   // spine along the axle ties the plates together
+})();
+const wgt = mk(new THREE.SphereGeometry(7, 20, 14), 0xb08a3c, mg, [-22, 50, 4]);   // small weight near the mirror edge (option D)
+// wind seen by each side of the frame (it is opposite on the two sides of the shaft)
+const windArrows = [-1, 1].map(sx => {
+  const a = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), new THREE.Vector3(sx * 100, CY + 30, -30), 60, 0x2b6fc4, 14, 9);
+  spin.add(a); return a;
+});
+mk(new THREE.BoxGeometry(10, 10, 5), 0xc4572b, mg, [18, MIR_R - 14, 0]);   // marker so you can see it turn
+mk(new THREE.BoxGeometry(10, 10, 5), 0x2b6fc4, mg, [MIR_R - 14, 14, 0]);
+
+// option A: motor on ring + counterweight + slip ring
+const gA = new THREE.Group(); spin.add(gA);
+mk(cylX(15, 36), 0x2d6a6a, gA, [RING_R + 24, CY, 0]);
+mk(cylX(15, 36), 0x7b7f86, gA, [-RING_R - 24, CY, 0]);
+const gAs = new THREE.Group(); scene.add(gAs);
+mk(cylY(17, 22), 0xe0922a, gAs, [0, 70, 0]);
+
+// option B: static column + crown gear, rotating pinion and link
+const gBs = new THREE.Group(); scene.add(gBs);
+mk(cylY(15, 160), 0x6f757d, gBs, [0, 80, 0]);
+mk(cylY(36, 8), 0xe0922a, gBs, [0, 164, 0]);
+const gB = new THREE.Group(); spin.add(gB);
+mk(cylX(14, 14), 0x2d6a6a, gB, [24, 182, 0]);
+mk(cylX(4, 70), 0x2d6a6a, gB, [60, 182, 0]);                              // horizontal link shaft
+mk(cylY(4, 90), 0x2d6a6a, gB, [92, 226, 0]);                              // vertical link shaft up the ring side
+mk(new THREE.SphereGeometry(8, 16, 12), 0x2d6a6a, gB, [92, 182, 0]);     // bevel pair (schematic)
+mk(new THREE.SphereGeometry(8, 16, 12), 0x2d6a6a, gB, [92, CY, 0]);
+
+// light rays
+function line(color) {
+  const g = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3(0, 1, 0)]);
+  const l = new THREE.Line(g, new THREE.LineBasicMaterial({ color })); scene.add(l); return l;
+}
+const incident = line(0xffc233), refl = line(0xffe9a8);
+function setLine(l, a, b) {
+  const p = l.geometry.attributes.position; p.setXYZ(0, a.x, a.y, a.z); p.setXYZ(1, b.x, b.y, b.z); p.needsUpdate = true;
+}
+setLine(incident, sun.position, new THREE.Vector3(0, CY, 0));
+
+function showOpt() {
+  gA.visible = gAs.visible = S.opt === 1;
+  gB.visible = gBs.visible = S.opt === 2;
+  mirFull.visible = S.opt !== 3; mirC.visible = S.opt === 3;
+  windArrows.forEach(a => a.visible = S.opt === 3);
+  wgt.visible = S.opt === 4;
+  ['lJit', 'lFric', 'lWt'].forEach(id => $(id).style.display = S.opt === 4 ? '' : 'none');
+  $('lTilt').style.display = S.opt === 1 ? '' : 'none';
+  $('lRatio').style.display = (S.opt === 2 || S.opt === 3) ? '' : 'none';
+  $('tRatio').textContent = S.opt === 3 ? 'Tilt : spin speed ratio (assumed, wanders)' : 'Tilt : spin gear ratio';
+  document.querySelectorAll('[data-opt]').forEach(b => b.classList.toggle('on', +b.dataset.opt === S.opt));
+  setLabels();
+}
+
+// ---------------------------------------------------------------- labels
+const labels = [];
+function setLabels() {
+  labels.forEach(l => l.el.remove()); labels.length = 0;
+  const add = (txt, get) => { const el = document.createElement('div'); el.className = 'lab'; el.textContent = txt; $('stage').appendChild(el); labels.push({ el, get }); };
+  add('outer frame, spins about vertical', () => new THREE.Vector3(0, CY + RING_R + 6, 0));
+  add('mirror, spins about horizontal hinge', () => new THREE.Vector3(0, CY - 40, 0));
+  add('motor under the table, vertical axis', () => new THREE.Vector3(36, -60, 0));
+  if (S.opt === 1) {
+    add('tilt motor on the ring', () => new THREE.Vector3(RING_R + 24, CY, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), S.az));
+    add('counterweight', () => new THREE.Vector3(-RING_R - 24, CY, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), S.az));
+    add('slip ring (power up the shaft)', () => new THREE.Vector3(17, 70, 0));
+  } else if (S.opt === 4) {
+    add('small weight on the mirror', () => new THREE.Vector3(-22, CY + 50, 4).applyAxisAngle(new THREE.Vector3(1, 0, 0), S.tilt).applyAxisAngle(new THREE.Vector3(0, 1, 0), S.az));
+    add('free hinge: nothing drives it', () => new THREE.Vector3(RING_R, CY, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), S.az));
+  } else if (S.opt === 3) {
+    add('quarter plates, staggered: S on one side, reversed S on the other', () => new THREE.Vector3(0, CY - 60, 0));
+    add('wind on this side', () => new THREE.Vector3(100, CY + 30, -30).applyAxisAngle(new THREE.Vector3(0, 1, 0), S.az));
+    add('opposite wind on this side', () => new THREE.Vector3(-100, CY + 30, -30).applyAxisAngle(new THREE.Vector3(0, 1, 0), S.az));
+  } else {
+    add('fixed crown gear', () => new THREE.Vector3(36, 164, 0));
+    add('pinion rolls on it, link shaft up the ring side', () => new THREE.Vector3(92, 226, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), S.az));
+  }
+}
+
+// ---------------------------------------------------------------- orbit
+const cam = { th: 1.2, ph: 0.15, d: 900, t: new THREE.Vector3(-60, 190, 0) };
+function placeCam() {
+  const c = Math.cos(cam.ph);
+  camera.position.set(cam.t.x + cam.d * Math.sin(cam.th) * c, cam.t.y + cam.d * Math.sin(cam.ph), cam.t.z + cam.d * Math.cos(cam.th) * c);
+  camera.lookAt(cam.t);
+}
+let drag = null;
+cv.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY }; cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; });
+cv.addEventListener('pointerup', () => { drag = null; cv.style.cursor = 'grab'; });
+cv.addEventListener('pointermove', e => {
+  if (!drag) return;
+  cam.th -= (e.clientX - drag.x) * 0.006; cam.ph = Math.max(-0.2, Math.min(1.3, cam.ph + (e.clientY - drag.y) * 0.006));
+  drag = { x: e.clientX, y: e.clientY };
+});
+cv.addEventListener('wheel', e => { e.preventDefault(); cam.d = Math.max(350, Math.min(2600, cam.d * Math.exp(e.deltaY * 0.001))); }, { passive: false });
+
+function resize() {
+  const w = cv.clientWidth, h = cv.clientHeight;
+  renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize);
+
+// ---------------------------------------------------------------- physics of the beam
+const n = new THREE.Vector3(), r = new THREE.Vector3();
+function reflect(az, t) {
+  n.set(Math.sin(az) * Math.cos(t), -Math.sin(t), Math.cos(az) * Math.cos(t));      // mirror normal in the world
+  const dn = SUN_D.dot(n);
+  const lit = S.dbl || dn < 0;
+  r.copy(SUN_D).addScaledVector(n, -2 * dn);
+  const s = (WALL_X) / r.x;                                                         // wall at x = WALL_X, mirror at x = 0
+  if (!lit || r.x > -1e-3) return null;
+  const hy = CY + r.y * s, hz = r.z * s;
+  if (Math.abs(hz) > WALL_W / 2 || Math.abs(hy - CY) > WALL_H / 2) return { out: true, I: Math.abs(dn), hy, hz };
+  return { I: Math.abs(dn), hy, hz, px: (0.5 - hz / WALL_W) * tc.width, py: (0.5 - (hy - CY) / WALL_H) * tc.height };
+}
+
+// ---------------------------------------------------------------- loop
+const g = { az: 180, tl: 110, ratio: 1.6, ts: 0.08, per: 1, jit: 0.45, fric: 0.3, wt: 4 };
+function rates() {                                  // rad per simulated second
+  const wa = g.az * TAU / 60;
+  let wt = S.opt === 1 ? g.tl * TAU / 60 : wa * g.ratio;
+  if (S.opt === 3) wt *= 1 + 0.12 * Math.sin(0.9 * simT) + 0.08 * Math.sin(2.3 * simT + 1);   // loose coupling: the speed ratio drifts
+  return [wa, wt];
+}
+let prev = null, last = performance.now(), simT = 0;
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  const sim = dt * g.ts; simT += sim; const [wa, wt] = rates();
+  windArrows.forEach((a, i) => a.setDirection(new THREE.Vector3(0, 0, (i ? 1 : -1) * (wa >= 0 ? 1 : -1))));
+  // fade the wall trail
+  tx.globalCompositeOperation = 'destination-out';
+  tx.fillStyle = 'rgba(0,0,0,' + (1 - Math.exp(-sim / g.per)) + ')';
+  tx.fillRect(0, 0, tc.width, tc.height);
+  tx.globalCompositeOperation = 'source-over';
+  const fast = S.opt === 4 ? Math.max(Math.abs(wa) * (1 + 3 * g.jit), Math.abs(S.tv)) : Math.max(Math.abs(wa), Math.abs(wt));
+  const nSteps = Math.max(1, Math.min(600, Math.ceil(fast * sim / 0.02)));
+  let curWa = wa, curWt = wt;
+  for (let i = 0; i < nSteps; i++) {
+    const ds = sim / nSteps;
+    if (S.opt === 4) {
+      // free hinge in a frame whose speed jitters: I th'' = w^2 K sin th cos th + m g d sin th - friction. Here K = I (disc + weight).
+      S.ou += -S.ou / 0.2 * ds + g.jit * Math.sqrt(2 / 0.2 * ds) * gauss();
+      const w = wa * (1 + S.ou), I0 = 0.047 * 0.065 * 0.065 / 4, mw = g.wt / 1000, It = I0 + mw * 0.0025;
+      const acc = w * w * Math.sin(S.tilt) * Math.cos(S.tilt) + (mw * 9.81 * 0.05 / It) * Math.sin(S.tilt) - g.fric * S.tv;
+      S.tv += acc * ds; S.tilt += S.tv * ds; S.az += w * ds; curWa = w; curWt = S.tv;
+    } else { S.az += wa * ds; S.tilt += wt * ds; }
+    const h = reflect(S.az, S.tilt);
+    if (h && !h.out) {
+      tx.strokeStyle = 'rgba(255,214,120,' + (0.35 + 0.6 * h.I) + ')';
+      tx.lineWidth = 3 + 9 * h.I; tx.lineCap = 'round';
+      tx.beginPath();
+      if (prev && Math.hypot(prev.px - h.px, prev.py - h.py) < 220) tx.moveTo(prev.px, prev.py); else tx.moveTo(h.px, h.py);
+      tx.lineTo(h.px + 0.01, h.py); tx.stroke();
+    }
+    prev = h && !h.out ? h : null;
+  }
+  S.az %= TAU * 1000; S.tilt %= TAU * 1000;
+  tex.needsUpdate = true;
+
+  spin.rotation.y = S.az; mg.rotation.x = S.tilt;
+  const h = reflect(S.az, S.tilt);
+  if (h) {
+    refl.visible = true;
+    const end = h.out ? new THREE.Vector3(0, CY, 0).addScaledVector(r, 700) : new THREE.Vector3(WALL_X, h.hy, h.hz);
+    setLine(refl, new THREE.Vector3(0, CY, 0), end);
+  } else refl.visible = false;
+
+  placeCam(); renderer.render(scene, camera);
+  const w = cv.clientWidth, hh = cv.clientHeight;
+  labels.forEach(l => {
+    const p = l.get().clone().project(camera);
+    l.el.style.left = ((p.x + 1) / 2 * w) + 'px'; l.el.style.top = ((1 - p.y) / 2 * hh) + 'px';
+    l.el.style.display = p.z < 1 ? '' : 'none';
+  });
+  const tip = Math.abs(curWa) * RING_R / 1000;
+  const wrapDeg = x => ((x / D2R) % 360 + 360) % 360;
+  $('read').innerHTML =
+    '<div class="row"><span>frame</span><b>' + (curWa * 60 / TAU).toFixed(0) + ' rpm</b></div>' +
+    '<div class="row"><span>mirror</span><b>' + (curWt * 60 / TAU).toFixed(0) + ' rpm</b></div>' +
+    '<div class="row"><span>ring tip speed</span><b>' + tip.toFixed(1) + ' m/s</b></div>' +
+    '<div class="row"><span>beam</span><b>' + (h ? (h.out ? 'off the wall' : 'on the wall') : 'dark') + '</b></div>';
+  requestAnimationFrame(frame);
+}
+
+// ---------------------------------------------------------------- UI
+function sync() {
+  g.az = +$('sAz').value; g.tl = +$('sTilt').value; g.ratio = +$('sRatio').value; g.ts = +$('sTs').value; g.per = +$('sPer').value; g.jit = +$('sJit').value / 100; g.fric = +$('sFric').value; g.wt = +$('sWt').value;
+  $('vJit').textContent = (g.jit * 100).toFixed(0) + ' %'; $('vFric').textContent = g.fric.toFixed(2) + ' /s'; $('vWt').textContent = g.wt + ' g';
+  $('vAz').textContent = g.az + ' rpm'; $('vTilt').textContent = g.tl + ' rpm'; $('vRatio').textContent = g.ratio.toFixed(2) + ' : 1';
+  $('vTs').textContent = g.ts.toFixed(2) + 'x'; $('vPer').textContent = g.per.toFixed(2) + ' s';
+}
+['sAz', 'sTilt', 'sRatio', 'sTs', 'sPer', 'sJit', 'sFric', 'sWt'].forEach(id => $(id).addEventListener('input', sync));
+document.querySelectorAll('[data-opt]').forEach(b => b.addEventListener('click', () => { S.opt = +b.dataset.opt; showOpt(); }));
+$('dbl').addEventListener('click', e => { S.dbl = !S.dbl; e.target.classList.toggle('on', S.dbl); e.target.textContent = S.dbl ? 'both sides silvered' : 'one side silvered'; });
+$('clr').addEventListener('click', () => tx.clearRect(0, 0, tc.width, tc.height));
+
+sync(); showOpt(); resize(); requestAnimationFrame(frame);
+</script>
+</body>
+</html>

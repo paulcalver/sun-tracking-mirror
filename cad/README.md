@@ -22,3 +22,9 @@ Wall mirror concept (2026-11-04): `src/wall_mirror_nema11.py` writes `out/wall-m
 Line of 7 wall mirrors, passive and wedge versions (2026-11-04): `src/line_mirrors.py` writes `out/line-mirrors/*.step` and renders to `media/previews/line-mirrors/`; `--check` runs clash and Sun-view ray checks; notes in `../docs/line-mirrors.md`.
 
 Sun pointer bead (2026-11-12): `src/sun_pointer_bead.py` writes `out/sun-pointer/sun-pointer-bead.step` and renders to `media/previews/sun-pointer/`; `--check` tests the tip against the sun formulas and sweeps spin and tilt for clashes; notes in `../docs/sun-pointer-bead.md`; the interactive concept is `../docs/sun-ring-concept.html`.
+
+Finger pointer (2026-11-13): `src/finger_pointer.py` writes `out/finger-pointer/` (assembly STEP, parts split laser/print/purchase with DXF and engraving PNGs) and `../bom/bom-finger-pointer.csv`, previews in `media/previews/finger-pointer/`; `src/trace_finger.py` traces the hand outline from `src/assets/finger-source.jpg`; `--check` runs interference tests; notes in `../docs/finger-pointer.md`.
+
+Spinning mirror gimbal (2026-11-14): `src/spinning_mirror.py` writes `out/spinning-mirror/` (assembly STEP, parts split print/purchase) and `../bom/bom-spinning-mirror.csv`, previews in `media/previews/spinning-mirror/`; `--check` sweeps the mirror tilt for clashes; notes in `../docs/spinning-mirror-gimbal.md`, concept page `../docs/spinning-mirror-gimbal-concept.html`.
+
+Spinning mirror row of 7 (2026-11-14): `src/spinning_mirror_row.py` writes `out/spinning-mirror-row/` (assembly STEP, parts split laser/print/purchase with DXF) and `../bom/bom-spinning-mirror-row.csv`, previews in `media/previews/spinning-mirror-row/`; `--check` runs random-pose clash checks; notes in `../docs/spinning-mirror-row.md`.

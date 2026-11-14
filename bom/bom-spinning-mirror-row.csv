@@ -1,0 +1,18 @@
+process,item,qty,note
+laser,"Plywood 6 mm: base layers, 720 x 140 mm, bottom (plain), middle (ballast and cable windows), top (cable holes, slots)",3,"own cutter, bed 1219 x 914"
+laser,"Plywood 6 mm: end upright, 70 mm wide, with bar window and tab; cut 4 (2 laminated per end)",4,DXF laser_upright_layer_6mm_x4
+laser,"Plywood 6 mm: centre plate, same profile as the upright",1,DXF laser_centre_plate_6mm
+print,"PETG: ring with foot and pin boss (x7), carrier (x7), hub adapter (x7), top bearing block (x7)",28,"Bambu P1S, 0.4 mm, 4 walls"
+print,PLA or PETG: motor boss (x7),7,bolts to the top plate with M3 x 16 self-tapping screws
+buy,"Brushless gimbal motor 2804 class, about 100 KV (ASSUMED size, check)",7,
+buy,"Motor drivers, 3-phase, open-loop capable (SimpleFOC Mini or similar), 7 in total; two boards with enough PWM (21 outputs)",7,ESP32-S3 or RP2040 x2
+buy,"12 V supply, 5 A, fuse, power distribution",1,
+buy,Bearing 683ZZ (3 x 7 x 3): 2 per ring hinge plus 1 per top block,21,
+buy,Steel pin 3 mm x 19 mm (ring top),7,press into the ring boss
+buy,Steel rod 3 mm x 78 mm (hinge axle),7,
+buy,"Acrylic mirror 2 mm, 60 mm discs (laser-cut), two per unit",14,one per unit if single-sided
+buy,"Brass slug 6 x 5 mm (swap for steel, aluminium or none)",7,tune the random behaviour
+buy,"Aluminium box tube 20 x 20 x 1.5, 700 mm",1,"drill 2 x 6 mm holes per unit, M4 screws to the blocks"
+buy,"Steel flat bar 38 x 6 mm, 620 mm (about 1.1 kg each)",2,ballast in the middle layer windows
+buy,Rubber feet 12 mm,4,
+buy,"Fasteners: M3 x 16 self-tapping (28), M3 x 8 (28 motor, 14 hub to ring), M2.5 x 6 (28), M4 x 12 (14), M3 x 6 trim (28), M3 and M4 heat-set inserts, wood glue",1,set

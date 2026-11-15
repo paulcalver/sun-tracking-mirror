@@ -143,7 +143,6 @@ def wall_slots(w, front=True, back=True, ends=True):
 
 # ------------------------------------------------------------------ acrylic hood (5 mm clear, laser cut, finger joints)
 HOOD_H = HOOD_TOP_IN - Z_BASE
-HOOD_SEG = 7                                                 # corner finger segments up the height
 
 
 def acr_box(x0, x1, y0, y1):
@@ -164,34 +163,23 @@ def hood_floor_slots(w):
     for c in hood_tab_centres(2 * HOOD_OUT_X):
         for y0 in (-HOOD_OUT_Y - 0.1, HOOD_IN_Y - 0.1):
             w = w.cut(cutter(c - HTAB / 2 - 0.1, c + HTAB / 2 + 0.1, y0, y0 + t))
-    for c in hood_tab_centres(2 * HOOD_OUT_Y):
+    for c in hood_tab_centres(2 * HOOD_IN_Y):
         for x0 in (-HOOD_OUT_X - 0.1, HOOD_IN_X - 0.1):
             w = w.cut(cutter(x0, x0 + t, c - HTAB / 2 - 0.1, c + HTAB / 2 + 0.1))
     return w
 
 
-def _seg(k):
-    h = HOOD_H / HOOD_SEG
-    return Z_BASE + k * h, Z_BASE + (k + 1) * h
-
-
-def hood_wall_flat(length, inner, outer, long_wall=True):
-    """Front/back wall (long) or end wall: profile in (u along the wall, v = Z), thickness ACR_T. Finger joints in the corner zones, tabs at the
-    bottom (into the base top layer) and top (into the hood top panel)."""
+def hood_wall_flat(length, inner=None, outer=None, long_wall=True):
+    """Front/back wall (long) or end wall: profile in (u along the wall, v = Z), thickness ACR_T. Plain edges: the corners and the top are
+    butt joints, solvent-welded. Only the bottom tabs remain (into the base top layer), which hold all four walls square while welding."""
     w = acr_box(-length / 2, length / 2, Z_BASE, HOOD_TOP_IN)
     for c in hood_tab_centres(length):
-        w = w.union(acr_box(c - HTAB / 2, c + HTAB / 2, Z_TOP, Z_BASE)).union(acr_box(c - HTAB / 2, c + HTAB / 2, HOOD_TOP_IN, HOOD_TOP_IN + ACR_T))
-    for k in range(HOOD_SEG):
-        if (k % 2 == 1) == long_wall:                      # the long walls lose the odd segments, the end walls the even ones
-            v0, v1 = _seg(k)
-            for sx in (-1, 1):
-                a, b = (inner, outer + 1) if sx > 0 else (-outer - 1, -inner)
-                w = w.cut(acr_cut(a, b, v0 - 0.0, v1 + 0.0))
+        w = w.union(acr_box(c - HTAB / 2, c + HTAB / 2, Z_TOP, Z_BASE))
     return w
 
 
 def hood_front_back(front=True):
-    w = hood_wall_flat(2 * HOOD_OUT_X, HOOD_IN_X, HOOD_OUT_X, long_wall=True)
+    w = hood_wall_flat(2 * HOOD_OUT_X)
     for k in range(6):                                                                       # vents just above the deck, 6 mm wide
         u = -150.0 + 60.0 * k
         w = w.cut(acr_cut(u - 20, u + 20, DECK_Z1 + 2, DECK_Z1 + 8))
@@ -201,18 +189,11 @@ def hood_front_back(front=True):
 
 
 def hood_end():
-    return hood_wall_flat(2 * HOOD_OUT_Y, HOOD_IN_Y, HOOD_OUT_Y, long_wall=False)
+    return hood_wall_flat(2 * HOOD_IN_Y)                                                    # fits between the front and back walls
 
 
 def hood_top():
     w = acr_box(-HOOD_OUT_X, HOOD_OUT_X, -HOOD_OUT_Y, HOOD_OUT_Y)
-    t = ACR_T + 0.2
-    for c in hood_tab_centres(2 * HOOD_OUT_X):
-        for y0 in (-HOOD_OUT_Y - 1, HOOD_IN_Y - 0.1):
-            w = w.cut(acr_cut(c - HTAB / 2 - 0.1, c + HTAB / 2 + 0.1, y0, y0 + t + 1))
-    for c in hood_tab_centres(2 * HOOD_OUT_Y):
-        for x0 in (-HOOD_OUT_X - 1, HOOD_IN_X - 0.1):
-            w = w.cut(acr_cut(x0, x0 + t + 1, c - HTAB / 2 - 0.1, c + HTAB / 2 + 0.1))
     for k in range(6):                                                                       # top vents, 6 x 40 mm, two rows
         u = -150.0 + 60.0 * k
         for y in (-30.0, 30.0):
@@ -370,11 +351,11 @@ def build_frame():
     px = POD_X - 18
     FRAME.append(("pot_10k_with_knob", cylz(8.0, Z_BASE + POD_H - 18, Z_BASE + POD_H - 5, px, POD_Y).union(cylz(10.0, Z_BASE + POD_H, Z_BASE + POD_H + 15, px, POD_Y)).val(), "#2b2b2b", "frame", "print_ph"))
     # ---- acrylic hood and the interlock
-    FRAME.append(("laser_hood_front_5mm", place_acr_xz(hood_front_back(front=True), -HOOD_IN_Y), "#bfe0f0", "frame", "acrylic"))
-    FRAME.append(("laser_hood_back_5mm", place_acr_xz(hood_front_back(front=False), HOOD_OUT_Y), "#bfe0f0", "frame", "acrylic"))
-    FRAME.append(("laser_hood_end_left_5mm", place_yz(hood_end(), -HOOD_OUT_X), "#bfe0f0", "frame", "acrylic"))
-    FRAME.append(("laser_hood_end_right_5mm", place_yz(hood_end(), HOOD_IN_X), "#bfe0f0", "frame", "acrylic"))
-    FRAME.append(("laser_hood_top_5mm", hood_top().translate((0, 0, HOOD_TOP_IN)).val(), "#bfe0f0", "frame", "acrylic"))
+    FRAME.append(("laser_hood_front_5mm", place_acr_xz(hood_front_back(front=True), -HOOD_IN_Y), "#e6f3f9", "frame", "acrylic"))
+    FRAME.append(("laser_hood_back_5mm", place_acr_xz(hood_front_back(front=False), HOOD_OUT_Y), "#e6f3f9", "frame", "acrylic"))
+    FRAME.append(("laser_hood_end_left_5mm", place_yz(hood_end(), -HOOD_OUT_X), "#e6f3f9", "frame", "acrylic"))
+    FRAME.append(("laser_hood_end_right_5mm", place_yz(hood_end(), HOOD_IN_X), "#e6f3f9", "frame", "acrylic"))
+    FRAME.append(("laser_hood_top_5mm", hood_top().translate((0, 0, HOOD_TOP_IN)).val(), "#e6f3f9", "frame", "acrylic"))
     FRAME.append(("reed_switch_3x16", cylx(1.5, REED_X - 8, REED_X + 8, WALL_Y + 1.5, MAG_Z).val(), "#b0c4de", "frame", "steel"))
     FRAME.append(("magnet_6x3_on_hood", cq.Workplane("XZ").workplane(offset=-HOOD_IN_Y).center(REED_X, MAG_Z).circle(3.0).extrude(3.0).val(), "#c0392b", "frame", "steel"))
     cx, cy = CTRL_XY
@@ -406,10 +387,12 @@ def cqc(h, a=1.0):
     return cq.Color(int(h[1:3], 16) / 255, int(h[3:5], 16) / 255, int(h[5:7], 16) / 255, a)
 
 
-def assemble(poses, yup):
+def assemble(poses, yup, hood=True, only_hood=False):
     root = cq.Assembly(name="spinning_mirror_row")
     subs = {}
     for nm, s, col, grp, _ in all_parts(poses):
+        if (not hood and nm.startswith("laser_hood")) or (only_hood and not nm.startswith("laser_hood")):
+            continue
         if yup:
             s = s.rotate((0, 0, 0), (1, 0, 0), -90)
         if grp not in subs:
@@ -610,6 +593,8 @@ def main():
     write_bom()
     P0 = random_poses(a.seed)
     assemble(P0, a.up == "y").save(str(OUTD / f"{TAG}-assembly.step"))
+    assemble(P0, a.up == "y", hood=False).save(str(OUTD / f"{TAG}-assembly-no-hood.step"))       # for Fusion: the hood as a separate, hideable file
+    assemble(P0, a.up == "y", only_hood=True).save(str(OUTD / f"{TAG}-hood.step"))
     print("Wrote", OUTD / f"{TAG}-assembly.step")
     P = all_parts(P0)
     hx = BASE_L / 2 + 10

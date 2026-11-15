@@ -4,7 +4,7 @@ Draft, nothing built or tested. Single unit, no top support, no box or hood. See
 
 Same idea as spinning_mirror.py (concept page, option D): one motor spins the ring about the vertical axis with a randomly jittering speed,
 nothing drives the hinge, and the mirror tumbles. Differences: a 150 mm mirror (1.5 mm acrylic, two discs back to back), a NEMA 17 stepper
-(42.3 mm square, 40 mm body, 5 mm D shaft) instead of the GM2804, a 4 mm axle on 684ZZ bearings, and a printed square pedestal in which the
+(The Pi Hut 42/60: 42.3 mm square, 60 mm body, 5 mm D shaft) instead of the GM2804, a 4 mm axle on 684ZZ bearings, and a printed square pedestal in which the
 motor hangs below the top plate with its shaft up. A stepper is run open loop (step/dir), so only the speed matters, not the position.
 
 World frame (mm): origin on the table at the centre of the base, Z up. The ring spins about Z. Its plane is XZ and the hinge axle runs along X
@@ -40,23 +40,23 @@ IMG = CAD / "media" / "previews" / TAG
 BOMF = CAD.parent / "bom" / f"bom-{TAG}.csv"
 
 # ------------------------------------------------------------------ parameters (mm)
-# NEMA 17, 40 mm body (typical datasheet numbers, check yours)
-N_W, N_L, N_CH = 42.3, 40.0, 3.0                # square face, body length, vertical edge chamfer
+# NEMA 17, The Pi Hut 42/60 (datasheet: 1.68 A, 1.65 ohm, 6.2 mH, 6.5 kg cm, 102 g cm2, 0.5 kg); face and hole dimensions are the usual NEMA 17 ones
+N_W, N_L, N_CH = 42.3, 60.0, 3.0                # square face, body length (The Pi Hut 42/60), vertical edge chamfer
 N_HOLE_PITCH, N_HOLE_D, N_HOLE_DEPTH = 31.0, 3.0, 4.5     # M3 tapped holes in the front face
 N_PILOT_R, N_PILOT_H = 11.0, 2.0                # 22 mm pilot boss, 2 mm high
 N_SHAFT_R, N_SHAFT_L = 2.5, 24.0                # 5 mm shaft, 24 mm out of the front face
 N_FLAT_Y, N_FLAT_L = 2.0, 15.0                  # D flat on the +Y side, 15 mm long from the tip
-N_ROTOR_I = 5.7e-6                              # kg m2, typical rotor inertia of a 40 mm NEMA 17
+N_ROTOR_I = 1.02e-5                             # kg m2, 102 g cm2 from the 42/60 datasheet
 
 # base: open-bottom printed pedestal (print it upside down, top plate on the bed) plus a lid
-BASE_H = 54.0                                   # top of the pedestal plate above the table
+BASE_H = 14.0 + N_L                             # top of the pedestal plate above the table (74 for the 60 mm motor)
 BASE_HALF = 75.0                                # 150 x 150 mm footprint
 WALL, PLATE_T = 4.0, 6.0
 LID_Z0, LID_T = 2.0, 3.0                        # lid 2..5, rubber feet 0..2
 POST_IN, POST_Z1 = 57.0, 18.0                   # corner posts 57..71 for the lid inserts, up to z 18
 LID_SCREW = 62.0                                # lid screws at (+/-62, +/-62), M3 countersunk into heat-set inserts in the posts
 INSERT_D = 4.2
-BALLAST_R0, BALLAST_R1, BALLAST_T = 32.0, 58.0, 10.0     # steel washers or plates in a ring around the motor, about 570 g
+BALLAST_R0, BALLAST_R1, BALLAST_T = 32.0, 58.0, 6.0      # steel washers or plates in a ring around the motor, about 350 g (the motor itself is 0.5 kg)
 MOTOR_Z1 = BASE_H - PLATE_T                     # front face of the motor, against the underside of the plate (48)
 MOTOR_Z0 = MOTOR_Z1 - N_L                       # 8
 SHAFT_Z1 = MOTOR_Z1 + N_SHAFT_L                 # 72
@@ -80,7 +80,7 @@ BRG = (4.0, 9.0, 4.0)                           # 684ZZ: bore, outer diameter, w
 HUB_D = 5.0                                     # carrier hub that touches the inner race
 FOOT_SCREW_D = 3.4
 
-RHO = {"print": 1.25e-3, "steel": 7.85e-3, "brass": 8.5e-3, "acrylic": 1.19e-3, "stator": 3.9e-3}      # g per mm3 (stator: about 280 g)
+RHO = {"print": 1.25e-3, "steel": 7.85e-3, "brass": 8.5e-3, "acrylic": 1.19e-3, "stator": 4.7e-3}      # g per mm3 (stator: 0.5 kg motor)
 
 PARTS_L = []
 
@@ -108,6 +108,9 @@ def build():
             x, y = sx * N_HOLE_PITCH / 2, sy * N_HOLE_PITCH / 2
             shell = shell.cut(cylz(1.7, BASE_H - PLATE_T - 1, BASE_H + 1, x, y)).cut(cylz(3.2, BASE_H - 3.0, BASE_H + 1, x, y))
     shell = shell.cut(box(-6, 6, -BASE_HALF - 1, -BASE_HALF + WALL + 1, LID_Z0 + LID_T, LID_Z0 + LID_T + 12))   # wire notch in the front wall
+    for sx in (-1, 1):                                       # vent slots in the side walls, the motor is enclosed and runs warm
+        for yv in (-24, 0, 24):
+            shell = shell.cut(box(sx * (BASE_HALF - WALL / 2) - 3, sx * (BASE_HALF - WALL / 2) + 3, yv - 2.5, yv + 2.5, 24, 56))
     lid = box(-inner + 0.2, inner - 0.2, -inner + 0.2, inner - 0.2, LID_Z0, LID_Z0 + LID_T)
     for sx in (-1, 1):
         for sy in (-1, 1):
@@ -130,7 +133,7 @@ def build():
     for sx in (-1, 1):
         for sy in (-1, 1):
             body = body.cut(cylz(N_HOLE_D / 2, MOTOR_Z1 - N_HOLE_DEPTH, MOTOR_Z1 + 1, sx * N_HOLE_PITCH / 2, sy * N_HOLE_PITCH / 2))
-    add("motor_nema17_40mm_body", body, MOTOR_C, "fixed", "stator")
+    add("motor_nema17_60mm_body", body, MOTOR_C, "fixed", "stator")
     shaft = cylz(N_SHAFT_R, MOTOR_Z1 + N_PILOT_H, SHAFT_Z1).cut(box(-5, 5, N_FLAT_Y, 5, SHAFT_Z1 - N_FLAT_L, SHAFT_Z1 + 1))
     add("motor_nema17_shaft_5mm_D", shaft, STEEL, "spin", "steel")
 
@@ -253,15 +256,15 @@ def write_bom():
     rows = [
         ("print", "PETG or ASA, matt black: ring with foot, mirror carrier, hub adapter (print the ring flat, 4 walls)", 3, "Bambu P1S, 0.4 mm, 0.16 to 0.2 mm layers; ring is 170 mm across, fits the 256 mm bed"),
         ("print", "PETG or ASA, matt black: base pedestal (print upside down, no supports) and lid", 2, "150 x 150 mm"),
-        ("buy", "NEMA 17 stepper, 40 mm body, 1.5 to 2.0 A, 5 mm D shaft, about 0.4 to 0.5 N m holding", 1, "check the front-face thread is M3 on a 31 mm square"),
-        ("buy", "Stepper driver TMC2209 module (StealthChop; a slight hum is wanted, so A4988 or DRV8825 would also do)", 1, "step/dir, 1/16 microstep; set the motor current to about 70 % of rated"),
+        ("buy", "NEMA 17 stepper 42/60 (The Pi Hut, 60 mm body): 1.68 A, 1.65 ohm, 6.2 mH, 0.64 N m holding, 5 mm D shaft, 0.5 kg", 1, "check the front-face thread is M3 on a 31 mm square"),
+        ("buy", "Stepper driver TMC2209 module (StealthChop; a slight hum is wanted, so A4988 or DRV8825 would also do)", 1, "step/dir, 1/16 microstep; set the motor current to about 1.2 to 1.5 A (enclosed in the pedestal, 9 W at full current); heatsink on the driver"),
         ("buy", "ESP32 dev board (random-walk speed setpoint, acceleration limited)", 1, "step pulses from the RMT or a hardware timer, not a software loop"),
         ("buy", "24 V 3 A supply, barrel jack, 100 uF 35 V capacitor across the driver supply", 1, "24 V gives the torque at several hundred rpm; 12 V works but is weaker"),
         ("buy", "Bearing 684ZZ (4 x 9 x 4 mm)", 2, "light grease or none"),
         ("buy", "Steel or stainless rod 4 mm, 169 mm long", 1, "glue to the carrier with CA or retaining compound"),
         ("buy", f"Acrylic mirror 1.5 mm, {int(2 * MIR_R)} mm discs, laser-cut", 2, "try a sample first: 1.5 mm may still dish, 2 mm is stiffer"),
         ("buy", f"Brass slug {int(SLUG_D)} x {int(SLUG_T)} mm (swap for steel or aluminium, or leave out)", 1, "eccentric weight, about 2.6 g"),
-        ("buy", "Steel washers or plates as ballast, about 570 g", 1, "ring around the motor in the pedestal"),
+        ("buy", "Steel washers or plates as ballast, about 350 g", 1, "ring around the motor in the pedestal"),
         ("buy", "Heat-set inserts M3 x 5 (4 lid, 2 ring foot, 2 grub screws)", 8, ""),
         ("buy", "Screws: M3 x 8 cap head (motor x4), M3 x 8 countersunk (lid x4), M3 x 16 (ring foot to hub x2), M3 x 5 grub (shaft x2), M3 x 6 (ring balance trim x4)", 1, "set; thread-lock the grub screws"),
         ("buy", "Rubber feet 9 mm", 4, "stick-on"),

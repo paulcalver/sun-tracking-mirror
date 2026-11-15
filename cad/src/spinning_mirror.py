@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CAD assembly: spinning mirror gimbal, a 60 mm round mirror on a free hinge inside a ring, the ring on a brushless motor (CadQuery).
+"""CAD assembly: spinning mirror gimbal, an 80 mm round mirror on a free hinge inside a ring, the ring on a brushless motor (CadQuery).
 Draft, nothing built or tested. See docs/spinning-mirror-gimbal.md and docs/spinning-mirror-gimbal-concept.html (option D).
 
 World frame (mm): origin on the table at the centre of the base, Z up. The ring spins about Z. Its plane is XZ and the mirror hinge axle
@@ -11,8 +11,10 @@ Hierarchy (maps to Fusion components, no joints):
 
 Nothing drives the hinge. The single motor jitters its speed at random and the mirror tumbles (concept page, option D). The eccentric
 weight slug is swappable (brass 1.2 g, steel, aluminium, or none).
-ASSUMED motor size (iPower GM2804 class): bell 34 mm x 22 mm tall, 4 x M2.5 on a 16 mm circle on top, 4 x M3 on a 19 mm circle under
-the stator. Check against the datasheet of the motor you buy and edit MOTOR_* below.
+Motor: the real iPower GM2804 with AS5048A encoder, imported from cad/src/assets/ipower-gm2804-as5048a.step (35 mm, 26.15 mm tall: stator
+housing below, 12.75 mm rotor bell above). Its stator is fixed, the bell turns with the ring. Mounting taken from the STEP: 4 blind holes
+(2.4 mm, 3.5 deep, on a 15.8 mm circle, not evenly spaced) in the bottom face, 4 holes on a 26 mm circle at the bell top, and a 6.5 mm hollow
+shaft through the stator that the wires can use. Whether those holes are threaded is not stated; check the part.
 
 Usage (from the repo root):
   python3 cad/src/spinning_mirror.py [--az DEG] [--tilt DEG] [--up y|z] [--check]
@@ -29,6 +31,7 @@ import cadquery as cq
 
 HERE = Path(__file__).resolve().parent
 CAD = HERE.parent
+ART = HERE / "assets"
 OUTD = CAD / "out" / "spinning-mirror"
 PARTS = OUTD / "parts"
 IMG = CAD / "media" / "previews" / "spinning-mirror"
@@ -40,32 +43,37 @@ FEET_T, PLATE_T, PUCK_Z0, PUCK_Z1 = 2.0, 3.0, 5.0, 21.0     # rubber feet 0..2, 
 POCKET_R, POCKET_Z1 = 48.0, 15.0                # ballast and cable pocket in the underside of the puck
 BALLAST_R0, BALLAST_R1, BALLAST_T = 30.0, 46.0, 5.0         # steel washers or nuts glued in, about 150 g
 BOSS_R, BOSS_Z1 = 15.0, 29.0                    # motor boss on top of the puck
-CABLE_R = 7.0                                   # central cable hole
+CABLE_R = 5.5                                   # central cable hole, 11 mm (the motor has a 6.5 mm hollow shaft)
 NOTCH_W, NOTCH_Z0, NOTCH_Z1 = 8.0, 10.5, 14.5   # cable notch through the puck wall, above the ballast
 INSERT_R, INSERT_D = 51.5, 4.2                  # M3 heat-set inserts that hold the floor plate (4 at 45 deg steps)
 
-MOTOR_D, MOTOR_H = 34.0, 22.0                   # ASSUMED gimbal motor bell
-MOTOR_Z0 = BOSS_Z1
-MOTOR_BASE_PCD, MOTOR_TOP_PCD = 19.0, 16.0      # ASSUMED bolt circles: under the stator, on the bell top
-HUB_T, HUB_R = 4.0, 17.0                        # hub adapter disc on the bell
+MOTOR_STEP = ART / "ipower-gm2804-as5048a.step"
+MOTOR_D = 35.0
+MOTOR_ZBOT, MOTOR_ZTOP = -13.4, 12.75           # in the STEP frame: bottom of the stator housing, top of the bell
+MOTOR_H = MOTOR_ZTOP - MOTOR_ZBOT               # 26.15
+MOTOR_BOTTOM_HOLES = [(5.09, 6.05), (-3.87, 6.89), (-5.09, -6.05), (3.87, -6.89)]    # blind 2.4 x 3.5 in the stator bottom face
+MOTOR_TOP_HOLES = [(9.19, 9.19), (-9.19, 9.19), (-9.19, -9.19), (9.19, -9.19)]       # bell top, on a 26 mm circle, countersunk 2.4
+MOTOR_Z0 = BOSS_Z1                              # bottom of the motor sits on the boss
+HUB_T, HUB_R = 7.0, 17.5                        # hub adapter disc on the bell (7 mm so its top is level with a 6 mm deck 1 mm above the bell)
+FOOT_SCREW_D = 3.4
 HUB_Z0 = MOTOR_Z0 + MOTOR_H
 HUB_Z1 = HUB_Z0 + HUB_T
 
-R_IN, R_OUT, RING_W = 34.0, 39.0, 8.0           # ring inside and outside radius, width along Y
+R_IN, R_OUT, RING_W = 44.0, 49.0, 10.0          # ring inside and outside radius, width along Y
 FOOT_H = 6.0
 FOOT_X, FOOT_SCREW_X = 8.0, 5.0                 # foot half width, M3 pair at x = +/-5
-ZC = HUB_Z1 + FOOT_H + R_OUT                    # ring and mirror centre height (100 mm)
+ZC = HUB_Z1 + FOOT_H + R_OUT                    # ring and mirror centre height (about 116 mm)
 
-MIR_R, MIR_T = 30.0, 2.0                        # 60 mm acrylic mirror discs, 2 mm
+MIR_R, MIR_T = 40.0, 2.0                        # 80 mm acrylic mirror discs, 2 mm
 CAR_T, RIM_W, BAR_W = 5.0, 3.0, 6.0             # carrier thickness, rim width, bar width
-PAD_Y, PAD_R, SLUG_D, SLUG_T = 22.0, 7.0, 6.0, 5.0         # weight pad off-axis by 22 mm, brass slug 6 x 5
+PAD_Y, PAD_R, SLUG_D, SLUG_T = 29.0, 8.0, 6.0, 5.0         # weight pad off-axis by 29 mm, brass slug 6 x 5
 AXLE_D, AXLE_L = 3.0, 2 * R_OUT                 # 3 mm axle, flush with the outer faces of the bosses
-BOSS_D, BOSS_X0 = 12.0, 31.5                    # axle bosses on the ring, inner face at x = 31.5
+BOSS_D, BOSS_X0 = 12.0, 41.5                    # axle bosses on the ring, inner face at x = 41.5 (1.5 mm from the mirror rim)
 BRG = (3.0, 7.0, 3.0)                           # 683ZZ: bore, outer diameter, width
 HUB_D = 4.0                                     # carrier hub that touches the inner race
 
-PRINT_C, STEEL, ALU, BRASS, MIRROR, MOTOR_C, RUBBER = ("#e8a400", "#c4c8cc", "#a9b0b8", "#c9a24a", "#cfe3ee", "#2f3338", "#222222")
-RHO = {"print": 1.25e-3, "steel": 7.85e-3, "brass": 8.5e-3, "acrylic": 1.19e-3}          # g per mm3
+PRINT_C, STEEL, ALU, BRASS, MIRROR, MOTOR_C, RUBBER = ("#262626", "#c4c8cc", "#a9b0b8", "#c9a24a", "#cfe3ee", "#2f3338", "#222222")
+RHO = {"print": 1.25e-3, "steel": 7.85e-3, "brass": 8.5e-3, "acrylic": 1.19e-3, "motor": 2.45e-3}   # g per mm3 (motor: 42.3 g over the STEP volume)
 
 
 # ------------------------------------------------------------------ helpers
@@ -94,6 +102,15 @@ def cylx(r, x0, x1, y=0.0, z=0.0):
 PARTS_L = []
 
 
+def motor_parts():
+    """(stator, rotor) of the imported motor, placed with the bottom of the stator at MOTOR_Z0."""
+    sol = cq.importers.importStep(str(MOTOR_STEP)).solids().vals()
+    stator = [x for x in sol if x.BoundingBox().zmin < -1][0]
+    rotor = [x for x in sol if x.BoundingBox().zmin >= -1]
+    dz = MOTOR_Z0 - MOTOR_ZBOT
+    return stator.translate((0, 0, dz)), cq.Compound.makeCompound([r.translate((0, 0, dz)) for r in rotor])
+
+
 def add(name, wp, colour, grp, mat):
     PARTS_L.append((name, _shape(wp), colour, grp, mat))
 
@@ -111,9 +128,9 @@ def build():
         x, y = INSERT_R * math.cos(a), INSERT_R * math.sin(a)
         puck = puck.cut(cylz(INSERT_D / 2, PUCK_Z0 - 1, PUCK_Z0 + 6, x, y))
         plate = plate.cut(cylz(1.6, FEET_T - 1, FEET_T + PLATE_T + 1, x, y))
-    for k in range(4):                                       # motor bolt holes in the boss top (M3 inserts)
-        a = math.radians(45 + 90 * k)
-        puck = puck.cut(cylz(2.1, BOSS_Z1 - 5, BOSS_Z1 + 1, MOTOR_BASE_PCD / 2 * math.cos(a), MOTOR_BASE_PCD / 2 * math.sin(a)))
+    for (x, y) in MOTOR_BOTTOM_HOLES:                        # M2 screws come up from the underside into the stator bottom
+        puck = puck.cut(cylz(1.2, PUCK_Z0 - 1, BOSS_Z1 + 1, x, y))
+        plate = plate.cut(cylz(1.2, FEET_T - 1, FEET_T + PLATE_T + 1, x, y))
     add("print_base_floor_plate", plate, PRINT_C, "fixed", "print")
     add("print_base_puck", puck, PRINT_C, "fixed", "print")
     feet = None
@@ -124,16 +141,16 @@ def build():
     add("rubber_feet_x4", feet, RUBBER, "fixed", "print")
     add("ballast_steel_washers", cylz(BALLAST_R1, PUCK_Z0, PUCK_Z0 + BALLAST_T).cut(cylz(BALLAST_R0, PUCK_Z0 - 1, PUCK_Z0 + BALLAST_T + 1)),
         STEEL, "fixed", "steel")
-    add("motor_gimbal_2804", cylz(MOTOR_D / 2, MOTOR_Z0, MOTOR_Z0 + MOTOR_H), MOTOR_C, "fixed", "steel")
+    stator, rotor = motor_parts()
+    add("motor_gm2804_stator", stator, MOTOR_C, "fixed", "motor")
+    add("motor_gm2804_rotor_bell", rotor, "#3a3f45", "spin", "motor")
 
     # ---- hub adapter and ring (ring_spin)
-    hub = cylz(HUB_R, HUB_Z0, HUB_Z1).cut(cylz(2.5, HUB_Z0 - 1, HUB_Z1 + 1))
-    for k in range(4):                                       # M2.5 into the bell top, heads counterbored
-        a = math.radians(45 + 90 * k)
-        x, y = MOTOR_TOP_PCD / 2 * math.cos(a), MOTOR_TOP_PCD / 2 * math.sin(a)
-        hub = hub.cut(cylz(1.4, HUB_Z0 - 1, HUB_Z1 + 1, x, y)).cut(cylz(2.5, HUB_Z1 - 2.5, HUB_Z1 + 1, x, y))
-    for sx in (-1, 1):                                       # M3 up into the ring foot
-        hub = hub.cut(cylz(1.7, HUB_Z0 - 1, HUB_Z1 + 1, sx * FOOT_SCREW_X, 0))
+    hub = cylz(HUB_R, HUB_Z0, HUB_Z1)
+    for (x, y) in MOTOR_TOP_HOLES:                           # M2 down into the bell top, heads counterbored from above
+        hub = hub.cut(cylz(1.2, HUB_Z0 - 1, HUB_Z1 + 1, x, y)).cut(cylz(2.1, HUB_Z1 - 1.6, HUB_Z1 + 1, x, y))
+    for sx in (-1, 1):                                       # M3 heat-set inserts that take the screws from inside the ring
+        hub = hub.cut(cylz(INSERT_D / 2, HUB_Z1 - 5.5, HUB_Z1 + 1, sx * FOOT_SCREW_X, 0))
     add("print_hub_adapter", hub, PRINT_C, "spin", "print")
 
     ring = cyly(R_OUT, -RING_W / 2, RING_W / 2, 0, ZC).cut(cyly(R_IN, -RING_W, RING_W, 0, ZC))
@@ -148,9 +165,10 @@ def build():
         ring = ring.cut(cyly(1.3, RING_W / 2 - 6, RING_W / 2 + 1, (R_IN + R_OUT) / 2 * math.cos(a), ZC + (R_IN + R_OUT) / 2 * math.sin(a)))
     foot_top = ZC - R_OUT + 2
     foot = box(-FOOT_X, FOOT_X, -RING_W / 2, RING_W / 2, HUB_Z1, foot_top)
-    for sx in (-1, 1):
-        foot = foot.cut(cylz(INSERT_D / 2, HUB_Z1 - 1, HUB_Z1 + 5, sx * FOOT_SCREW_X, 0))
     ring = ring.union(foot)
+    z_in = ZC - R_IN
+    for sx in (-1, 1):                                       # M3 x 16 from inside the ring, down through the ring bottom and foot into the hub
+        ring = ring.cut(cylz(FOOT_SCREW_D / 2, HUB_Z1 - 1, z_in + 1, sx * FOOT_SCREW_X, 0)).cut(cylz(3.2, z_in - 2.5, z_in + 1, sx * FOOT_SCREW_X, 0))
     add("print_ring_with_foot", ring, PRINT_C, "spin", "print")
     for nm, sx in (("bearing_683zz_a", 1), ("bearing_683zz_b", -1)):
         x0 = BOSS_X0 if sx > 0 else -BOSS_X0 - BRG[2]
@@ -161,15 +179,16 @@ def build():
     rim = cylz(MIR_R, ZC - CAR_T / 2, ZC + CAR_T / 2).cut(cylz(MIR_R - RIM_W, ZC - CAR_T, ZC + CAR_T))
     bar = box(-MIR_R + 1, MIR_R - 1, -BAR_W / 2, BAR_W / 2, ZC - CAR_T / 2, ZC + CAR_T / 2)
     pad = cylz(PAD_R, ZC - CAR_T / 2, ZC + CAR_T / 2, 0, PAD_Y)
-    car = rim.union(bar).union(pad)
+    bar2 = box(-BAR_W / 2, BAR_W / 2, -MIR_R + 1, MIR_R - 1, ZC - CAR_T / 2, ZC + CAR_T / 2)      # cross bar supports the mirror quadrants
+    car = rim.union(bar).union(bar2).union(pad)
     car = car.cut(cylz(SLUG_D / 2, ZC - CAR_T, ZC + CAR_T, 0, PAD_Y))
     hub_len = BOSS_X0 - 0.1
     car = car.union(cylx(HUB_D / 2, MIR_R - 1, hub_len, 0, ZC)).union(cylx(HUB_D / 2, -hub_len, -MIR_R + 1, 0, ZC))
     car = car.cut(cylx(AXLE_D / 2, -hub_len - 1, hub_len + 1, 0, ZC))
     add("print_mirror_carrier", car, PRINT_C, "tilt", "print")
-    add("axle_3mm_steel_rod", cylx(AXLE_D / 2, -AXLE_L / 2, AXLE_L / 2, 0, ZC), STEEL, "tilt", "steel")
-    add("mirror_front_acrylic_60", cylz(MIR_R, ZC + CAR_T / 2, ZC + CAR_T / 2 + MIR_T), MIRROR, "tilt", "acrylic")
-    add("mirror_back_acrylic_60", cylz(MIR_R, ZC - CAR_T / 2 - MIR_T, ZC - CAR_T / 2), MIRROR, "tilt", "acrylic")
+    add(f"axle_3mm_steel_rod", cylx(AXLE_D / 2, -AXLE_L / 2, AXLE_L / 2, 0, ZC), STEEL, "tilt", "steel")
+    add(f"mirror_front_acrylic_{int(2 * MIR_R)}", cylz(MIR_R, ZC + CAR_T / 2, ZC + CAR_T / 2 + MIR_T), MIRROR, "tilt", "acrylic")
+    add(f"mirror_back_acrylic_{int(2 * MIR_R)}", cylz(MIR_R, ZC - CAR_T / 2 - MIR_T, ZC - CAR_T / 2), MIRROR, "tilt", "acrylic")
     add("weight_slug_brass_6x5", cylz(SLUG_D / 2, ZC - SLUG_T / 2, ZC + SLUG_T / 2, 0, PAD_Y), BRASS, "tilt", "brass")
 
 
@@ -245,13 +264,13 @@ def write_bom():
     rows = [
         ("print", "PETG: ring with foot, mirror carrier, hub adapter (balance and weight sensitive, print the ring flat)", 3, "Bambu P1S, 0.4 mm, 0.16 to 0.2 mm layers, 4 walls"),
         ("print", "PLA or PETG: base puck and floor plate", 2, "Bambu P1S"),
-        ("buy", "Brushless gimbal motor, 2804 class, about 100 KV, 12 V (check bell size and bolt circles against MOTOR_* in the script)", 1, "iPower GM2804 or equivalent"),
+        ("buy", "iPower GM2804-100T gimbal motor with AS5048A encoder, 12 V", 1, "35 x 26 mm, hollow shaft 6.5 mm"),
         ("buy", "Motor driver SimpleFOC Mini (or similar 3-phase gimbal driver) and an ESP32 dev board", 1, "controller, random-walk speed setpoint"),
         ("buy", "Magnetic encoder AS5600 or AS5048 (optional, closed-loop speed and logging)", 1, "open-loop speed mode works without it"),
         ("buy", "12 V supply, 2 A, and a barrel jack or screw terminal", 1, ""),
         ("buy", "Bearing 683ZZ (3 x 7 x 3 mm)", 2, "choose low-drag, light grease or none"),
         ("buy", "Stainless or silver-steel rod 3 mm, 78 mm long", 1, "glue to the carrier with CA or retaining compound"),
-        ("buy", "Acrylic mirror 2 mm, 60 mm discs (laser-cut or hole-sawn), one or two", 2, "cut from sheet; one-sided is fine, two give both faces"),
+        ("buy", "Acrylic mirror 2 mm, 80 mm discs (laser-cut or hole-sawn), one or two", 2, "cut from sheet; one-sided is fine, two give both faces"),
         ("buy", "Brass slug 6 x 5 mm (swap for steel or aluminium, or leave out)", 1, "eccentric weight, about 1.2 g"),
         ("buy", "Steel washers or M8 nuts as ballast, about 150 g", 1, "glue into the base pocket"),
         ("buy", "Heat-set inserts M3 x 5 (4 floor plate, 4 motor, 2 ring foot)", 10, ""),
@@ -291,7 +310,7 @@ def render(parts, path, views, hide=(), box_=None, zoom=1.2, only=(), cut_y=None
             n = np.cross(tri[1] - tri[0], tri[2] - tri[0])
             nn = np.linalg.norm(n)
             sh = 0.55 + 0.45 * abs(float(n @ light) / nn) if nn > 1e-9 else 0.8
-            tris.append(tri); cols.append(np.clip(base * sh, 0, 1))
+            tris.append(tri); cols.append(np.clip(base * sh * (2.4 if col == PRINT_C else 1.0), 0, 1))   # matt black prints, brightened in previews only
     x0, x1, y0, y1, z0, z1 = box_ or (-80, 80, -80, 80, 0, ZC + 60)
     fig = plt.figure(figsize=(7 * len(views), 8.5))
     for k, (elev, azim, title) in enumerate(views):

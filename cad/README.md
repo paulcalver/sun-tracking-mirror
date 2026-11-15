@@ -36,3 +36,5 @@ Spinning mirror trio (2026-11-14): the unit is now an 80 mm mirror on the real i
 Spinning mirror control deck (2026-11-15): the rigs now sit on a plywood box with a deck level with the hub tops (electronics inside, jitter knob, DC jack and USB cut-outs), 170 mm wide, printed parts matt black; see `../docs/spinning-mirror-row.md`.
 
 Spinning mirror hood (2026-11-15): 5 mm clear acrylic cover on the base top layer, front ledge with a printed control pod (dial, DC jack, USB-C) and a reed-switch interlock; see `../docs/spinning-mirror-row.md`.
+
+Spinning mirror 150 mm NEMA 17 test rig (2026-11-15): `python3 src/spinning_mirror_150_nema17.py` writes `out/spinning-mirror-150-nema17/`, `../bom/bom-spinning-mirror-150-nema17.csv` and previews in `media/previews/spinning-mirror-150-nema17/`; `--check` runs the tilt-sweep clash check. Single unit on a printed pedestal, no top bar, box or hood; notes in `../docs/spinning-mirror-150-nema17.md`.

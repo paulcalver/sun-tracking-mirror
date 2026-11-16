@@ -1,0 +1,17 @@
+process,item,qty,note
+laser,Opal (milk-white) cast acrylic 3 mm: disc 100 mm with a 3 mm radial slot,2,own cutter; about half the light passes
+laser,"Black acrylic 3 mm: strip 3 x 50, pressed into the slot",2,own cutter
+print,PETG-CF: hub 2,1,
+print,"PETG-CF black: frame tub and lid (with 16 pinholes each), arm and tray; keep them opaque so the sides do not glow",3,"Bambu P1S, hardened nozzle"
+print,"PETG-CF: turntable (5 mm), base shell with the cable spool (140 mm, USB-C slot, 3 mm sensor window), az adapter, elevation adapter",4,"Bambu P1S, hardened nozzle"
+buy,"RGBW addressable LED strip (SK6812 RGBW), 10 mm wide, about 60 per metre: three runs of about 114 mm, 100 mm and 100 mm",1,"about 20 LEDs, LEDs facing in"
+buy,"Small flex PCB arc or hand-wired 2 x 2 mm RGB LEDs: 16 per face on a 55.5 mm radius, every 6 degrees from 0 to 90",2,"32 LEDs, one data chain with the strip; check the minimum bend radius"
+buy,"Ambient light sensor breakout (VEML7700 or TEMT6000), about 6 x 6 mm",1,in the base behind the 3 mm wall hole; I2C on the ESP32
+buy,"Matt white paint for the frame interior (no thickness modelled), black masking for the pinholes if needed",1,diffuse reflector
+buy,"Thin silicone wire, 4 cores (12 V, 5 V, ground, serial), about 400 mm",1,"winds round the spool; LED data shares the serial wire pair via the RP2040, no extra core"
+buy,iPower GM2804 gimbal motor with AS5048A encoder (35 x 26.15 mm),2,elevation and azimuth; confirm torque and screw size
+buy,SimpleFOC Mini driver (26.1 x 21 x 7.6 mm),2,"one in the base, one in the frame"
+buy,XIAO ESP32-S3 (base) and XIAO RP2040 (frame),2,ESP32 supplied
+buy,"Compass module about 12 mm square, small RTC clock breakout, USB-C PD 12 V trigger board with socket, buck converter to 5 V (size for about 1 A on the LEDs)",4,sizes are placeholders
+buy,"Steel rod 3 mm, 35 mm long (posts) and steel pin 6 mm, 20 mm long",3,cut from bars
+buy,"M3 heat-set inserts x12 (4 tub corners, 4 turntable, 4 az adapter), M3 screws, M2 screws, grub screws, thread-lock, acrylic cement or CA glue for hubs",1,fasteners not modelled

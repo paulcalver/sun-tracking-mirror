@@ -3,7 +3,7 @@
 ```
 src/      CadQuery and matplotlib scripts (run from the repo root, e.g. python3 cad/src/hinge_mirror.py)
 out/          (2026-11-16 tidy: one folder per project, older versions in an archive/ inside it)
-  sun-dial/             sun-dial-small/ is the latest; archive/ holds sun-dial-one (150 mm, slip ring) and gm2804-dials (two-dial plate)
+  sun-dial/             sun-dial-glow/ (small dial with light) and sun-dial-small/ are the latest; archive/ holds sun-dial-one (150 mm, slip ring) and gm2804-dials (two-dial plate)
   spinning-mirror/      spinning-mirror-150-nema17/ and spinning-mirror-150-nema17-trio/ are the main ones; archive/ holds the GM2804 versions (single, test rig, trio, row of 7)
   hinge-mirror/         assembly/ (hinge-mirror-assembly.step, open in Fusion), parts/ (one STEP per part: print/ for the P1S, laser/ for flat parts with DXF cut outlines and *_engrave.dxf locating pockets, purchase/ reference shapes), archive/ (v1 exposed, test rig)
   earlier-concepts/     finger-pointer, line-mirrors, sun-pointer, wall-mirror
@@ -40,3 +40,5 @@ Spinning mirror hood (2026-11-15): 5 mm clear acrylic cover on the base top laye
 Spinning mirror 150 mm NEMA 17 test rig (2026-11-15): `python3 src/spinning_mirror_150_nema17.py` writes `out/spinning-mirror/spinning-mirror-150-nema17/`, `../bom/bom-spinning-mirror-150-nema17.csv` and previews in `media/previews/spinning-mirror-150-nema17/`; `--check` runs the tilt-sweep clash check. Single unit on a printed pedestal, no top bar, box or hood; notes in `../docs/spinning-mirror-150-nema17.md`.
 
 Spinning mirror 150 mm NEMA 17 trio (2026-11-15), now the primary route: `python3 src/spinning_mirror_150_nema17_trio.py` (`--check` for clashes) writes `out/spinning-mirror/spinning-mirror-150-nema17-trio/`, `../bom/bom-spinning-mirror-150-nema17-trio.csv` and previews in `media/previews/spinning-mirror-150-nema17-trio/`: three 150 mm units on a laser-cut plywood box with the motors hanging under the deck. No hood or top bar yet. The brushless GM2804 versions above are the alternative.
+
+Sun dial with light (2026-11-16): `python3 src/sun_dial_glow.py` (`--check` for clashes) builds on `sun_dial_small.py` and writes `out/sun-dial/sun-dial-glow/`, `../bom/bom-sun-dial-glow.csv` and previews in `media/previews/sun-dial-glow/`: opal discs, perimeter LED strip, pinhole peak-elevation arcs, ambient sensor; notes in `../docs/sun-dial-glow.md`, behaviour in `../sim/sun-dial-glow.html`.

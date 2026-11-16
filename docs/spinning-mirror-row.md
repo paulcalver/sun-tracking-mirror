@@ -1,5 +1,7 @@
 # Spinning mirror rigs: trio, row of 7 and single test (updated 2026-11-14)
 
+> Primary route from 2026-11-15: 150 mm mirrors on NEMA 17 steppers, see `spinning-mirror-150-nema17.md`. This brushless GM2804 version is the alternative.
+
 Draft CAD, nothing cut, printed or tested. Model: `cad/src/spinning_mirror_row.py` (reuses the single unit from `spinning_mirror.py`; `--check` runs 8 random poses of all units against everything). Single-unit notes: `spinning-mirror-gimbal.md`.
 
 ## Current focus: the trio (`--units 3`)

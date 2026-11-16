@@ -1,15 +1,25 @@
 process,item,qty,note
-print,"PETG or ASA, matt black: ring with foot, mirror carrier, hub adapter (print the ring flat, 4 walls)",3,"Bambu P1S, 0.4 mm, 0.16 to 0.2 mm layers; ring is 170 mm across, fits the 256 mm bed"
-print,"PETG or ASA, matt black: base pedestal (print upside down, no supports) and lid",2,150 x 150 mm
-buy,"NEMA 17 stepper 42/60 (The Pi Hut, 60 mm body): 1.68 A, 1.65 ohm, 6.2 mH, 0.64 N m holding, 5 mm D shaft, 0.5 kg",1,check the front-face thread is M3 on a 31 mm square
-buy,"Stepper driver TMC2209 module (StealthChop; a slight hum is wanted, so A4988 or DRV8825 would also do)",1,"step/dir, 1/16 microstep; set the motor current to about 1.2 to 1.5 A (enclosed in the pedestal, 9 W at full current); heatsink on the driver"
-buy,"ESP32 dev board (random-walk speed setpoint, acceleration limited)",1,"step pulses from the RMT or a hardware timer, not a software loop"
-buy,"24 V 3 A supply, barrel jack, 100 uF 35 V capacitor across the driver supply",1,24 V gives the torque at several hundred rpm; 12 V works but is weaker
-buy,Bearing 684ZZ (4 x 9 x 4 mm),2,light grease or none
-buy,"Steel or stainless rod 4 mm, 169 mm long",1,glue to the carrier with CA or retaining compound
-buy,"Acrylic mirror 1.5 mm, 150 mm discs, laser-cut",2,"try a sample first: 1.5 mm may still dish, 2 mm is stiffer"
-buy,"Brass slug 8 x 5 mm (swap for steel or aluminium, or leave out)",1,"eccentric weight, about 2.6 g"
-buy,"Steel washers or plates as ballast, about 350 g",1,ring around the motor in the pedestal
-buy,"Heat-set inserts M3 x 5 (4 lid, 2 ring foot, 2 grub screws)",8,
-buy,"Screws: M3 x 8 cap head (motor x4), M3 x 8 countersunk (lid x4), M3 x 16 (ring foot to hub x2), M3 x 5 grub (shaft x2), M3 x 6 (ring balance trim x4)",1,set; thread-lock the grub screws
-buy,Rubber feet 9 mm,4,stick-on
+print,"Ring with foot: PETG or ASA, matt black, print flat (circular face on the bed, 169 x 178 mm), 4 walls, 0.2 mm; about 45 g",1,ream the two 9.1 mm bearing pockets and 5 mm axle holes after printing
+print,"Mirror carrier: print flat, 4 walls; about 27 g",1,"keep it flat, a warped carrier will rub the ring"
+print,"Hub adapter: print upright, 4 walls, 100 % infill for the clamp; about 16 g",1,
+print,"Base pedestal: print upside down (top plate on the bed), 4 walls, 20 to 25 % gyroid; about 365 g solid",1,150 x 150 x 72 mm; small bridges over the motor screw counterbores
+print,Base lid: 4 walls; about 75 g,1,
+buy,"NEMA 17 stepper 42/60 (The Pi Hut, 60 mm body): 1.68 A, 1.65 ohm, 6.2 mH, 0.64 N m holding, 5 mm D shaft, 0.5 kg",1,check the shaft length (24 mm assumed) and the front-face thread depth
+buy,"Adafruit TMC2209 stepper driver breakout, with headers",2,"one spare; 5 to 29 V motor supply, 2 A max; set about 1.2 to 1.5 A"
+buy,"Heatsink for the TMC2209 (Adafruit 1493 or 1515, or a stick-on stepper-driver heatsink)",2,check clearance over the chip
+buy,ESP32 dev board (38-pin or QT Py ESP32-S3),1,step pulses from the RMT or a hardware timer; powered from USB for the first test
+buy,"24 V 3 A DC supply, 5.5 x 2.1 mm plug",1,24 V gives the torque at several hundred rpm
+buy,"DC barrel jack breakout with screw terminals, inline fuse holder and 3 A fuses",1,fuse in the 24 V lead
+buy,"Electrolytic capacitor 100 uF, 35 V or higher",2,"across the driver's + and GND screw terminals, one spare"
+buy,"Breadboard or perfboard, jumper wires, 22 AWG wire red/black, ferrules, heat shrink",1,set
+buy,4-pin 2.54 mm extension cable or crimp kit for the motor lead,1,only if the motor cable is too short
+buy,10k potentiometer and knob (jitter amount),1,"optional, the same can be set over USB"
+buy,Bearing 684ZZ (4 x 9 x 4 mm),4,"2 used, 2 spare; light grease or none"
+buy,Steel or stainless rod 4 mm x 169 mm (or a longer rod cut to length),1,hinge axle
+buy,"Mirror acrylic 1.5 mm, 150 mm round discs",3,"2 used, 1 spare or a 2 mm sample; peel the protective film last"
+buy,Brass rod 8 mm cut to 5 mm (or a steel or aluminium slug),1,eccentric weight about 2 g; try without it first
+buy,"Steel flat bar 38 x 6 mm, 180 mm long, cut in 3 pieces of 60 mm (about 320 g)",1,"ballast: lay on the lid either side of the motor, glue down"
+buy,"Heat-set inserts M3 x 5.7 (4 pedestal corner posts for the lid screws, 2 hub top for the ring screws, 2 hub sides for the grub screws)",10,2 spare
+buy,"Screws, stainless: M3 x 6 cap head (motor, 4), M3 x 8 pan head (lid, 4), M3 x 18 (ring to hub, 2, thread-locked), M3 x 6 cup-point grub (shaft, 2), M3 x 6 pan head (ring trim, 4)",1,set; also a few spares; if the motor holes are deeper than 5 mm use M3 x 8 for the motor
+buy,"Thread-locking compound (medium), cyanoacrylate glue, 2-part epoxy, double-sided foam tape",1,set
+buy,Rubber feet 9 mm,4,"stick-on, under the lid corners"

@@ -53,7 +53,7 @@ BASE_H = 14.0 + N_L                             # top of the pedestal plate abov
 BASE_HALF = 75.0                                # 150 x 150 mm footprint
 WALL, PLATE_T = 4.0, 6.0
 LID_Z0, LID_T = 2.0, 3.0                        # lid 2..5, rubber feet 0..2
-POST_IN, POST_Z1 = 57.0, 18.0                   # corner posts 57..71 for the lid inserts, up to z 18
+POST_IN, POST_Z1, POST_RUN = 57.0, 24.0, 14.0   # corner posts 57..71 for the lid inserts: a full 45 degree wedge from the wall corner at z 24 down to z 10, no flat face
 LID_SCREW = 62.0                                # lid screws at (+/-62, +/-62), M3 countersunk into heat-set inserts in the posts
 INSERT_D = 4.2
 BALLAST_R0, BALLAST_R1, BALLAST_T = 32.0, 58.0, 6.0      # steel washers or plates in a ring around the motor, about 350 g (the motor itself is 0.5 kg)
@@ -65,7 +65,7 @@ HUB_R, HUB_T = 17.5, 15.0
 HUB_Z0 = BASE_H + 3.0                           # 3 mm above the plate
 HUB_Z1 = HUB_Z0 + HUB_T                         # 72, flush with the shaft tip
 BORE_R = 2.55
-FOOT_H, FOOT_X, FOOT_SCREW_X, FOOT_NEST = 6.0, 12.0, 8.0, 2.5     # the foot nests 2.5 mm into a pocket in the hub top
+FOOT_H, FOOT_X, FOOT_SCREW_X, FOOT_NEST = 6.0, 12.0, 8.0, 4.5     # the foot nests 4.5 mm into a pocket in the hub top
 
 MIR_R, MIR_T = 75.0, 1.5                        # 150 mm acrylic discs, 1.5 mm
 CAR_T, RIM_W, BAR_W = 5.0, 3.5, 8.0             # carrier thickness, rim width, bar width
@@ -100,17 +100,27 @@ def build():
         for sy in (-1, 1):                                   # corner posts for the lid inserts
             x0, x1 = (POST_IN, inner) if sx > 0 else (-inner, -POST_IN)
             y0, y1 = (POST_IN, inner) if sy > 0 else (-inner, -POST_IN)
-            shell = shell.union(box(x0, x1, y0, y1, LID_Z0 + LID_T, POST_Z1))
+            post = box(x0, x1, y0, y1, LID_Z0 + LID_T, POST_Z1)
+            zw, e = POST_Z1 - POST_RUN, 0.01
+            wx = [(sx * POST_IN, zw), (sx * POST_IN, POST_Z1 + e), (sx * (POST_IN + POST_RUN), POST_Z1 + e)]
+            wy = [(sy * POST_IN, zw), (sy * POST_IN, POST_Z1 + e), (sy * (POST_IN + POST_RUN), POST_Z1 + e)]
+            # 45 degree wedge on the two inward faces, running the full width of the post: the pedestal prints upside down, so the post grows
+            # from a line in the wall corner (z 24) and every layer is supported at 45 degrees or better, no flat face and no support material
+            post = post.cut(cq.Workplane("XZ").workplane(offset=-y1 - 1).polyline(wx).close().extrude(y1 - y0 + 2))
+            post = post.cut(cq.Workplane("YZ").workplane(offset=x0 - 1).polyline(wy).close().extrude(x1 - x0 + 2))
+            shell = shell.union(post)
             shell = shell.cut(cylz(INSERT_D / 2, LID_Z0 + LID_T - 1, LID_Z0 + LID_T + 6, sx * LID_SCREW, sy * LID_SCREW))
     shell = shell.cut(cylz(N_PILOT_R + 0.15, BASE_H - PLATE_T - 1, BASE_H + 1))            # pilot and shaft opening
     for sx in (-1, 1):
         for sy in (-1, 1):                                   # motor screws from above, heads counterbored
             x, y = sx * N_HOLE_PITCH / 2, sy * N_HOLE_PITCH / 2
             shell = shell.cut(cylz(1.7, BASE_H - PLATE_T - 1, BASE_H + 1, x, y)).cut(cylz(3.2, BASE_H - 3.0, BASE_H + 1, x, y))
-    shell = shell.cut(box(-6, 6, -BASE_HALF - 1, -BASE_HALF + WALL + 1, LID_Z0 + LID_T, LID_Z0 + LID_T + 12))   # wire notch in the front wall
+    shell = shell.cut(cq.Workplane("XZ").workplane(offset=BASE_HALF - WALL - 1).polyline(
+        [(-6, LID_Z0 - 1), (6, LID_Z0 - 1), (6, 11), (0, 17), (-6, 11)]).close().extrude(WALL + 2))   # wire notch in the front wall, open to the lid side and pointed at the top, so it prints without a bridge
     for sx in (-1, 1):                                       # vent slots in the side walls, the motor is enclosed and runs warm
         for yv in (-24, 0, 24):
-            shell = shell.cut(box(sx * (BASE_HALF - WALL / 2) - 3, sx * (BASE_HALF - WALL / 2) + 3, yv - 2.5, yv + 2.5, 24, 56))
+            shell = shell.cut(cq.Workplane("YZ").workplane(offset=sx * (BASE_HALF - WALL / 2) - 3).polyline(
+                [(yv, 24), (yv + 2.5, 26.5), (yv + 2.5, 56), (yv - 2.5, 56), (yv - 2.5, 26.5)]).close().extrude(6))   # pointed at the lid end, no bridge
     lid = box(-inner + 0.2, inner - 0.2, -inner + 0.2, inner - 0.2, LID_Z0, LID_Z0 + LID_T)
     for sx in (-1, 1):
         for sy in (-1, 1):
@@ -145,7 +155,7 @@ def build():
         hub = hub.cut(cyly(INSERT_D / 2, 6.0, HUB_R + 1, 0, zg) if sgn > 0 else cyly(INSERT_D / 2, -HUB_R - 1, -6.0, 0, zg))
     hub = hub.cut(box(-FOOT_X - 0.15, FOOT_X + 0.15, -RING_W / 2 - 0.15, RING_W / 2 + 0.15, HUB_Z1 - FOOT_NEST, HUB_Z1 + 1))   # pocket for the ring foot
     for sx in (-1, 1):
-        hub = hub.cut(cylz(INSERT_D / 2, HUB_Z1 - 8.0, HUB_Z1 + 1, sx * FOOT_SCREW_X, 0))
+        hub = hub.cut(cylz(INSERT_D / 2, HUB_Z1 - 11.0, HUB_Z1 + 1, sx * FOOT_SCREW_X, 0))
     add("print_hub_adapter", hub, PRINT_C, "spin", "print")
 
     ring = cyly(R_OUT, -RING_W / 2, RING_W / 2, 0, ZC).cut(cyly(R_IN, -RING_W, RING_W, 0, ZC))
@@ -162,9 +172,10 @@ def build():
     ring = ring.union(box(-FOOT_X, FOOT_X, -RING_W / 2, RING_W / 2, HUB_Z1 - FOOT_NEST, foot_top))
     ring = ring.cut(cylz(BORE_R + 0.2, HUB_Z1 - FOOT_NEST - 1, HUB_Z1 + 0.5))      # relief for the shaft tip
     z_in = ZC - R_IN
-    for sx in (-1, 1):                                       # M3 x 16 from inside the ring, down through the ring bottom and foot into the hub inserts
+    for sx in (-1, 1):                                       # M3 x 18 from inside the ring, down through the ring bottom and foot into the hub inserts
         ring = ring.cut(cylz(FOOT_SCREW_D / 2, HUB_Z1 - FOOT_NEST - 1, z_in + 1, sx * FOOT_SCREW_X, 0)).cut(
             cylz(3.2, z_in - 2.5, z_in + 1, sx * FOOT_SCREW_X, 0))
+    ring = ring.intersect(box(-R_OUT - 5, R_OUT + 5, -RING_W / 2, RING_W / 2, 0, ZC + R_OUT + 5))      # trim the bosses flush with the ring faces, so it lies flat on the bed and prints without a tilt
     add("print_ring_with_foot", ring, PRINT_C, "spin", "print")
     for nm, sx in (("bearing_684zz_a", 1), ("bearing_684zz_b", -1)):
         x0 = BOSS_X0 if sx > 0 else -BOSS_X0 - BRG[2]
@@ -240,34 +251,83 @@ def process_of(nm):
     return "print" if nm.startswith("print_") else "purchase"
 
 
+def write_step(name, shape, path):
+    """Write one part as a STEP file with a single product named after the part, so slicers (Bambu Studio, Orca) list the object
+    by name instead of 'Open CASCADE STEP translator 7.9'. The solid is wrapped in a compound so no extra 'SOLID' product is written."""
+    from OCP.IFSelect import IFSelect_RetDone
+    from OCP.STEPCAFControl import STEPCAFControl_Writer
+    from OCP.STEPControl import STEPControl_AsIs
+    from OCP.TCollection import TCollection_ExtendedString
+    from OCP.TDataStd import TDataStd_Name
+    from OCP.TDocStd import TDocStd_Document
+    from OCP.XCAFApp import XCAFApp_Application
+    from OCP.XCAFDoc import XCAFDoc_DocumentTool
+    doc = TDocStd_Document(TCollection_ExtendedString("XmlOcaf"))
+    XCAFApp_Application.GetApplication_s().NewDocument(TCollection_ExtendedString("MDTV-XCAF"), doc)
+    lab = XCAFDoc_DocumentTool.ShapeTool_s(doc.Main()).AddShape(cq.Compound.makeCompound([shape]).wrapped, False)
+    TDataStd_Name.Set_s(lab, TCollection_ExtendedString(name))
+    w = STEPCAFControl_Writer()
+    w.SetNameMode(True)
+    w.Transfer(doc, STEPControl_AsIs)
+    if w.Write(str(path)) != IFSelect_RetDone:
+        raise RuntimeError(f"could not write {path}")
+
+
+def print_oriented(name, shape):
+    """The part in its printing orientation, Z up, centred on the origin, lowest point at z = 0 (see docs/spinning-mirror-150-nema17-build.md).
+    Ring: flat with the +Y face up. Pedestal: upside down. Hub, carrier and lid: as modelled (upright or flat)."""
+    if name == "print_ring_with_foot":
+        shape = shape.rotate((0, 0, 0), (1, 0, 0), 90)
+    elif name == "print_base_pedestal":
+        shape = shape.rotate((0, 0, 0), (1, 0, 0), 180)
+    bb = shape.BoundingBox()
+    return shape.translate((-(bb.xmin + bb.xmax) / 2, -(bb.ymin + bb.ymax) / 2, -bb.zmin))
+
+
 def export_parts(yup):
     for sub in ("print", "purchase"):
         d = PARTS / sub
         d.mkdir(parents=True, exist_ok=True)
         for old in list(d.glob("*.step")):
             old.unlink()
+    ready = PARTS / "print_ready"
+    ready.mkdir(parents=True, exist_ok=True)
+    for old in list(ready.glob("*.step")):
+        old.unlink()
     for nm, s, _, _, _ in PARTS_L:
         sh = s.rotate((0, 0, 0), (1, 0, 0), -90) if yup else s
-        cq.exporters.export(cq.Workplane(obj=sh), str(PARTS / process_of(nm) / f"{nm}.step"))
+        write_step(nm, sh, PARTS / process_of(nm) / f"{nm}.step")
+        if nm.startswith("print_"):
+            write_step(nm, print_oriented(nm, s), ready / f"{nm}.step")
     print("Wrote", len(PARTS_L), "part STEP files to", PARTS)
 
 
 def write_bom():
     rows = [
-        ("print", "PETG or ASA, matt black: ring with foot, mirror carrier, hub adapter (print the ring flat, 4 walls)", 3, "Bambu P1S, 0.4 mm, 0.16 to 0.2 mm layers; ring is 170 mm across, fits the 256 mm bed"),
-        ("print", "PETG or ASA, matt black: base pedestal (print upside down, no supports) and lid", 2, "150 x 150 mm"),
-        ("buy", "NEMA 17 stepper 42/60 (The Pi Hut, 60 mm body): 1.68 A, 1.65 ohm, 6.2 mH, 0.64 N m holding, 5 mm D shaft, 0.5 kg", 1, "check the front-face thread is M3 on a 31 mm square"),
-        ("buy", "Stepper driver TMC2209 module (StealthChop; a slight hum is wanted, so A4988 or DRV8825 would also do)", 1, "step/dir, 1/16 microstep; set the motor current to about 1.2 to 1.5 A (enclosed in the pedestal, 9 W at full current); heatsink on the driver"),
-        ("buy", "ESP32 dev board (random-walk speed setpoint, acceleration limited)", 1, "step pulses from the RMT or a hardware timer, not a software loop"),
-        ("buy", "24 V 3 A supply, barrel jack, 100 uF 35 V capacitor across the driver supply", 1, "24 V gives the torque at several hundred rpm; 12 V works but is weaker"),
-        ("buy", "Bearing 684ZZ (4 x 9 x 4 mm)", 2, "light grease or none"),
-        ("buy", "Steel or stainless rod 4 mm, 169 mm long", 1, "glue to the carrier with CA or retaining compound"),
-        ("buy", f"Acrylic mirror 1.5 mm, {int(2 * MIR_R)} mm discs, laser-cut", 2, "try a sample first: 1.5 mm may still dish, 2 mm is stiffer"),
-        ("buy", f"Brass slug {int(SLUG_D)} x {int(SLUG_T)} mm (swap for steel or aluminium, or leave out)", 1, "eccentric weight, about 2.6 g"),
-        ("buy", "Steel washers or plates as ballast, about 350 g", 1, "ring around the motor in the pedestal"),
-        ("buy", "Heat-set inserts M3 x 5 (4 lid, 2 ring foot, 2 grub screws)", 8, ""),
-        ("buy", "Screws: M3 x 8 cap head (motor x4), M3 x 8 countersunk (lid x4), M3 x 16 (ring foot to hub x2), M3 x 5 grub (shaft x2), M3 x 6 (ring balance trim x4)", 1, "set; thread-lock the grub screws"),
-        ("buy", "Rubber feet 9 mm", 4, "stick-on"),
+        ("print", "Ring with foot: PETG or ASA, matt black, print flat (circular face on the bed, 169 x 178 mm), 4 walls, 0.2 mm; about 45 g", 1, "ream the two 9.1 mm bearing pockets and 5 mm axle holes after printing"),
+        ("print", "Mirror carrier: print flat, 4 walls; about 27 g", 1, "keep it flat, a warped carrier will rub the ring"),
+        ("print", "Hub adapter: print upright, 4 walls, 100 % infill for the clamp; about 16 g", 1, ""),
+        ("print", "Base pedestal: print upside down (top plate on the bed), 4 walls, 20 to 25 % gyroid; about 365 g solid", 1, "150 x 150 x 72 mm; small bridges over the motor screw counterbores"),
+        ("print", "Base lid: 4 walls; about 75 g", 1, ""),
+        ("buy", "NEMA 17 stepper 42/60 (The Pi Hut, 60 mm body): 1.68 A, 1.65 ohm, 6.2 mH, 0.64 N m holding, 5 mm D shaft, 0.5 kg", 1, "check the shaft length (24 mm assumed) and the front-face thread depth"),
+        ("buy", "Adafruit TMC2209 stepper driver breakout, with headers", 2, "one spare; 5 to 29 V motor supply, 2 A max; set about 1.2 to 1.5 A"),
+        ("buy", "Heatsink for the TMC2209 (Adafruit 1493 or 1515, or a stick-on stepper-driver heatsink)", 2, "check clearance over the chip"),
+        ("buy", "ESP32 dev board (38-pin or QT Py ESP32-S3)", 1, "step pulses from the RMT or a hardware timer; powered from USB for the first test"),
+        ("buy", "24 V 3 A DC supply, 5.5 x 2.1 mm plug", 1, "24 V gives the torque at several hundred rpm"),
+        ("buy", "DC barrel jack breakout with screw terminals, inline fuse holder and 3 A fuses", 1, "fuse in the 24 V lead"),
+        ("buy", "Electrolytic capacitor 100 uF, 35 V or higher", 2, "across the driver's + and GND screw terminals, one spare"),
+        ("buy", "Breadboard or perfboard, jumper wires, 22 AWG wire red/black, ferrules, heat shrink", 1, "set"),
+        ("buy", "4-pin 2.54 mm extension cable or crimp kit for the motor lead", 1, "only if the motor cable is too short"),
+        ("buy", "10k potentiometer and knob (jitter amount)", 1, "optional, the same can be set over USB"),
+        ("buy", "Bearing 684ZZ (4 x 9 x 4 mm)", 4, "2 used, 2 spare; light grease or none"),
+        ("buy", "Steel or stainless rod 4 mm x 169 mm (or a longer rod cut to length)", 1, "hinge axle"),
+        ("buy", f"Mirror acrylic 1.5 mm, {int(2 * MIR_R)} mm round discs", 3, "2 used, 1 spare or a 2 mm sample; peel the protective film last"),
+        ("buy", f"Brass rod {int(SLUG_D)} mm cut to {int(SLUG_T)} mm (or a steel or aluminium slug)", 1, "eccentric weight about 2 g; try without it first"),
+        ("buy", "Steel flat bar 38 x 6 mm, 180 mm long, cut in 3 pieces of 60 mm (about 320 g)", 1, "ballast: lay on the lid either side of the motor, glue down"),
+        ("buy", "Heat-set inserts M3 x 5.7 (4 pedestal corner posts for the lid screws, 2 hub top for the ring screws, 2 hub sides for the grub screws)", 10, "2 spare"),
+        ("buy", "Screws, stainless: M3 x 6 cap head (motor, 4), M3 x 8 pan head (lid, 4), M3 x 18 (ring to hub, 2, thread-locked), M3 x 6 cup-point grub (shaft, 2), M3 x 6 pan head (ring trim, 4)", 1, "set; also a few spares; if the motor holes are deeper than 5 mm use M3 x 8 for the motor"),
+        ("buy", "Thread-locking compound (medium), cyanoacrylate glue, 2-part epoxy, double-sided foam tape", 1, "set"),
+        ("buy", "Rubber feet 9 mm", 4, "stick-on, under the lid corners"),
     ]
     BOMF.parent.mkdir(exist_ok=True)
     with open(BOMF, "w", newline="") as f:

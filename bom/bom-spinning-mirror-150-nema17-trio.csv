@@ -1,0 +1,18 @@
+process,item,qty,note
+laser,"Plywood 6 mm: floor 570 x 170 mm (wall slots) and deck 570 x 170 mm (3 motor openings with M3 holes, front-panel screw holes, wall slots)",2,"own cutter, bed 1219 x 914; DXF laser_floor_6mm, laser_deck_6mm"
+laser,"Plywood 6 mm: back wall (9 vent slots), two end walls (same profile), front panel (removable: 3 screws through the deck; holes for DC jack, USB-C, dial)",4,DXF laser_*_wall / panel
+print,"PETG or ASA, matt black: ring with foot, mirror carrier, hub adapter (x3 each)",9,"Bambu P1S, 0.4 mm, 4 walls; print each ring flat"
+buy,"NEMA 17 stepper 42/60 (The Pi Hut, 60 mm body): 1.68 A, 1.65 ohm, 6.2 mH, 0.64 N m holding, 5 mm D shaft, 0.5 kg",3,check the wire order and the shaft length (24 mm assumed)
+buy,Stepper driver TMC2209 module with heatsink; set the current to about 1.2 to 1.5 A,3,"step/dir, default 1/8 microstep (interpolated), StealthChop"
+buy,"ESP32 dev board, three independent random-walk speed setpoints, acceleration limited; step pulses from the RMT or hardware timers",1,one board is enough for three open-loop steppers
+buy,"24 V 5 A supply (3 motors at 1.2 to 1.5 A), 5.5 x 2.1 mm DC barrel jack (12 mm hole), fuse, 100 uF 35 V capacitor per driver, 5 V buck for the ESP32",1,
+buy,"USB-C panel-mount socket (11 x 4.6 mm slot), wired to the ESP32 for programming",1,
+buy,"10k rotary potentiometer, 7 mm bushing (7.5 mm hole), knob about 20 mm: jitter amount",1,"optional, the same can be set over USB"
+buy,Bearing 684ZZ (4 x 9 x 4),6,
+buy,Steel or stainless rod 4 mm x 169 mm (hinge axle),3,glue to the carrier
+buy,"Acrylic mirror 1.5 mm, 150 mm discs, laser-cut, two per unit",6,try a sample first; 2 mm if 1.5 mm dishes
+buy,Brass slug 8 x 5 mm,3,tune the random behaviour
+buy,"Steel flat bar 38 x 6 mm, 500 mm (about 0.89 kg each)",2,"stacked on the floor behind the motors, glued or screwed down"
+buy,"Heat-set inserts M3 x 5 (per unit: 2 hub top for the ring screws, 2 hub sides for the grub screws)",12,
+buy,"Fasteners: M3 x 10 (motor to deck, 12), M3 x 18 (ring to hub, 6, thread-locked), M3 x 5 grub (6), M3 x 6 trim (12), M3 x 20 wood screws (3, front panel), wood glue",1,set; thread-lock the grub screws
+buy,Rubber feet 12 mm,4,"stick-on, under the floor corners"

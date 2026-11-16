@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 660" width="920" height="660" font-family="system-ui, -apple-system, Segoe UI, sans-serif">
+<style>
+text{font-size:13px;fill:#1d232a}
+.s{font-size:11px;fill:#55606b}
+.b{font-weight:600}
+.box{fill:#f3f5f7;stroke:#44505c;stroke-width:1.5}
+.w{fill:none;stroke-width:2.5;stroke-linecap:round}
+.red{stroke:#d63031}.blk{stroke:#111}.org{stroke:#e08a1e}.blu{stroke:#2a6fd6}.pur{stroke:#8a4fc7}.grn{stroke:#2a9d4a}
+</style>
+<rect width="920" height="660" fill="#ffffff"/>
+<text x="30" y="32" class="b" style="font-size:16px">Single 150 mm test unit: power and signal wiring</text>
+<g class="s">
+<line x1="560" y1="26" x2="590" y2="26" class="w red"/><text x="596" y="30">+24 V</text>
+<line x1="650" y1="26" x2="680" y2="26" class="w blk"/><text x="686" y="30">GND</text>
+<line x1="725" y1="26" x2="755" y2="26" class="w org"/><text x="761" y="30">3.3 V</text>
+<line x1="810" y1="26" x2="840" y2="26" class="w blu"/><text x="846" y="30">signal</text>
+</g>
+
+<!-- wires, drawn first -->
+<path d="M170 100 H520" class="w red"/>
+<path d="M170 130 H520" class="w blk"/>
+<path d="M455 100 V113 M455 119 V130" class="w blk"/>
+<path d="M455 100 V113" class="w red"/>
+<path d="M490 130 V250" class="w blk"/>
+<path d="M260 250 H520" class="w blk"/>
+<path d="M260 275 H520" class="w org"/>
+<path d="M260 300 H520 M260 325 H520 M260 350 H520" class="w blu"/>
+<path d="M260 379 H300" class="w blu"/>
+<path d="M300 405 H282" class="w org"/>
+<path d="M300 430 H282" class="w blk"/>
+<path d="M470 350 V372 M470 400 V414" class="w org"/>
+<path d="M150 420 V470" class="w blk" stroke-dasharray="5 4"/>
+<path d="M700 120 H790 M700 145 H790" class="w pur"/>
+<path d="M700 200 H790 M700 225 H790" class="w grn"/>
+<line x1="445" y1="113" x2="465" y2="113" class="w blk"/>
+<line x1="445" y1="119" x2="465" y2="119" class="w blk"/>
+<circle cx="455" cy="100" r="3.6" fill="#d63031"/><circle cx="455" cy="130" r="3.6" fill="#111"/>
+<circle cx="490" cy="130" r="3.6" fill="#111"/><circle cx="490" cy="250" r="3.6" fill="#111"/>
+<circle cx="470" cy="350" r="3.6" fill="#2a6fd6"/>
+
+<!-- mains and supply -->
+<text x="30" y="62" class="s">mains in</text>
+<rect x="30" y="70" width="140" height="90" rx="6" class="box"/>
+<text x="42" y="95" class="b">24 V 3 A supply</text><text x="42" y="113" class="s">5.5 x 2.1 mm plug</text>
+<text x="156" y="104" text-anchor="end" class="s">+</text><text x="156" y="134" text-anchor="end" class="s">-</text>
+<rect x="200" y="70" width="130" height="90" rx="6" class="box"/>
+<text x="210" y="95" class="b">DC jack breakout</text><text x="210" y="113" class="s">screw terminals</text>
+<rect x="370" y="88" width="56" height="24" rx="4" fill="#fff" stroke="#d63031" stroke-width="2"/>
+<text x="398" y="105" text-anchor="middle" class="b">3 A</text><text x="398" y="80" text-anchor="middle" class="s">fuse in +24 V</text>
+<text x="438" y="112" text-anchor="end" class="s">100 uF</text>
+<text x="438" y="124" text-anchor="end" class="s">35 V+</text>
+
+<!-- driver -->
+<rect x="520" y="80" width="180" height="332" rx="6" class="box"/>
+<text x="530" y="104" class="s">+ (motor supply)</text>
+<text x="530" y="134" class="s">GND</text>
+<text x="530" y="254" class="s">GND (logic)</text>
+<text x="530" y="279" class="s">VDD (3.3 V logic)</text>
+<text x="530" y="304" class="s">STEP</text>
+<text x="530" y="329" class="s">DIR</text>
+<text x="530" y="354" class="s">EN (low = on)</text>
+<text x="530" y="380" class="s">MS1, MS2 open = 1/8 step</text>
+<text x="530" y="402" class="b">Adafruit TMC2209</text>
+<text x="692" y="124" text-anchor="end" class="s">1A</text><text x="692" y="149" text-anchor="end" class="s">1B</text>
+<text x="692" y="204" text-anchor="end" class="s">2A</text><text x="692" y="229" text-anchor="end" class="s">2B</text>
+
+<!-- motor -->
+<rect x="790" y="95" width="120" height="140" rx="6" class="box"/>
+<text x="800" y="258" class="s" text-anchor="start"> </text>
+<text x="800" y="125" class="s">coil A +</text><text x="800" y="150" class="s">coil A -</text>
+<text x="800" y="205" class="s">coil B +</text><text x="800" y="230" class="s">coil B -</text>
+<text x="850" y="180" text-anchor="middle" class="b" transform="rotate(0)">NEMA 17</text>
+<text x="850" y="196" text-anchor="middle" class="s"> </text>
+<text x="710" y="262" class="s">Motor 42/60, 1.68 A. Each coil is a wire pair that</text>
+<text x="710" y="276" class="s">reads about 1.65 ohm; set the driver to 1.2 to 1.5 A.</text>
+
+<!-- ESP32 -->
+<rect x="40" y="230" width="220" height="190" rx="6" class="box"/>
+<text x="52" y="256" class="b">ESP32 dev board</text>
+<text x="52" y="272" class="s">3.3 V logic</text>
+<text x="52" y="300" class="s">USB 5 V in,</text><text x="52" y="314" class="s">3.3 V on board</text>
+<text x="252" y="254" text-anchor="end" class="s">GND</text>
+<text x="252" y="279" text-anchor="end" class="s">3V3</text>
+<text x="252" y="304" text-anchor="end" class="s">GPIO25 STEP</text>
+<text x="252" y="329" text-anchor="end" class="s">GPIO16 DIR</text>
+<text x="252" y="354" text-anchor="end" class="s">GPIO19 EN</text>
+<text x="252" y="383" text-anchor="end" class="s">GPIO34 ADC</text>
+<rect x="60" y="470" width="180" height="50" rx="6" class="box"/>
+<text x="72" y="492" class="b">Computer USB</text><text x="72" y="508" class="s">5 V power + programming</text>
+
+<!-- pot and pull-up -->
+<rect x="300" y="366" width="110" height="82" rx="6" class="box" stroke-dasharray="5 4"/>
+<text x="308" y="383" class="s">wiper</text><text x="308" y="409" class="s">3V3 rail</text><text x="308" y="434" class="s">GND rail</text>
+<text x="308" y="462" class="s">10k pot (optional)</text>
+<rect x="463" y="372" width="14" height="28" fill="#fff" stroke="#e08a1e" stroke-width="2"/>
+<text x="470" y="432" text-anchor="middle" class="s">10k pull-up</text>
+<text x="470" y="446" text-anchor="middle" class="s">to 3V3</text>
+
+<!-- notes -->
+<rect x="30" y="545" width="860" height="100" rx="6" fill="#fafbfc" stroke="#c8d0d8"/>
+<text x="42" y="566" class="b">Power routing</text>
+<text x="42" y="584" class="s">Mains, 24 V supply, DC jack, 3 A fuse in the +24 V lead, then the driver's + screw terminal (next to GND, 1A, 1B, 2A, 2B) with a 100 uF capacitor across + and GND at that terminal.</text>
+<text x="42" y="600" class="s">24 V goes only to the driver, which sends the chopped current to the motor. The ESP32 runs from USB 5 V; its 3.3 V pin feeds the driver's VDD pin and the dial.</text>
+<text x="42" y="616" class="s">All grounds join at the driver. EN is active low: the pull-up keeps the driver off while the ESP32 boots. Never unplug the motor with 24 V on.</text>
+<text x="42" y="632" class="s">Check each pin label on your boards before wiring. The trio later: 24 V, fuse, lever connectors to 3 drivers and a 5 V buck for the ESP32; signals repeated for each.</text>
+</svg>

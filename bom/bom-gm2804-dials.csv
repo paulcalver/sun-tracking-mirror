@@ -1,0 +1,11 @@
+process,item,qty,note
+laser,"White acrylic 3 mm: back plate 550 x 220 (2 x 12 mm shaft holes, 8 x 3.4 mm case screw holes, 4 x 4.6 mm post holes)",1,own cutter
+laser,White acrylic 3 mm: disc 150 mm with a 3 mm radial slot,2,own cutter
+laser,"Black acrylic 3 mm: strip 3 x 75, pressed into the slot",2,own cutter
+print,"PETG-CF: motor case x2, shaft adapter x2, hub x2, driver bay x2, bay lid x2, wall post x4",12,"Bambu P1S, hardened nozzle"
+buy,iPower GM2804 gimbal motor with AS5048A encoder,2,"35 mm x 26.15 mm, STEP supplied; check torque and screw size with the supplier"
+buy,SimpleFOC Mini driver (kept as a 50 mm cube each),2,the real board may be smaller; the bay could shrink
+buy,"ESP32 board, 12 V supply and buck converter (no space reserved yet)",1,needs its own place
+buy,"Silver steel pin 6 mm, 10.5 mm long",2,cut from one bar
+buy,"M2 screws (adapter to rotor cap, short, with thread-lock) x8, M3 screws and heat-set inserts (case to plate x8, motor base to case x8), M3 grub screws x2, M4 wall screws, plugs and spacers x4",1,fasteners not modelled
+buy,VHB tape or acrylic cement for the driver bays and hubs,1,

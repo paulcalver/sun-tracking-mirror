@@ -1,0 +1,15 @@
+process,item,qty,note
+print,"PETG: ring with foot, mirror carrier, hub adapter (balance and weight sensitive, print the ring flat)",3,"Bambu P1S, 0.4 mm, 0.16 to 0.2 mm layers, 4 walls"
+print,PLA or PETG: base puck and floor plate,2,Bambu P1S
+buy,"iPower GM2804-100T gimbal motor with AS5048A encoder, 12 V",1,"35 x 26 mm, hollow shaft 6.5 mm"
+buy,Motor driver SimpleFOC Mini (or similar 3-phase gimbal driver) and an ESP32 dev board,1,"controller, random-walk speed setpoint"
+buy,"Magnetic encoder AS5600 or AS5048 (optional, closed-loop speed and logging)",1,open-loop speed mode works without it
+buy,"12 V supply, 2 A, and a barrel jack or screw terminal",1,
+buy,Bearing 683ZZ (3 x 7 x 3 mm),2,"choose low-drag, light grease or none"
+buy,"Stainless or silver-steel rod 3 mm, 78 mm long",1,glue to the carrier with CA or retaining compound
+buy,"Acrylic mirror 2 mm, 80 mm discs (laser-cut or hole-sawn), one or two",2,"cut from sheet; one-sided is fine, two give both faces"
+buy,"Brass slug 6 x 5 mm (swap for steel or aluminium, or leave out)",1,"eccentric weight, about 1.2 g"
+buy,"Steel washers or M8 nuts as ballast, about 150 g",1,glue into the base pocket
+buy,"Heat-set inserts M3 x 5 (4 floor plate, 4 motor, 2 ring foot)",10,
+buy,"Screws: M3 x 8 (floor plate x4, motor x4, hub to ring foot x2), M2.5 x 6 (bell to hub x4), M3 x 6 (ring balance trim x4)",1,set
+buy,Rubber feet 10 mm,4,stick-on

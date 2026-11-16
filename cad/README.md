@@ -22,3 +22,19 @@ Wall mirror concept (2026-11-04): `src/wall_mirror_nema11.py` writes `out/wall-m
 Line of 7 wall mirrors, passive and wedge versions (2026-11-04): `src/line_mirrors.py` writes `out/line-mirrors/*.step` and renders to `media/previews/line-mirrors/`; `--check` runs clash and Sun-view ray checks; notes in `../docs/line-mirrors.md`.
 
 Sun pointer bead (2026-11-12): `src/sun_pointer_bead.py` writes `out/sun-pointer/sun-pointer-bead.step` and renders to `media/previews/sun-pointer/`; `--check` tests the tip against the sun formulas and sweeps spin and tilt for clashes; notes in `../docs/sun-pointer-bead.md`; the interactive concept is `../docs/sun-ring-concept.html`.
+
+Finger pointer (2026-11-13): `src/finger_pointer.py` writes `out/finger-pointer/` (assembly STEP, parts split laser/print/purchase with DXF and engraving PNGs) and `../bom/bom-finger-pointer.csv`, previews in `media/previews/finger-pointer/`; `src/trace_finger.py` traces the hand outline from `src/assets/finger-source.jpg`; `--check` runs interference tests; notes in `../docs/finger-pointer.md`.
+
+Spinning mirror gimbal (2026-11-14): `src/spinning_mirror.py` writes `out/spinning-mirror/` (assembly STEP, parts split print/purchase) and `../bom/bom-spinning-mirror.csv`, previews in `media/previews/spinning-mirror/`; `--check` sweeps the mirror tilt for clashes; notes in `../docs/spinning-mirror-gimbal.md`, concept page `../docs/spinning-mirror-gimbal-concept.html`.
+
+Spinning mirror row of 7 (2026-11-14): `src/spinning_mirror_row.py` writes `out/spinning-mirror-row/` (assembly STEP, parts split laser/print/purchase with DXF) and `../bom/bom-spinning-mirror-row.csv`, carbon-tube top bar on steel rod posts with two thin blades; previews in `media/previews/spinning-mirror-row/`; `--check` runs random-pose clash checks; notes in `../docs/spinning-mirror-row.md`.
+
+Single mirror test rig (2026-11-14): `python3 src/spinning_mirror_row.py --units 1` writes `out/spinning-mirror-test/` and `../bom/bom-spinning-mirror-test.csv`, previews in `media/previews/spinning-mirror-test/`; same top support as the row on a 220 mm base; notes at the end of `../docs/spinning-mirror-row.md`.
+
+Spinning mirror trio (2026-11-14): the unit is now an 80 mm mirror on the real iPower GM2804 + AS5048A motor (STEP in `src/assets/`). `python3 src/spinning_mirror_row.py --units 3` writes `out/spinning-mirror-trio/`, `../bom/bom-spinning-mirror-trio.csv` and previews in `media/previews/spinning-mirror-trio/`; `--units 1` and `--units 7` rebuild the test rig and the row with the new unit.
+
+Spinning mirror control deck (2026-11-15): the rigs now sit on a plywood box with a deck level with the hub tops (electronics inside, jitter knob, DC jack and USB cut-outs), 170 mm wide, printed parts matt black; see `../docs/spinning-mirror-row.md`.
+
+Spinning mirror hood (2026-11-15): 5 mm clear acrylic cover on the base top layer, front ledge with a printed control pod (dial, DC jack, USB-C) and a reed-switch interlock; see `../docs/spinning-mirror-row.md`.
+
+Spinning mirror 150 mm NEMA 17 test rig (2026-11-15): `python3 src/spinning_mirror_150_nema17.py` writes `out/spinning-mirror-150-nema17/`, `../bom/bom-spinning-mirror-150-nema17.csv` and previews in `media/previews/spinning-mirror-150-nema17/`; `--check` runs the tilt-sweep clash check. Single unit on a printed pedestal, no top bar, box or hood; notes in `../docs/spinning-mirror-150-nema17.md`.

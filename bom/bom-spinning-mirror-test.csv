@@ -1,0 +1,28 @@
+process,item,qty,note
+laser,"Plywood 6 mm: base layers, 290 x 224 mm, bottom (motor screw holes), middle (ballast windows, nut pockets), top (wall slots, motor holes)",3,"own cutter, bed 1219 x 914"
+laser,"Plywood 6 mm: deck 252 x 150 mm, level with the top of the hub adapters (hub holes, post holes, front screw holes)",1,DXF laser_deck_6mm
+laser,"Plywood 6 mm: box walls, back (glued, 4 mm reed lead hole), two ends (glued, same profile), front panel (removable, 3 screws through the deck, 10 mm hole for the pod wires)",4,DXF laser_*_wall / panel
+laser,"Clear cast acrylic 5 mm: hood, 278 x 176 x 191 mm tall; top, front, back, two ends (finger joints, vents 6 mm wide, notch for the pod wires). Solvent-weld the corners, leave the bottom tabs loose",5,CO2 laser (to be confirmed) or order cut; DXF laser_hood_*
+buy,"Solvent cement for acrylic (e.g. Weld-On 4 or dichloromethane type), adhesive foam strip 3 mm for the hood seat",1,
+print,"PETG: ring with foot and pin boss, carrier, hub adapter, top block, top cap (x1 each)",5,"Bambu P1S, 0.4 mm, 4 walls"
+print,PETG: end clamp block (x2) and end cap (x2) for the tube and rod posts,4,"M3 x 16 screws, M3 grub screw for the rod"
+print,"PETG or ASA, matt black: motor boss (x1)",1,clamped between the base and the motor by the M2 screws
+print,"PETG or ASA, matt black: control pod on the front ledge (dial, DC jack, USB-C), 4 M3 x 25 screws from below into heat-set inserts",1,"all printed parts: matt black, PETG or ASA in the sun, not PLA"
+buy,"iPower GM2804-100T gimbal motor with AS5048A encoder, 12 V (35 x 26 mm, hollow shaft 6.5 mm)",1,STEP in cad/src/assets
+buy,"Motor driver, 3-phase, open-loop capable (SimpleFOC Mini or similar), plus a microcontroller with 3 PWM outputs (ESP32 or RP2040)",1,random-walk speed per motor
+buy,"12 V supply, 2 A, fuse, 5.5 x 2.1 mm DC barrel jack (11 mm hole) in the control pod",1,
+buy,"USB-C panel-mount socket or short USB-C extension (9.5 x 3.8 mm slot) in the control pod, wired to the controller for programming",1,
+buy,"10k rotary potentiometer, 7 mm bushing (hole 7.5 mm), knob about 20 mm, for the jitter amount, in the control pod",1,wires to the controller
+buy,"Reed switch (glass, 3 x 16 mm) on the plywood back wall and a 6 x 3 mm neodymium magnet on the hood: the controller stops the motors when the hood lifts",2,interlock
+buy,Standoffs M3 x 3 mm and screws for the driver and controller boards (envelopes in the model are placeholders: 30 x 25 x 12 and 55 x 28 x 14),2,check real board sizes
+buy,Bearing 683ZZ (3 x 7 x 3): 2 per ring hinge plus 1 per top block,3,
+buy,Steel pin 3 mm x 16 mm (ring top),1,press into the ring boss
+buy,Steel rod 3 mm x 98 mm (hinge axle),1,
+buy,"Acrylic mirror 2 mm, 80 mm discs (laser-cut), two per unit",2,one per unit if single-sided
+buy,"Brass slug 6 x 5 mm (swap for steel, aluminium or none)",1,tune the random behaviour
+buy,"Carbon fibre tube 10 x 8 mm, 150 mm",1,"clamped, no drilling; check the stiffness on a sample"
+buy,"Steel rod 8 mm (silver steel), about 150 mm, threaded M8 for the lower 14 mm",2,"end posts, screw into the captive nuts"
+buy,"M8 thin nut, 4 mm (DIN 439)",2,captive in the middle layer
+buy,"Steel flat bar 38 x 6 mm, 250 mm (about 0.45 kg each)",2,ballast in the middle layer windows
+buy,Rubber feet 12 mm,4,
+buy,"Fasteners: M2 x 30 (4, up from under the base into each motor), M2 x 6 countersunk (4, hub to bell), M3 x 16 (2 ring to hub, 8 clamps), M3 x 6 trim (4), M3 grub (2), M3 heat-set inserts (2), M3 x 20 wood screws (3, front panel), wood glue",1,set

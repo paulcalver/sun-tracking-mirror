@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sun and Moon Wall Discs Perpendicular</title>
+<style>
+  :root {
+    --wall: #e9e9e7;
+    --wall-hi: #f1f1ef;
+    --disc: #f7f7f5;
+    --ink: #111;
+    --muted: #8a8a86;
+    --panel: #ffffff;
+    --line: #d9d9d5;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--wall); color: #333;
+    font: 14px/1.4 -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; }
+  main { max-width: 1100px; margin: 0 auto; padding: 24px 16px 40px; }
+  .wall {
+    background: linear-gradient(160deg, var(--wall-hi), var(--wall) 60%, #e3e3e0);
+    box-shadow: 0 1px 0 #fff inset, 0 0 0 1px rgba(0,0,0,.04), 0 12px 30px rgba(0,0,0,.10);
+    border-radius: 2px;
+  }
+  .label.rowtitle { text-anchor: start; }
+  .wall { position: relative; overflow: hidden; }
+  #read { position: absolute; left: 16px; top: 12px; font: 300 15px -apple-system, "Helvetica Neue", Arial, sans-serif; color: #66665f; line-height: 1.5; pointer-events: none; }
+  #readM { position: absolute; right: 16px; top: 12px; text-align: right; font: 300 15px -apple-system, "Helvetica Neue", Arial, sans-serif; color: #66665f; line-height: 1.5; pointer-events: none; }
+  #readM b { font-weight: 500; letter-spacing: .14em; font-size: 10px; text-transform: uppercase; color: #8a8a86; margin-right: 6px; }
+  #read { right: 16px; display: flex; flex-wrap: wrap; gap: 4px 28px; font-size: 13px; line-height: 1.5; }
+  #read b { font-weight: 500; letter-spacing: .14em; font-size: 10px; text-transform: uppercase; color: #8a8a86; margin-right: 6px; }
+  canvas { display: block; }
+  svg { display: block; width: 100%; height: auto; }
+  .label { font: 500 11px -apple-system, "Helvetica Neue", Arial, sans-serif; letter-spacing: .18em;
+    fill: var(--muted); text-anchor: middle; text-transform: uppercase; }
+  .read { font: 300 22px -apple-system, "Helvetica Neue", Arial, sans-serif; fill: #55554f; text-anchor: middle; }
+  .sub { font: 400 12px -apple-system, "Helvetica Neue", Arial, sans-serif; fill: var(--muted); text-anchor: middle; }
+
+  .controls { margin-top: 20px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: 16px; display: grid; gap: 16px 24px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .controls h3 { margin: 0 0 8px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+  label { display: flex; gap: 6px; align-items: center; }
+  input[type=date], input[type=number] { font: inherit; padding: 5px 7px; border: 1px solid var(--line); border-radius: 5px; background: #fff; color: #222; }
+  input[type=number] { width: 74px; }
+  input[type=range] { width: 100%; accent-color: #222; }
+  button { font: inherit; padding: 5px 10px; border: 1px solid var(--line); border-radius: 5px; background: #fff; color: #222; cursor: pointer; }
+  button:hover { background: #f3f3f1; }
+  button.on { background: #222; color: #fff; border-color: #222; }
+  .big { font-size: 15px; padding: 7px 16px; }
+  .val { color: #222; font-variant-numeric: tabular-nums; }
+  @media (prefers-color-scheme: dark) { /* wall piece stays white by design */ body { background: #cfcfcc; } }
+</style>
+</head>
+<body>
+<main>
+  <div class="wall" id="stage"><div id="read"></div></div>
+
+  <div class="controls">
+    <section>
+      <h3>Date &amp; time</h3>
+      <div class="row">
+        <input type="date" id="date">
+        <button id="now">Now</button>
+      </div>
+      <div class="row">
+        <button data-d="03-20">Equinox Mar</button>
+        <button data-d="06-21">Solstice Jun</button>
+        <button data-d="09-22">Equinox Sep</button>
+        <button data-d="12-21">Solstice Dec</button>
+      </div>
+      <div class="row" style="margin-bottom:0"><span>Time of day</span><span class="val" id="timeLbl"></span></div>
+      <input type="range" id="tod" min="0" max="1439" step="1">
+    </section>
+
+    <section>
+      <h3>Speed</h3>
+      <div class="row">
+        <button id="play" class="big on">Pause</button>
+        <label><input type="checkbox" id="rev"> Reverse</label>
+      </div>
+      <input type="range" id="speed" min="0" max="100" step="0.5" value="0">
+      <div class="row" style="margin:6px 0 8px"><span class="val" id="speedLbl"></span></div>
+      <div class="row" style="margin-bottom:0">
+        <button data-s="1">Real time</button>
+        <button data-s="600">10 min/s</button>
+        <button data-s="3600">1 h/s</button>
+        <button data-s="86400">1 day/s</button>
+        <button data-s="2551443">Lunar month / s</button>
+      </div>
+    </section>
+
+    <section>
+      <h3>Place &amp; display</h3>
+      <div class="row">
+        <label>Lat <input type="number" id="lat" value="51.5" step="0.1" min="-90" max="90"></label>
+        <label>Lon <input type="number" id="lon" value="-0.1" step="0.1" min="-180" max="180"></label>
+      </div>
+      <div class="row">
+        <label>UTC offset <input type="number" id="tz" step="0.5" min="-12" max="14"></label>
+      </div>
+      <div class="row" style="margin-bottom:0">
+        <label><input type="checkbox" id="ray"> X-ray: show mechanism</label>
+        <label><input type="checkbox" id="text" checked> Show text</label>
+      </div>
+    </section>
+  </div>
+  <p style="color:#777; font-size:12px; margin:12px 4px 0">
+    Route 1b with the azimuth discs perpendicular to the elevation discs. Sun only. Each vertical disc shows elevation (line angle above the horizontal). Each flat disc below it shows azimuth as a compass seen from above: north is towards the wall, east to the right. Every disc turns as a whole on its own hidden stepper and its inlaid black line is the hand. A line pointing below the horizontal means the body is below the horizon. Tick X-ray to see the steppers. Drag to orbit, scroll to zoom.
+  </p>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+const rad = Math.PI / 180, deg = 180 / Math.PI;
+const $ = id => document.getElementById(id);
+const sin = x => Math.sin(x * rad), cos = x => Math.cos(x * rad);
+const norm = x => ((x % 360) + 360) % 360;
+
+// JPL approximate Keplerian elements (Standish, 1800-2050): [a, da, e, de, I, dI, L, dL, varpi, dvarpi, Omega, dOmega] per century
+const ELEM = {
+  mercury: [0.38709927,0.00000037,0.20563593,0.00001906,7.00497902,-0.00594749,252.25032350,149472.67411175,77.45779628,0.16047689,48.33076593,-0.12534081],
+  venus:   [0.72333566,0.00000390,0.00677672,-0.00004107,3.39467605,-0.00078890,181.97909950,58517.81538729,131.60246718,0.00268329,76.67984255,-0.27769418],
+  earth:   [1.00000261,0.00000562,0.01671123,-0.00004392,-0.00001531,-0.01294668,100.46457166,35999.37244981,102.93768193,0.32327364,0,0],
+  mars:    [1.52371034,0.00001847,0.09339410,0.00007882,1.84969142,-0.00813131,-4.55343205,19140.30268499,-23.94362959,0.44441088,49.55953891,-0.29257343],
+  jupiter: [5.20288700,-0.00011607,0.04838624,-0.00013253,1.30439695,-0.00183714,34.39644051,3034.74612775,14.72847983,0.21252668,100.47390909,0.20469106],
+  saturn:  [9.53667594,-0.00125060,0.05386179,-0.00050991,2.48599187,0.00193609,49.95424423,1222.49362201,92.59887831,-0.41897216,113.66242448,-0.28867794],
+  uranus:  [19.18916464,-0.00196176,0.04725744,-0.00004397,0.77263783,-0.00242939,313.23810451,428.48202785,170.95427630,0.40805281,74.01692503,0.04240589],
+  neptune: [30.06992276,0.00026291,0.00859048,0.00005105,1.77004347,0.00035372,-55.12002969,218.45945325,44.96476227,-0.32241464,131.78422574,-0.00508664]
+};
+function helio(el, T) {
+  const a = el[0] + el[1] * T, e = el[2] + el[3] * T, I = el[4] + el[5] * T, L = el[6] + el[7] * T,
+        wb = el[8] + el[9] * T, Om = el[10] + el[11] * T;
+  const w = wb - Om; let M = norm(L - wb); if (M > 180) M -= 360;
+  let E = M + e * deg * sin(M);
+  for (let i = 0; i < 8; i++) E -= (E - e * deg * sin(E) - M) / (1 - e * cos(E));
+  const xp = a * (cos(E) - e), yp = a * Math.sqrt(1 - e * e) * sin(E);
+  return [
+    (cos(w) * cos(Om) - sin(w) * sin(Om) * cos(I)) * xp + (-sin(w) * cos(Om) - cos(w) * sin(Om) * cos(I)) * yp,
+    (cos(w) * sin(Om) + sin(w) * cos(Om) * cos(I)) * xp + (-sin(w) * sin(Om) + cos(w) * cos(Om) * cos(I)) * yp,
+    (sin(w) * sin(I)) * xp + (cos(w) * sin(I)) * yp
+  ];
+}
+const PLANETS = ["mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune"];
+
+// ---------- astronomy ----------
+function positions(ms, latD, lonD) {
+  const jd = ms / 86400000 + 2440587.5;
+  const n = jd - 2451545.0, T = n / 36525;
+  const eps = 23.439 - 0.0000004 * n;
+  const gmst = 280.46061837 + 360.98564736629 * n;
+
+  function toHoriz(ra, dec) {
+    const H = norm(gmst + lonD - ra);
+    const alt = Math.asin(sin(latD) * sin(dec) + cos(latD) * cos(dec) * cos(H)) * deg;
+    // azimuth from north, clockwise
+    const az = norm(Math.atan2(sin(H), cos(H) * sin(latD) - Math.tan(dec * rad) * cos(latD)) * deg + 180);
+    return { alt, az, H };
+  }
+
+  // Sun
+  const L = 280.460 + 0.9856474 * n, g = 357.528 + 0.9856003 * n;
+  const lamS = L + 1.915 * sin(g) + 0.020 * sin(2 * g);
+  const raS = norm(Math.atan2(cos(eps) * sin(lamS), cos(lamS)) * deg);
+  const decS = Math.asin(sin(eps) * sin(lamS)) * deg;
+  const sun = toHoriz(raS, decS);
+
+  // Moon
+  const lamM = 218.32 + 481267.881 * T + 6.29 * sin(135.0 + 477198.87 * T) - 1.27 * sin(259.3 - 413335.36 * T)
+    + 0.66 * sin(235.7 + 890534.22 * T) + 0.21 * sin(269.9 + 954397.74 * T) - 0.19 * sin(357.5 + 35999.05 * T)
+    - 0.11 * sin(186.5 + 966404.03 * T);
+  const betM = 5.13 * sin(93.3 + 483202.02 * T) + 0.28 * sin(228.2 + 960400.89 * T)
+    - 0.28 * sin(318.3 + 6003.15 * T) - 0.17 * sin(217.6 - 407332.21 * T);
+  const parM = 0.9508 + 0.0518 * cos(135.0 + 477198.87 * T) + 0.0095 * cos(259.3 - 413335.36 * T)
+    + 0.0078 * cos(235.7 + 890534.22 * T) + 0.0028 * cos(269.9 + 954397.74 * T);
+  const x = cos(betM) * cos(lamM);
+  const y = cos(eps) * cos(betM) * sin(lamM) - sin(eps) * sin(betM);
+  const z = sin(eps) * cos(betM) * sin(lamM) + cos(eps) * sin(betM);
+  const raM = norm(Math.atan2(y, x) * deg), decM = Math.asin(z) * deg;
+  const moon = toHoriz(raM, decM);
+  moon.alt -= parM * cos(moon.alt); // parallax
+
+  const elong = norm(lamM - lamS);
+  const illum = (1 - cos(elong)) / 2;
+
+  // Planets: geocentric ecliptic (J2000) -> precess to date -> equatorial of date
+  const earth = helio(ELEM.earth, T), pa = 1.39697 * T;
+  const bodies = { sun, moon };
+  for (const k of PLANETS) {
+    const q = helio(ELEM[k], T), gx = q[0] - earth[0], gy = q[1] - earth[1], gz = q[2] - earth[2];
+    const x1 = gx * cos(pa) - gy * sin(pa), y1 = gx * sin(pa) + gy * cos(pa);
+    const ye = y1 * cos(eps) - gz * sin(eps), ze = y1 * sin(eps) + gz * cos(eps);
+    bodies[k] = toHoriz(norm(Math.atan2(ye, x1) * deg), Math.asin(ze / Math.hypot(x1, ye, ze)) * deg);
+  }
+  return { bodies, sun, moon, elong, illum };
+}
+
+function phaseName(e) {
+  const names = ["New moon", "Waxing crescent", "First quarter", "Waxing gibbous", "Full moon", "Waning gibbous", "Last quarter", "Waning crescent"];
+  return names[Math.round(e / 45) % 8];
+}
+
+// ---------- state ----------
+let t = Date.now();          // simulated UTC ms
+let playing = true;
+let speed = 1;               // simulated seconds per real second
+let last = performance.now();
+
+function defaultOffset(ms) { return -new Date(ms).getTimezoneOffset() / 60; }
+$("tz").value = defaultOffset(t);
+
+const tzMs = () => (parseFloat($("tz").value) || 0) * 3600000;
+const localDate = () => new Date(t + tzMs());   // use getUTC* for local wall-clock
+const pad = n => String(n).padStart(2, "0");
+
+function setLocalYMD(y, m, d) {
+  const L = localDate();
+  const ms = Date.UTC(y, m - 1, d, L.getUTCHours(), L.getUTCMinutes(), L.getUTCSeconds()) - tzMs();
+  t = ms;
+}
+
+// ---------- speed slider (log, 1x .. 1e7x) ----------
+const sliderToSpeed = v => Math.pow(10, v / 100 * 7);
+const speedToSlider = s => Math.log10(Math.max(1, s)) / 7 * 100;
+function fmtSpeed(s) {
+  const units = [[86400 * 30.44, "months"], [86400, "days"], [3600, "hours"], [60, "minutes"], [1, "seconds"]];
+  if (s < 1.5) return "Real time (1×)";
+  for (const [u, name] of units) if (s >= u * 0.95) return `${(s / u).toFixed(s / u < 10 ? 1 : 0)} ${name} per second`;
+  return `${s.toFixed(0)}×`;
+}
+function setSpeed(s) { speed = s; $("speed").value = speedToSlider(s); $("speedLbl").textContent = fmtSpeed(s) + "  (" + (s >= 10 ? Math.round(s).toLocaleString() : s.toFixed(1)) + "×)"; }
+$("speed").addEventListener("input", e => setSpeed(sliderToSpeed(+e.target.value)));
+document.querySelectorAll("button[data-s]").forEach(b => b.onclick = () => setSpeed(+b.dataset.s));
+setSpeed(1);
+
+// ---------- controls ----------
+$("play").onclick = () => { playing = !playing; $("play").textContent = playing ? "Pause" : "Play"; $("play").classList.toggle("on", playing); };
+$("now").onclick = () => { t = Date.now(); setSpeed(1); };
+document.querySelectorAll("button[data-d]").forEach(b => b.onclick = () => {
+  const [m, d] = b.dataset.d.split("-").map(Number);
+  setLocalYMD(localDate().getUTCFullYear(), m, d);
+});
+$("date").addEventListener("change", e => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(e.target.value);
+  if (m) setLocalYMD(+m[1], +m[2], +m[3]);
+});
+$("tod").addEventListener("input", e => {
+  const mins = +e.target.value, L = localDate();
+  t = Date.UTC(L.getUTCFullYear(), L.getUTCMonth(), L.getUTCDate(), 0, mins, 0) - tzMs();
+});
+
+// ---------- 3D scene: route 1b, azimuth discs perpendicular ----------
+// Per body: an elevation disc standing on the wall panel, and an azimuth disc lying flat on a slim shelf below it.
+// Each disc is glued to its own hidden stepper shaft and turns as a whole; the inlaid black line is the hand.
+const R = 1, TH = 0.08, GAP = 0.12, PITCH = 2.3, EY = 1.3;
+const KEYS = ["sun"];   // sun only (add "moon", "venus", "mars", "jupiter", "saturn", "mercury" to bring the others back)
+const NB = KEYS.length;
+const PLATE_H = EY + R + 0.45 + 0.75;                       // back plate height
+const WIDTH = Math.max((NB - 1) * PITCH + 2 * R + 0.2, PLATE_H);   // square for one column   // EY: height of the elevation disc centres
+const stage = $("stage");
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+stage.appendChild(renderer.domElement);
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0xb4b4b0);
+const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
+camera.position.set(3.6, 4.2, 11.6);
+const orbit = new THREE.OrbitControls(camera, renderer.domElement);
+orbit.target.set(0, 0.8, 1.3); orbit.enableDamping = true;
+orbit.minAzimuthAngle = -1.4; orbit.maxAzimuthAngle = 1.4; orbit.minPolarAngle = 0.5; orbit.maxPolarAngle = 2.0;
+orbit.update();
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0xb0b0ab, 0.7));
+const key = new THREE.DirectionalLight(0xffffff, 0.5);
+key.position.set(-4, 7, 8); key.castShadow = true;
+key.shadow.mapSize.set(4096, 4096); key.shadow.radius = 6; key.shadow.bias = -0.0003;
+Object.assign(key.shadow.camera, { left: -9, right: 9, top: 9, bottom: -9, near: 1, far: 30 });
+scene.add(key);
+
+const white = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 });
+const panelMat = new THREE.MeshStandardMaterial({ color: 0xdcdcd8, roughness: 0.95 });
+const wallMat = new THREE.MeshStandardMaterial({ color: 0xb4b4b0, roughness: 1 });
+const black = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.6 });
+const dark = new THREE.MeshStandardMaterial({ color: 0x2b2b2b, roughness: 0.7 });
+
+const wall = new THREE.Mesh(new THREE.PlaneGeometry(60, 40), wallMat);
+wall.position.z = -0.5; wall.receiveShadow = true; scene.add(wall);
+const PBOT = -0.75, PTOP = EY + R + 0.45;
+const panel = new THREE.Mesh(new THREE.BoxGeometry(WIDTH, PTOP - PBOT, 0.06), panelMat);
+panel.position.set(0, (PTOP + PBOT) / 2, -0.03); panel.castShadow = panel.receiveShadow = true; scene.add(panel);
+
+const zcyl = (r, len, mat) => { const g = new THREE.CylinderGeometry(r, r, len, 48); g.rotateX(Math.PI / 2); return new THREE.Mesh(g, mat); };
+const ycyl = (r, len, mat) => new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, 48), mat);
+const vGeo = new THREE.CylinderGeometry(R, R, TH, 120); vGeo.rotateX(Math.PI / 2);   // vertical disc (axis z)
+const hGeo = new THREE.CylinderGeometry(R, R, TH, 120);                               // horizontal disc (axis y)
+const mech = new THREE.Group(); mech.visible = false; scene.add(mech);
+const shelves = [];
+
+function makeElevation(x) {
+  const spin = new THREE.Group(); spin.position.set(x, EY, GAP + TH / 2); scene.add(spin);
+  const disc = new THREE.Mesh(vGeo, white); disc.castShadow = disc.receiveShadow = true; spin.add(disc);
+  const line = new THREE.Mesh(new THREE.BoxGeometry(R, 0.045, TH + 0.01), black); line.position.x = R / 2; spin.add(line);
+  const stub = zcyl(0.06, GAP, white); stub.position.z = -(TH + GAP) / 2; stub.castShadow = true; spin.add(stub);
+  const m = zcyl(0.19, 0.3, dark); m.position.set(x, EY, -0.21); mech.add(m);
+  const sh = zcyl(0.035, 0.06 + GAP, dark); sh.position.set(x, EY, (GAP - 0.06) / 2); mech.add(sh);
+  return spin;
+}
+function makeAzimuth(x) {
+  const PT = 0.06, plateTop = -0.38, discY = -0.2 - TH / 2, cz = (PTOP - PBOT) / 2;   // centred front to back on the base plate
+  // the stepper hangs under the plate in a short can in the panel finish, tucked below the overhanging disc
+  const can = ycyl(0.22, 0.28, panelMat); can.position.set(x, plateTop - PT - 0.14, cz); can.castShadow = true; scene.add(can);
+  const spin = new THREE.Group(); spin.position.set(x, discY, cz); scene.add(spin);
+  const disc = new THREE.Mesh(hGeo, white); disc.castShadow = disc.receiveShadow = true; spin.add(disc);
+  const line = new THREE.Mesh(new THREE.BoxGeometry(R, TH + 0.01, 0.045), black); line.position.x = R / 2; spin.add(line);
+  const stub = ycyl(0.06, 0.1, white); stub.position.y = -(TH + 0.1) / 2; spin.add(stub);
+  const m = ycyl(0.19, 0.26, dark); m.position.set(x, plateTop - PT - 0.14, cz); mech.add(m);
+  const sh = ycyl(0.035, 0.3, dark); sh.position.set(x, plateTop - 0.01, cz); mech.add(sh);
+  return spin;
+}
+// one thin base plate, the full width and the same thickness and finish as the back panel, folding out of its lower edge
+const BASE_D = PTOP - PBOT, BASE_TOP = -0.38;
+const base = new THREE.Mesh(new THREE.BoxGeometry(WIDTH, 0.06, BASE_D), panelMat);
+base.position.set(0, BASE_TOP - 0.03, BASE_D / 2); base.castShadow = base.receiveShadow = true; scene.add(base);
+const xs = KEYS.map((_, i) => (i - (NB - 1) / 2) * PITCH);
+const elDiscs = xs.map(makeElevation), azDiscs = xs.map(makeAzimuth);
+const board = new THREE.Mesh(new THREE.BoxGeometry(WIDTH - 1, 0.3, 0.03), dark); board.position.set(0, 0.1, -0.45); mech.add(board);
+
+$("ray").addEventListener("change", e => {
+  const on = e.target.checked;
+  mech.visible = on;
+  [panelMat].forEach(mt => { mt.transparent = on; mt.opacity = on ? 0.14 : 1; mt.depthWrite = !on; mt.needsUpdate = true; });
+});
+$("text").addEventListener("change", e => { $("read").style.display = e.target.checked ? "" : "none"; });
+
+function resize() {
+  const w = stage.clientWidth, h = Math.max(380, Math.round(w * 0.5));
+  renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+window.addEventListener("resize", resize); resize();
+
+function frame(now) {
+  const dt = Math.min(0.25, (now - last) / 1000); last = now;
+  if (playing) t += dt * speed * 1000 * ($("rev").checked ? -1 : 1);
+
+  const lat = Math.max(-90, Math.min(90, parseFloat($("lat").value) || 0));
+  const lon = parseFloat($("lon").value) || 0;
+  const P = positions(t, lat, lon);
+  const NAMES = { sun: "Sun", moon: "Moon", mercury: "Mercury", venus: "Venus", mars: "Mars", jupiter: "Jupiter", saturn: "Saturn" };
+  const f = v => (v < 0 ? "\u2212" : "") + Math.abs(v).toFixed(1) + "\u00b0";
+  let html = "";
+  KEYS.forEach((k, i) => {
+    const b = P.bodies[k];
+    elDiscs[i].rotation.z = b.alt * rad;         // vertical disc: line angle above the horizontal = elevation
+    azDiscs[i].rotation.y = (90 - b.az) * rad;   // flat disc seen from above: north is towards the wall, east to the right
+    html += `<div><b>${NAMES[k]}${k === "moon" ? " " + Math.round(P.illum * 100) + "%" : ""}</b><br>El ${f(b.alt)}<br>Az ${b.az.toFixed(1)}\u00b0</div>`;
+  });
+  $("read").innerHTML = html;
+
+  const L = localDate();
+  const dstr = `${L.getUTCFullYear()}-${pad(L.getUTCMonth() + 1)}-${pad(L.getUTCDate())}`;
+  const mins = L.getUTCHours() * 60 + L.getUTCMinutes();
+  if (document.activeElement !== $("date") && $("date").value !== dstr) $("date").value = dstr;
+  if (document.activeElement !== $("tod")) $("tod").value = mins;
+  $("timeLbl").textContent = `${pad(L.getUTCHours())}:${pad(L.getUTCMinutes())}`;
+
+  orbit.update();
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

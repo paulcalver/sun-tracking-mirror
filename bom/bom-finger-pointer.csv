@@ -1,0 +1,16 @@
+process,item,qty,note
+laser,"Black acrylic 6 mm: floor plate 151 mm square, top frame 170 mm with a 24.4 mm hole",2,"own cutter, 6 mm max"
+laser,"Black acrylic 3 mm: 2 long wall panels (164 x 74.3), 2 short (158 x 74.3), one with a 12 mm cable notch",4,own cutter
+laser,"Black acrylic 3 mm: hand plate (cut DXF, engrave the front PNG: light areas frosted)",1,own cutter
+print,"PETG-CF: housing, cradles x2, rod bracket, tray, compass post, Hall post, collar, 2 pulleys, head bracket, hub ring",13,"Bambu P1S, hardened nozzle"
+buy,NEMA 17 stepper 42 x 34 mm,2,"Pi Hut 42 x 34, in earlier BOM"
+buy,"GT2 pulley 20T, 6 mm belt, 5 mm bore",2,123-3D
+buy,"GT2 closed belt 6 mm, 200 mm (100 teeth)",2,123-3D 200 mm in stock
+buy,"Aluminium tube 12 x 2 mm, about 189 mm cut",1,Aluminium Warehouse
+buy,"Silver steel rod 6 mm, one 333 mm bar cut into the rod (about 228 mm) and the axle (about 21.7 mm)",1,"Tesco marketplace, Bolts.co.uk"
+buy,Bearing 6701 (12 x 18 x 4),2,"Simply Bearings, Henderson"
+buy,Bearing 686ZZ (6 x 13 x 5),1,standard
+buy,Bearing 626ZZ (6 x 19 x 6),1,standard
+buy,"RS PRO POM mitre gear 20T, module 1, 6 mm bore (521-6058)",2,"RS, about 5.83 each"
+buy,Torsion spring on the axle to take up bevel backlash (not modelled),1,to be designed
+buy,"Pico, DS3231, 2 x TMC2209, buck converter, GY-271 compass, 2 x Hall board, 2 x 5 x 2 magnets, M3 and M2 fasteners, heat-set inserts",1,as the mirror BOM

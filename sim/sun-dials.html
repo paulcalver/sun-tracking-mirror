@@ -31,6 +31,15 @@
   .read { font: 300 22px -apple-system, "Helvetica Neue", Arial, sans-serif; fill: #55554f; text-anchor: middle; }
   .sub { font: 400 12px -apple-system, "Helvetica Neue", Arial, sans-serif; fill: var(--muted); text-anchor: middle; }
 
+  .mech { margin-top: 20px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px;
+    display: flex; gap: 8px 28px; flex-wrap: wrap; align-items: center; }
+  .mech h3 { margin: 0 0 8px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .mech svg { width: 100%; max-width: 340px; height: auto; flex: 0 0 auto; }
+  .mech ol { margin: 0; padding-left: 20px; line-height: 1.55; }
+  .mech .enc { margin-top: 10px; font-variant-numeric: tabular-nums; color: #222; }
+  .mech .enc span { color: var(--muted); }
+  .mech .note { margin-top: 8px; font-size: 12px; color: #777; max-width: 520px; }
+  svg .step { font: 600 11px -apple-system, Arial, sans-serif; fill: #fff; text-anchor: middle; }
   .controls { margin-top: 20px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
     padding: 16px; display: grid; gap: 16px 24px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
   .controls h3 { margin: 0 0 8px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
@@ -65,6 +74,45 @@
       <g id="dials"></g>
     </svg>
   </div>
+
+  <section class="mech" id="mech">
+    <svg viewBox="0 0 280 340" role="img" aria-label="Side section of one dial: wall, encoder, back plate, GM2804 motor, disc">
+      <defs>
+        <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2="6" stroke="#b5b5b0" stroke-width="1.2"/>
+        </pattern>
+      </defs>
+      <!-- scale 5 px per mm, wall surface at x=40; the disc is cropped to +/-30 mm of its centre -->
+      <rect x="10" y="20" width="30" height="300" fill="url(#hatch)" stroke="#aaa"/>
+      <rect x="75" y="95" width="65" height="150" fill="#cfd5cf" stroke="#8a8f8a"/>
+      <rect x="140" y="20" width="15" height="300" fill="#e5e5e2" stroke="#999"/>
+      <rect x="155" y="82.5" width="25" height="175" fill="#6b6b68" stroke="#444"/>
+      <rect x="180" y="82.5" width="35" height="175" fill="#2b2b2b" stroke="#111"/>
+      <rect x="215" y="20" width="15" height="300" fill="#fff" stroke="#888"/>
+      <rect x="203" y="123" width="22" height="4" fill="#999"/><rect x="203" y="213" width="22" height="4" fill="#999"/>
+      <path d="M215 20 l3 -5 l3 5 l3 -5 l3 5 M215 320 l3 5 l3 -5 l3 5 l3 -5" fill="none" stroke="#888"/>
+      <line x1="40" y1="335" x2="230" y2="335" stroke="#999"/>
+      <line x1="40" y1="330" x2="40" y2="340" stroke="#999"/><line x1="230" y1="330" x2="230" y2="340" stroke="#999"/>
+      <text x="135" y="331" text-anchor="middle" font-size="11" fill="#777" font-family="-apple-system, Arial, sans-serif">about 38 mm from the wall</text>
+      <g fill="#111"><circle cx="25" cy="170" r="8"/><circle cx="107" cy="170" r="8"/><circle cx="147" cy="45" r="8"/>
+        <circle cx="167" cy="170" r="8"/><circle cx="197" cy="170" r="8"/><circle cx="223" cy="45" r="8"/></g>
+      <g class="step"><text x="25" y="174">1</text><text x="107" y="174">2</text><text x="147" y="49">3</text>
+        <text x="167" y="174">4</text><text x="197" y="174">5</text><text x="223" y="49">6</text></g>
+    </svg>
+    <div>
+      <h3>GM2804 direct drive (side section)</h3>
+      <ol>
+        <li>Wall</li>
+        <li>AS5048A encoder, 14-bit absolute, behind the plate</li>
+        <li>Back plate, 3 mm acrylic</li>
+        <li>GM2804 stator, fixed to the plate</li>
+        <li>Rotor, turning in front of the stator</li>
+        <li>Disc, 3 mm, screwed to the rotor face; it turns with it</li>
+      </ol>
+      <div class="enc"><span>Elevation disc</span> <b id="encEl"></b> &nbsp; <span>Azimuth disc</span> <b id="encAz"></b></div>
+      <div class="note">Each dial is one GM2804 with its own field-oriented-control driver, a 12 V supply and no gears. The encoder gives the disc angle straight away at power-up, so no homing sensor is needed. Sizes are from retailer listings (about 35 mm across, 12 mm for the motor, about 25 mm with encoder); how the encoder mounts and which part is the fixed shaft are assumed, so check them on the real motor.</div>
+    </div>
+  </section>
 
   <div class="controls">
     <section>
@@ -125,6 +173,7 @@
     </section>
   </div>
   <p style="color:#777; font-size:12px; margin:12px 4px 0">
+    Drive: each disc is turned directly by a GM2804 gimbal motor, so the disc itself turns and the black line is its hand. The counts above are what a 14-bit encoder would read (0.022 degrees per count).
     Pure elevation: the hand sits on the right and its angle from the horizontal is the elevation, so it swings up and back down each day.
     Elevation (flips) mode: the hand points at the sun's height above the horizon, on the left in the morning (east) and the right in the afternoon (west); it points down below the horizon (the line stays black).
     Sky view: the hand points at the sun's position projected on a south-facing wall, so it passes straight over the top without flipping.
@@ -324,6 +373,13 @@ function frame(now) {
     const d = dialEls[key], b = P.bodies[key];
     setHand(d.hand, b, mode);
     d.rd.textContent = (b.alt >= 0 ? "" : "−") + Math.abs(b.alt).toFixed(1) + "°";
+  }
+  {
+    // what the two encoders would read: the disc angle as a 14-bit count (16384 per turn)
+    const [hx, hy] = handAngle(P.bodies.sun, mode);
+    const cnt = deg => String(Math.round(((deg % 360) + 360) % 360 / 360 * 16384) % 16384).padStart(5, " ") + " / 16384";
+    $("encEl").textContent = cnt(Math.atan2(hy, hx) * deg);
+    $("encAz").textContent = cnt(P.bodies.sun.az);
   }
   for (const key in azEls) {
     const d = azEls[key], b = P.bodies[key], r = b.az * rad;

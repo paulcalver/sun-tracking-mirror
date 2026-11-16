@@ -1,7 +1,7 @@
 # Wall-mounted tip-tilt sun mirror, two NEMA 11 (concept, 2026-11-04)
 
 Status: concept model only. Nothing ordered, printed or tested. A separate idea from the v4 plinth mirror (`cad-brief.md`).
-Source of truth: `cad/src/wall_mirror_nema11.py`. STEP: `cad/out/wall-mirror/wall-mirror-nema11.step` (17 named solids, Y up, Z out of the wall, posed for the example Sun). Renders: `cad/media/previews/wall-mirror/`.
+Source of truth: `cad/src/wall_mirror_nema11.py`. STEP: `cad/out/earlier-concepts/wall-mirror/wall-mirror-nema11.step` (17 named solids, Y up, Z out of the wall, posed for the example Sun). Renders: `cad/media/previews/wall-mirror/`.
 
 ## Idea
 A small round mirror on a wall reflects the Sun to a fixed spot (heliostat). The mirror normal bisects the Sun and target directions, so the mirror moves half as far as the Sun. The Sun must be in front of the wall, so it only works in daylight and parks otherwise.

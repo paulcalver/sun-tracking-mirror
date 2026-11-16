@@ -18,7 +18,7 @@ Motors: NEMA 11 (28.2 x 28.2 x 34) screw actuators (X and wedge motors at the le
 
 Usage (from the repo root):
   python3 cad/src/line_mirrors.py [--variant passive|wedge|both] [--check] [--no-render]
-Writes cad/out/line-mirrors/*.step and renders to cad/media/previews/line-mirrors/.
+Writes cad/out/earlier-concepts/line-mirrors/*.step and renders to cad/media/previews/line-mirrors/.
 """
 import argparse
 import math
@@ -27,7 +27,7 @@ from pathlib import Path
 import cadquery as cq
 
 CAD = Path(__file__).resolve().parent.parent
-OUT = CAD / "out" / "line-mirrors"
+OUT = CAD / "out" / "earlier-concepts" / "line-mirrors"
 IMG = CAD / "media" / "previews" / "line-mirrors"
 
 # ------------------------------------------------------------------ parameters (mm)

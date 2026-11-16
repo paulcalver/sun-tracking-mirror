@@ -26,7 +26,7 @@ import line_mirrors as lm  # noqa: E402
 from line_mirrors import box, cyl_along, cylz, shp, sph  # noqa: E402
 
 CAD = Path(__file__).resolve().parent.parent
-OUT = CAD / "out" / "sun-pointer"
+OUT = CAD / "out" / "earlier-concepts" / "sun-pointer"
 IMG = CAD / "media" / "previews" / "sun-pointer"
 D2R = math.pi / 180
 

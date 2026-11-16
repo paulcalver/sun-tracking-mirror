@@ -78,7 +78,7 @@ Open architecture choice: run everything on the ESP32 (standalone, robust for in
 
   README.md
   HANDOVER.md
-  cad/            # parametric model (OpenSCAD or CadQuery), STLs exported to cad/out/parts/test-rig
+  cad/            # parametric model (OpenSCAD or CadQuery), STLs exported to cad/out/hinge-mirror/parts/test-rig
   firmware/       # ESP32 (PlatformIO): steppers, homing, serial/Wi-Fi commands
   host/           # Python: sun position, IK, posture logic, simulation
   sim/            # visualise sun path and arm poses before building
@@ -136,7 +136,7 @@ Prompted by a photo of a rectangular table mirror on a wedge. Drawing: `cad/src/
 - Comparison (upright height, base): goal post 368 and 480, pedestal 420 and 250 (no slip ring), hinge 276 and 250.
 
 ## DECISION 2026-11-02: go with the hinged flat mirror, first-pass CAD built
-User chose the hinge design with a 3:4 (portrait) rectangular mirror, 200 x 267 mm. CAD: `cad/src/hinge_mirror.py` -> `cad/out/assembly/hinge-mirror-assembly.step` (and .glb, previews). Full detail in `docs/cad-brief.md`.
+User chose the hinge design with a 3:4 (portrait) rectangular mirror, 200 x 267 mm. CAD: `cad/src/hinge_mirror.py` -> `cad/out/hinge-mirror/assembly/hinge-mirror-assembly.step` (and .glb, previews). Full detail in `docs/cad-brief.md`.
 Changes found while detailing it (honest corrections to the earlier hinge drawing):
 - A GT2 belt on the hinge is overloaded (1.0 kg mirror, 267 mm tall: 1.43 N.m flat, 139 N belt force). Changed to the ANSI 25 chain (32T/16T, 44 N). That put the hinge axis at 95.8 mm and the chain outside the right hand hinge block, so the base is 262 mm, not 250.
 - Azimuth changed to a belt around a FIXED 160T hub pulley with a standing NEMA 17 on the drum (10:1, no backlash, fits the base). Not yet reviewed by the user.
@@ -152,6 +152,6 @@ User found the exposed hinge (shaft, blocks, chain, sprocket, encoder) ugly. Dra
 - Total concealment is impossible: the mirror has to emerge from the base, so the bar (or a notch) always shows.
 
 ## DONE 2026-11-02: CAD rebuilt around the hidden hinge (v2)
-`cad/src/hinge_mirror.py` -> `cad/out/assembly/hinge-mirror-assembly.step` (v1 exposed version archived as `*_v1_exposed*`). Details in `docs/cad-brief.md`.
+`cad/src/hinge_mirror.py` -> `cad/out/hinge-mirror/assembly/hinge-mirror-assembly.step` (v1 exposed version archived as `*_v1_exposed*`). Details in `docs/cad-brief.md`.
 Changes from the concept drawing: the worm drive was dropped (a gear on the shaft rises above the top plate when the mirror tilts). Replaced by a crank arm on the shaft, a pin sliding in a vertical slot in a yoke on a lead screw nut, driven by a NEMA 17 along Y. Everything is below the plate. Tilt limited to +/-70 deg, height 360 mm.
 Next: user explores in Fusion; open points are in the brief (idler for the azimuth belt, bar clamp detail, real mirror mass, brackets and fasteners).

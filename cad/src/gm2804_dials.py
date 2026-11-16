@@ -18,7 +18,7 @@ Motor outline from the supplied STEP (iPower GM2804 with AS5048A): 35 mm across,
 
 Usage (from the repo root):
   python3 cad/src/gm2804_dials.py [--el DEG] [--az DEG] [--check]
-Writes cad/out/gm2804-dials/ (assembly STEP, parts/<laser|print|purchase>/ with STEP and DXF), bom/bom-gm2804-dials.csv and
+Writes cad/out/sun-dial/archive/gm2804-dials/ (assembly STEP, parts/<laser|print|purchase>/ with STEP and DXF), bom/bom-gm2804-dials.csv and
 previews in cad/media/previews/gm2804-dials/.
 """
 import argparse
@@ -31,7 +31,7 @@ import cadquery as cq
 
 HERE = Path(__file__).resolve().parent
 CAD = HERE.parent
-OUTD = CAD / "out" / "gm2804-dials"
+OUTD = CAD / "out" / "sun-dial" / "archive" / "gm2804-dials"
 PARTS = OUTD / "parts"
 IMG = CAD / "media" / "previews" / "gm2804-dials"
 BOMF = CAD.parent / "bom" / "bom-gm2804-dials.csv"

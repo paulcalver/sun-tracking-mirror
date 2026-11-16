@@ -1,11 +1,11 @@
 # First test unit: 150 mm mirror on a NEMA 17, build guide (2026-11-15)
 
-Draft, nothing built or tested. One unit, no top bar, no hood. CAD: `cad/src/spinning_mirror_150_nema17.py`; STEP and part files in `cad/out/spinning-mirror-150-nema17/parts/`; BOM `bom/bom-spinning-mirror-150-nema17.csv`. Background: `spinning-mirror-150-nema17.md`, wiring: `spinning-mirror-150-nema17-wiring-and-order.md`.
+Draft, nothing built or tested. One unit, no top bar, no hood. CAD: `cad/src/spinning_mirror_150_nema17.py`; STEP and part files in `cad/out/spinning-mirror/spinning-mirror-150-nema17/parts/`; BOM `bom/bom-spinning-mirror-150-nema17.csv`. Background: `spinning-mirror-150-nema17.md`, wiring: `spinning-mirror-150-nema17-wiring-and-order.md`.
 
 **Safety first.** A 169 mm ring spins up to about 2.7 m/s at its edge and the mirror tumbles inside it, with no guard. Clamp or weigh down the base, keep hands, hair, cables and faces clear, wear eye protection, put a switch or the supply plug within reach, and start at low speed. Acrylic is the right choice (it does not shatter like glass), but treat the rig as a machine.
 
 ## Parts to print (PETG or ASA, matt black, 0.4 mm nozzle, 0.2 mm layers, 4 walls)
-STEP files for slicing: `cad/out/spinning-mirror-150-nema17/parts/print_ready/` (Z up, already in the orientation below: ring flat with +Y up, pedestal upside down, hub upright, carrier and lid flat; each file's name is its part name). The same parts, Y-up for Fusion, are in `parts/print/`.
+STEP files for slicing: `cad/out/spinning-mirror/spinning-mirror-150-nema17/parts/print_ready/` (Z up, already in the orientation below: ring flat with +Y up, pedestal upside down, hub upright, carrier and lid flat; each file's name is its part name). The same parts, Y-up for Fusion, are in `parts/print/`.
 | Part | Orientation | Mass (solid) | Notes |
 |---|---|---|---|
 | Ring with foot | flat, circular face on the bed (169 x 178 x 12 mm; the bosses are trimmed flush with the ring faces so it lies flat) | 45 g | bearing pockets 9.1 mm and axle holes 5 mm run along the bed: check with a drill after printing; print a test ring section first if unsure |

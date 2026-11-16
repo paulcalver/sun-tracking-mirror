@@ -59,5 +59,5 @@ Mechanical
 | 1 set | Heat-set inserts M3 x 5 (12) and screws: M3 x 10 (12), M3 x 18 (6), M3 x 5 grub (6), M3 x 6 (12), M3 x 20 wood screws (3) | thread-lock the grub screws |
 | 4 | Rubber feet 12 mm | |
 | 1 | PETG or ASA filament, matt black | about 1 kg |
-| 1 | Plywood 6 mm sheet, about 1 x 0.7 m | laser-cut, DXF in `cad/out/spinning-mirror-150-nema17-trio/parts/laser/` |
+| 1 | Plywood 6 mm sheet, about 1 x 0.7 m | laser-cut, DXF in `cad/out/spinning-mirror/spinning-mirror-150-nema17-trio/parts/laser/` |
 | 1 | Wood glue, CA glue or retaining compound | |

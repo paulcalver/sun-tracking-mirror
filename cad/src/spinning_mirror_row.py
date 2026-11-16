@@ -13,8 +13,8 @@ Hierarchy: frame (base layers, ballast, rod posts, end clamps, blades, tube), an
 bearings), tilt (carrier, axle, mirrors, weight).
 
 Usage (from the repo root):
-  python3 cad/src/spinning_mirror_row.py [--units N] [--up y|z] [--check] [--seed N]    (--units 1 writes out/spinning-mirror-test/)
-Writes cad/out/spinning-mirror-row/ (assembly STEP, parts/<laser|print|purchase>/ with DXF for the laser parts), bom/bom-spinning-mirror-row.csv
+  python3 cad/src/spinning_mirror_row.py [--units N] [--up y|z] [--check] [--seed N]    (--units 1 writes out/spinning-mirror/archive/spinning-mirror-test/)
+Writes cad/out/spinning-mirror/archive/spinning-mirror-row/ (assembly STEP, parts/<laser|print|purchase>/ with DXF for the laser parts), bom/bom-spinning-mirror-row.csv
 and previews in cad/media/previews/spinning-mirror-row/.
 """
 import argparse
@@ -32,7 +32,7 @@ CAD = HERE.parent
 # number of units: --units N on the command line (7 = the long row, 3 = the trio, 1 = the single test rig); read here because the layout is computed at import
 N = int(sys.argv[sys.argv.index("--units") + 1]) if "--units" in sys.argv else 7
 TAG = {1: "spinning-mirror-test", 3: "spinning-mirror-trio"}.get(N, "spinning-mirror-row")
-OUTD = CAD / "out" / TAG
+OUTD = CAD / "out" / "spinning-mirror" / "archive" / TAG
 PARTS = OUTD / "parts"
 IMG = CAD / "media" / "previews" / TAG
 BOMF = CAD.parent / "bom" / f"bom-{TAG}.csv"

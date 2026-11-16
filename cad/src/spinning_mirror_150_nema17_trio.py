@@ -11,7 +11,7 @@ treat it as an exposed machine and keep hands clear; see docs/spinning-mirror-15
 World frame (mm): origin on the table at the centre of the box, Z up, X along the row, units on Y = 0.
 Usage (from the repo root):
   python3 cad/src/spinning_mirror_150_nema17_trio.py [--check] [--up y|z] [--seed N]
-Writes cad/out/spinning-mirror-150-nema17-trio/ (assembly STEP, parts/<laser|print|purchase>/ with DXF for the laser parts),
+Writes cad/out/spinning-mirror/spinning-mirror-150-nema17-trio/ (assembly STEP, parts/<laser|print|purchase>/ with DXF for the laser parts),
 bom/bom-spinning-mirror-150-nema17-trio.csv and previews in cad/media/previews/spinning-mirror-150-nema17-trio/.
 """
 import argparse
@@ -30,7 +30,7 @@ import spinning_mirror_150_nema17 as u             # noqa: E402  (the unit)
 
 CAD = HERE.parent
 TAG = "spinning-mirror-150-nema17-trio"
-OUTD = CAD / "out" / TAG
+OUTD = CAD / "out" / "spinning-mirror" / TAG
 PARTS = OUTD / "parts"
 IMG = CAD / "media" / "previews" / TAG
 BOMF = CAD.parent / "bom" / f"bom-{TAG}.csv"

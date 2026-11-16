@@ -13,7 +13,7 @@ The smallest version of the single dial: a deep 120 mm square frame holds two fl
 - **Pose:** `--az` is the compass bearing the line points at (90 = along +X); `--el` is the elevation.
 
 ## Printed pieces (9 in all)
-Frame tub, frame lid, arm-and-tray, turntable, base shell (spool included), azimuth adapter, elevation adapter hub, front disc, back disc (with hub 2). The two discs are two-colour. Print-ready files (each laid in its print orientation, Z up, on the bed) are in `cad/out/sun-dial-small/parts/print_ready/`; the discs come as `disc_*_2colour.step` with two bodies so Bambu Studio loads each as one object with two parts, and you give the strip the black filament.
+Frame tub, frame lid, arm-and-tray, turntable, base shell (spool included), azimuth adapter, elevation adapter hub, front disc, back disc (with hub 2). The two discs are two-colour. Print-ready files (each laid in its print orientation, Z up, on the bed) are in `cad/out/sun-dial/sun-dial-small/parts/print_ready/`; the discs come as `disc_*_2colour.step` with two bodies so Bambu Studio loads each as one object with two parts, and you give the strip the black filament.
 - **Print orientation:** discs and tub with the outer face down; lid with its outer face down; hubs with the flange down; the arm-and-tray flat on the tray (the arm is a tall thin rib, so print it slowly or consider lying it on its side).
 - **Plate:** the face that touches the plate sets the finish of the dial face and the tub front. Use a smooth plate for a glossy finish.
 - **Filament:** white PETG or ASA for the discs (sun near a window), black for the line; PETG-CF for the rest.
@@ -47,4 +47,4 @@ python3 cad/src/sun_dial_small.py --check
 ```
 The STEP files are written Y up, with the base standing on the Y = 0 plane, so they open upright in Fusion; add `--up z` for Z up. The print-ready files are always Z up.
 
-Outputs: `cad/out/sun-dial-small/`, `bom/bom-sun-dial-small.csv`, `cad/media/previews/sun-dial-small/`.
+Outputs: `cad/out/sun-dial/sun-dial-small/`, `bom/bom-sun-dial-small.csv`, `cad/media/previews/sun-dial-small/`.

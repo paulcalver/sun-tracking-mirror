@@ -1,6 +1,6 @@
 # Line of 7 wall mirrors: passive and wedge "out of sync" versions (concept CAD, 2026-11-04)
 
-Status: concept model only. Nothing ordered, printed or tested. Source of truth: `cad/src/line_mirrors.py` (CadQuery). STEP: `cad/out/line-mirrors/line-mirrors-passive.step` and `line-mirrors-wedge.step` (named parts, Y up, Z out of the wall, posed for a Sun 40 deg to one side). Renders: `cad/media/previews/line-mirrors/` (`-front`, `-posed-rays`, `-mechanism`, `-inner`, `-section` for each version). Builds on `wall-mirror-nema11.md`.
+Status: concept model only. Nothing ordered, printed or tested. Source of truth: `cad/src/line_mirrors.py` (CadQuery). STEP: `cad/out/earlier-concepts/line-mirrors/line-mirrors-passive.step` and `line-mirrors-wedge.step` (named parts, Y up, Z out of the wall, posed for a Sun 40 deg to one side). Renders: `cad/media/previews/line-mirrors/` (`-front`, `-posed-rays`, `-mechanism`, `-inner`, `-section` for each version). Builds on `wall-mirror-nema11.md`.
 
 ## What it is
 Seven 50 mm round mirrors in a horizontal line, 70 mm pitch, all tilted together to reflect the Sun to a fixed target, and a way to move the seven spots in and out of a straight line.
@@ -41,7 +41,7 @@ The model draws NEMA 11 screw actuators (body 28.2 x 34 mm + rod). UK stock of t
 - The nut must be stopped from turning (a rail or slot), and a return spring is still needed.
 
 ## Wave version: NEMA 17 belts and a camshaft travelling wave (2026-11-04)
-`python3 cad/src/line_mirrors.py --variant wave` writes `cad/out/line-mirrors/line-mirrors-wave.step` and renders `line-wave-*.png`. Chosen because a continuously moving wave never needs a perfect straight line, so tolerances relax from about 0.05 mm to about 0.3 mm (0.3 mm is about 60 mm of spot at 3 m, hidden by a +/-170 mm wave).
+`python3 cad/src/line_mirrors.py --variant wave` writes `cad/out/earlier-concepts/line-mirrors/line-mirrors-wave.step` and renders `line-wave-*.png`. Chosen because a continuously moving wave never needs a perfect straight line, so tolerances relax from about 0.05 mm to about 0.3 mm (0.3 mm is about 60 mm of spot at 3 m, hidden by a +/-170 mm wave).
 - **Pan (X):** NEMA 17 at the left end, 20T GT2 pulley, idler, short belt loop in the XZ plane; an arm on the pan bar clamps the upper run. Pan bar travel +/-12.7 mm.
 - **Tilt (Y):** NEMA 17 standing on the back plate at the right end, pulley above it, idler on a post, belt loop in the XY plane; a bracket on the tilt frame clamps the left run.
 - **Wave:** a 5 mm camshaft along the row carries seven 7 mm eccentric cams (1 mm throw, 60 deg phase step per mirror). Each cam lifts a slotted tab (the back lip plate for that mirror) so tip height = Y + sin(cam angle + 60 deg x i). A third NEMA 17 on the tilt frame turns the camshaft through a coupler, slowly and continuously; its speed is the wave speed. Rotate the other way and the wave runs back.

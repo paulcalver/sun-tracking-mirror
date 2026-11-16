@@ -38,6 +38,6 @@ Draft CAD, nothing built or tested. `--check` runs the clash checks (8 random po
 - Front panel is removable (three screws through the deck) with holes for the DC jack, USB-C and the jitter dial; the back wall has nine vent slots.
 - Total about 4.9 kg (frame 2.9 kg with the ballast, three units 2.0 kg).
 - Controller: one ESP32 is enough for three open-loop step/dir drivers (steps from the RMT or hardware timers). Each motor gets its own random-walk speed, acceleration limited to about 100 to 150 rad/s2. Use 24 V.
-- Files: `cad/out/spinning-mirror-150-nema17-trio/`, `bom/bom-spinning-mirror-150-nema17-trio.csv`, previews in `cad/media/previews/spinning-mirror-150-nema17-trio/`.
+- Files: `cad/out/spinning-mirror/spinning-mirror-150-nema17-trio/`, `bom/bom-spinning-mirror-150-nema17-trio.csv`, previews in `cad/media/previews/spinning-mirror-150-nema17-trio/`.
 
 Not in the trio yet (the brushless trio has both): the clear acrylic hood and the top bar. The rings are 169 mm across and reach about 2.7 m/s at their edge at 300 rpm, so until a hood is added keep hands and cables clear. A hood for this size would be about 590 x 190 x 290 mm of 5 mm acrylic; say if you want it. If a ring wobbles on its 5 mm shaft, a top pin and bar like the brushless trio is the fix.

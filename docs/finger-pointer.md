@@ -24,7 +24,7 @@ A small tabletop pointer: a flat 120 mm pointing hand on a slim shaft that turns
 - Not checked: tooth meshing (gears are plain cones, tangent along the mesh line), belt tension, wiring, assembly order, printability (support, bridging, bed orientation), strength.
 
 ## Parts
-Laser, 6 mm and 3 mm black acrylic (STEP, DXF in `cad/out/finger-pointer/parts/laser/`): floor plate, top frame, 4 wall panels (3 DXFs: long, long with a 12 mm cable notch, short x2), the hand plate. Engraving artwork: `finger-engrave-front.png` at 203 dpi, 8 px per mm in the plate frame, black = laser frosts the light areas and leaves the ink black.
+Laser, 6 mm and 3 mm black acrylic (STEP, DXF in `cad/out/earlier-concepts/finger-pointer/parts/laser/`): floor plate, top frame, 4 wall panels (3 DXFs: long, long with a 12 mm cable notch, short x2), the hand plate. Engraving artwork: `finger-engrave-front.png` at 203 dpi, 8 px per mm in the plate frame, black = laser frosts the light areas and leaves the ink black.
 
 Printed in PETG-CF on the P1S (13 parts): bearing housing, 2 motor cradles, rod bottom bracket, controller tray, compass post, Hall post, tube collar, tube pulley, rod pulley, head bracket, hub ring. PETG-CF rather than PLA-CF because a sun-facing piece near a window can soften PLA-CF; check the nozzle is hardened.
 

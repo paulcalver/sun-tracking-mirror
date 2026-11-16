@@ -8,7 +8,7 @@ shaft is read by an AS5600 board so we can see the true output angle.
 
 Usage (from the repo root):
     python3 cad/src/test_joint_rig.py
-Writes STL and STEP files to cad/out/archive/test-rig, an assembly (STEP and GLB, named and coloured
+Writes STL and STEP files to cad/out/hinge-mirror/archive/test-rig, an assembly (STEP and GLB, named and coloured
 parts) and a preview PNG to cad/.
 
 Coordinates: shaft axis along Y at the origin, X toward the motor, Z up, top of base plate at Z = 0.
@@ -27,8 +27,8 @@ import numpy as np
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 CAD = Path(__file__).resolve().parent.parent
-OUT = CAD / "out" / "archive"
-STL = CAD / "out" / "archive" / "test-rig"
+OUT = CAD / "out" / "hinge-mirror" / "archive"
+STL = CAD / "out" / "hinge-mirror" / "archive" / "test-rig"
 IMG = CAD / "media" / "test-rig"
 
 # ---- parameters ----

@@ -1,6 +1,6 @@
 # Sun pointer: the bead (concept CAD, 2026-11-12)
 
-Status: concept model only, nothing built or tested. Source: `cad/src/sun_pointer_bead.py` (CadQuery). STEP: `cad/out/sun-pointer/sun-pointer-bead.step` (named parts, posed for 21 Dec 09:30 at 51.5 N, south wall, `--step --day --hour --lat`). Renders: `cad/media/previews/sun-pointer/` (`--render`). Design idea and the interactive view: `docs/sun-ring-concept.html` (Support: pointer).
+Status: concept model only, nothing built or tested. Source: `cad/src/sun_pointer_bead.py` (CadQuery). STEP: `cad/out/earlier-concepts/sun-pointer/sun-pointer-bead.step` (named parts, posed for 21 Dec 09:30 at 51.5 N, south wall, `--step --day --hour --lat`). Renders: `cad/media/previews/sun-pointer/` (`--render`). Design idea and the interactive view: `docs/sun-ring-concept.html` (Support: pointer).
 
 ## What it is
 A horizontal arm from the wall ends in a ball socket; the bead hangs on the ball. Inside the bead a polar shaft turns once a day (spin); on its front end a fork carries a hinge, and a 390 mm carbon rod with a side-glow fibre tilts on it by the Sun's declination (+/-23.44 deg). The rod tip (a diffuser bead) is the Sun. The hinge point is the viewer.

@@ -31,7 +31,7 @@ cap and on a 15.8 mm circle in the back face). The SimpleFOC Mini is 26.1 x 21.0
 
 Usage (from the repo root):
   python3 cad/src/sun_dial_small.py [--az DEG] [--el DEG] [--up y|z] [--discs printed|laser] [--check]
-Writes cad/out/sun-dial-small/ (assembly STEP, parts/<laser|print|purchase>/ with STEP and DXF), bom/bom-sun-dial-small.csv and
+Writes cad/out/sun-dial/sun-dial-small/ (assembly STEP, parts/<laser|print|purchase>/ with STEP and DXF), bom/bom-sun-dial-small.csv and
 previews in cad/media/previews/sun-dial-small/.
 """
 import argparse
@@ -43,7 +43,7 @@ import cadquery as cq
 
 HERE = Path(__file__).resolve().parent
 CAD = HERE.parent
-OUTD = CAD / "out" / "sun-dial-small"
+OUTD = CAD / "out" / "sun-dial" / "sun-dial-small"
 PARTS = OUTD / "parts"
 IMG = CAD / "media" / "previews" / "sun-dial-small"
 BOMF = CAD.parent / "bom" / "bom-sun-dial-small.csv"
@@ -72,7 +72,7 @@ BASE_R, BASE_WALL, BASE_FLOOR = 70.0, 3.0, 6.0
 AZ_FL_T, AZ_FL_R = 3.0, 25.0                   # az adapter flange between the rotor cap and the turntable
 AZ_CAP_Z = BASE_FLOOR + M_TOTAL                # az rotor cap front face, 32.15
 TT_Z0 = AZ_CAP_Z + AZ_FL_T                     # turntable bottom, 35.15
-TT_T, TT_R = 5.0, BASE_R - 1.0                    # printed turntable, 5 mm so it can take inserts
+TT_T, TT_R = 5.0, BASE_R                  # printed turntable, 5 mm so it can take inserts, same diameter as the base
 BASE_TOP = TT_Z0 - 1.15                        # wall top, 1.15 mm under the turntable (the shadow gap)
 SPOOL_RI, SPOOL_RO, SPOOL_Z1 = 19.0, 21.0, 30.0
 CABLE_X = -30.0                                # cable hole in the turntable and frame floor, 30 mm from the axis

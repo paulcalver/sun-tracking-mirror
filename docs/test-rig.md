@@ -1,8 +1,8 @@
-> **Status: not built, not part of the current design (2026-11-03).** Files moved to `cad/out/archive/test-rig` and `cad/media/test-rig`.
+> **Status: not built, not part of the current design (2026-11-03).** Files moved to `cad/out/hinge-mirror/archive/test-rig` and `cad/media/test-rig`.
 
 # Single-joint test rig (belt reduction variant), design v0.1
 
-Purpose: before building the arm, measure whether a printed belt reduction is smooth, quiet and stiff enough for a pitch joint, and learn what holding the load costs in heat. CAD: `cad/src/test_joint_rig.py` (CadQuery, run from the repo root). Outputs: `cad/out/archive/test-rig/rig_*.stl` and `.step` (single parts), `cad/out/assembly/test_joint_rig_assembly.step` and `.glb` (full assembly, 13 named parts, bought parts in grey and the belt in black), preview in `cad/images/test-rig-preview.png`, labelled views in `cad/images/test-rig-labelled.png` (from `rig_labelled_views.py`). The belt is drawn as a plain band, without teeth.
+Purpose: before building the arm, measure whether a printed belt reduction is smooth, quiet and stiff enough for a pitch joint, and learn what holding the load costs in heat. CAD: `cad/src/test_joint_rig.py` (CadQuery, run from the repo root). Outputs: `cad/out/hinge-mirror/archive/test-rig/rig_*.stl` and `.step` (single parts), `cad/out/hinge-mirror/assembly/test_joint_rig_assembly.step` and `.glb` (full assembly, 13 named parts, bought parts in grey and the belt in black), preview in `cad/images/test-rig-preview.png`, labelled views in `cad/images/test-rig-labelled.png` (from `rig_labelled_views.py`). The belt is drawn as a plain band, without teeth.
 
 Status: drafted and checked for part overlaps in software only. Nothing has been printed or test-fitted. Check every bought part against its drawing before printing.
 

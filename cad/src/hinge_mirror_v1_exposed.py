@@ -16,7 +16,7 @@ Teeth are NOT modelled (pulleys and sprockets are root cylinders). Bought parts 
 
 Usage (from the repo root):
   python3 cad/src/hinge_mirror_v1_exposed.py [--tilt DEG] [--az DEG] [--check]
-Writes cad/out/assembly/hinge-mirror-v1-exposed-assembly.step, .glb and hinge-mirror-v1-exposed-preview.png (suffix added if posed).
+Writes cad/out/hinge-mirror/assembly/hinge-mirror-v1-exposed-assembly.step, .glb and hinge-mirror-v1-exposed-preview.png (suffix added if posed).
 """
 import argparse
 import math
@@ -25,8 +25,8 @@ from pathlib import Path
 import cadquery as cq
 
 CAD = Path(__file__).resolve().parent.parent
-ASM = CAD / "out" / "archive"
-PARTS = CAD / "out" / "archive" / "hinge-mirror-v1-parts"
+ASM = CAD / "out" / "hinge-mirror" / "archive"
+PARTS = CAD / "out" / "hinge-mirror" / "archive" / "hinge-mirror-v1-parts"
 IMG = CAD / "media" / "earlier-concepts"
 
 # ------------------------------------------------------------------ parameters (mm)

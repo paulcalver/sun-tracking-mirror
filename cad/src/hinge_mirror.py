@@ -24,8 +24,8 @@ Teeth: GT2 pulleys are toothed; the lead screw has no thread; belt is a plain lo
 
 Usage (from the repo root):
   python3 cad/src/hinge_mirror.py [--tilt DEG] [--az DEG] [--up y|z] [--check]
-Writes cad/out/assembly/hinge-mirror-assembly.step, one STEP per part in
-cad/out/parts/<laser|print|purchase>/, and previews in cad/media/previews/ (suffix if posed).
+Writes cad/out/hinge-mirror/assembly/hinge-mirror-assembly.step, one STEP per part in
+cad/out/hinge-mirror/parts/<laser|print|purchase>/, and previews in cad/media/previews/ (suffix if posed).
 """
 import argparse
 import math
@@ -34,8 +34,8 @@ from pathlib import Path
 import cadquery as cq
 
 CAD = Path(__file__).resolve().parent.parent
-ASM = CAD / "out" / "assembly"
-PARTS = CAD / "out" / "parts"
+ASM = CAD / "out" / "hinge-mirror" / "assembly"
+PARTS = CAD / "out" / "hinge-mirror" / "parts"
 MEDIA = CAD / "media"
 IMG = MEDIA / "previews"
 
@@ -436,7 +436,7 @@ def process_of(nm):
 
 
 def export_parts(yup=False):
-    """One STEP per part in out/parts/<laser|print|purchase>/, matching the BOM. Purchase files are reference shapes for
+    """One STEP per part in out/hinge-mirror/parts/<laser|print|purchase>/, matching the BOM. Purchase files are reference shapes for
     fit checks only. Parts keep their assembly-frame coordinates (mirror_tilting parts are in the hinge axis frame)."""
     for sub in ("laser", "print", "purchase"):
         d = PARTS / sub
@@ -455,7 +455,7 @@ def export_parts(yup=False):
 
 
 def export_dxf():
-    """Flat outlines of the laser parts in out/parts/laser/*.dxf (mm): <name>.dxf is the cut, <name>_engrave.dxf the shallow
+    """Flat outlines of the laser parts in out/hinge-mirror/parts/laser/*.dxf (mm): <name>.dxf is the cut, <name>_engrave.dxf the shallow
     locating pockets (ENG mm deep). Plates with pockets in the underside (top frame, drum top plate) have their engrave file
     mirrored in X: engrave with the sheet turned over about the Y axis, then turn it back and cut."""
     d = PARTS / "laser"

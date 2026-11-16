@@ -5,7 +5,7 @@
 Draft CAD, nothing cut, printed or tested. Model: `cad/src/spinning_mirror_row.py` (reuses the single unit from `spinning_mirror.py`; `--check` runs 8 random poses of all units against everything). Single-unit notes: `spinning-mirror-gimbal.md`.
 
 ## Current focus: the trio (`--units 3`)
-Three units with the real iPower GM2804 + AS5048A encoder motor and an 80 mm mirror (ring 88 / 98 mm), same top support as below on a 420 x 140 mm plywood base. Unit pitch 115 mm (17 mm clear between rings), centres X = -115, 0, +115, carbon tube 380 mm with rod posts at X +/-189, no blades. Tube centre 184 mm above the table, ring centre 116 mm. Frame about 2.1 kg (1.36 kg steel ballast), units about 0.37 kg. No clashes in 8 random poses. Files in `cad/out/spinning-mirror-trio/`, `bom/bom-spinning-mirror-trio.csv`, previews in `cad/media/previews/spinning-mirror-trio/`.
+Three units with the real iPower GM2804 + AS5048A encoder motor and an 80 mm mirror (ring 88 / 98 mm), same top support as below on a 420 x 140 mm plywood base. Unit pitch 115 mm (17 mm clear between rings), centres X = -115, 0, +115, carbon tube 380 mm with rod posts at X +/-189, no blades. Tube centre 184 mm above the table, ring centre 116 mm. Frame about 2.1 kg (1.36 kg steel ballast), units about 0.37 kg. No clashes in 8 random poses. Files in `cad/out/spinning-mirror/archive/spinning-mirror-trio/`, `bom/bom-spinning-mirror-trio.csv`, previews in `cad/media/previews/spinning-mirror-trio/`.
 Run: `python3 cad/src/spinning_mirror_row.py --units 3`. The 7-unit row and the single test rig come from the same script (`--units 7`, `--units 1`) and are regenerated with the new unit; the 7-unit row (pitch 115, about 870 mm base) has the blades.
 Motor mounting in the base: four M2 x 30 screws come up from under the bottom plywood layer through the layers and the printed boss into the stator bottom holes; the 11 mm cable hole under each motor lines up with the 6.5 mm hollow shaft.
 
@@ -24,7 +24,7 @@ Motor mounting in the base: four M2 x 30 screws come up from under the bottom pl
 No clashes in the static pose and over 8 random poses of all units. Mass about 3.4 kg frame (2.2 kg steel) and 1.5 kg for the 7 units.
 
 ## Cutting
-Bed 1219 x 914, plywood: the base layers (6 mm) and blades (3 mm) fit on one sheet each. DXFs in `cad/out/spinning-mirror-row/parts/laser/` (`laser_blade_3mm_x2.dxf` is one profile, cut twice). Needs both 6 mm and 3 mm ply.
+Bed 1219 x 914, plywood: the base layers (6 mm) and blades (3 mm) fit on one sheet each. DXFs in `cad/out/spinning-mirror/archive/spinning-mirror-row/parts/laser/` (`laser_blade_3mm_x2.dxf` is one profile, cut twice). Needs both 6 mm and 3 mm ply.
 
 ## Open
 - Motor size and bolt circles are still assumed.
@@ -35,7 +35,7 @@ Bed 1219 x 914, plywood: the base layers (6 mm) and blades (3 mm) fit on one she
 - Vibration through the shared base and tube between units, worth watching on the first run.
 
 ## Single mirror test rig
-`python3 cad/src/spinning_mirror_row.py --units 1` writes the same design for one unit to `cad/out/spinning-mirror-test/` (assembly STEP, parts split laser/print/purchase with DXF), `bom/bom-spinning-mirror-test.csv` and `cad/media/previews/spinning-mirror-test/`.
+`python3 cad/src/spinning_mirror_row.py --units 1` writes the same design for one unit to `cad/out/spinning-mirror/archive/spinning-mirror-test/` (assembly STEP, parts split laser/print/purchase with DXF), `bom/bom-spinning-mirror-test.csv` and `cad/media/previews/spinning-mirror-test/`.
 - Same unit, pin, top block, tube clamp and 8 mm rod posts as the row, so it tests the top bearing alignment, random tumbling, balance and the post mounting before building seven.
 - Base 220 x 140 mm (three 6 mm plywood layers), two steel bars 38 x 6 x 180 (about 0.64 kg ballast), posts at X +/-64, carbon tube 130 mm long, tube centre 158 mm above the table. No blades.
 - Mass: frame about 1.1 kg, unit about 0.21 kg. Checked for clashes at 8 random poses, none.
@@ -72,4 +72,4 @@ A safety cover over everything, standing on the base. It supersedes the deck-lev
 - **Interlock:** a glass reed switch (3 x 16 mm) on the outside of the plywood back wall (X +103, 30 mm up, lead hole 4 mm) and a 6 x 3 mm magnet glued to the inside of the hood back wall, 2 mm apart when the hood is seated. The controller should stop the motors when the switch opens. Magnet size and switch sensitivity need testing.
 - **Laser cutter:** assumed CO2 (to be checked: a diode laser cannot cut clear acrylic). Polycarbonate cannot be laser cut.
 - **Things to watch:** acrylic faces add faint ghost reflections to the beams, a closed hood warms up in the sun (the vents help), and a closed hood can amplify motor hum (foam strip under the walls).
-- Outputs for the trio: `cad/out/spinning-mirror-trio/` (DXFs for the hood panels and plywood parts, STEP with the hood at 25% opacity), previews `row.png` (hood on) and `row-open.png` (hood off), `row-pod.png`.
+- Outputs for the trio: `cad/out/spinning-mirror/archive/spinning-mirror-trio/` (DXFs for the hood panels and plywood parts, STEP with the hood at 25% opacity), previews `row.png` (hood on) and `row-open.png` (hood off), `row-pod.png`.

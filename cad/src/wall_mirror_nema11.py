@@ -15,7 +15,7 @@ Mechanism:
 Usage (from the repo root):
   python3 cad/src/wall_mirror_nema11.py [--pitch DEG --yaw DEG | --sun AZ EL] [--wall-bearing DEG] [--target X Y Z]
                                         [--check] [--day MM-DD --lat DEG --lon DEG] [--no-render]
-Writes cad/out/wall-mirror/wall-mirror-nema11.step and renders to cad/media/previews/wall-mirror/.
+Writes cad/out/earlier-concepts/wall-mirror/wall-mirror-nema11.step and renders to cad/media/previews/wall-mirror/.
 """
 import argparse
 import math
@@ -24,7 +24,7 @@ from pathlib import Path
 import cadquery as cq
 
 CAD = Path(__file__).resolve().parent.parent
-OUT = CAD / "out" / "wall-mirror"
+OUT = CAD / "out" / "earlier-concepts" / "wall-mirror"
 IMG = CAD / "media" / "previews" / "wall-mirror"
 
 # ------------------------------------------------------------------ parameters (mm)

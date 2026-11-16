@@ -14,7 +14,7 @@ Hierarchy: base_fixed (pedestal, lid, ballast, motor), ring_spin (shaft, hub, ri
 
 Usage (from the repo root):
   python3 cad/src/spinning_mirror_150_nema17.py [--az DEG] [--tilt DEG] [--up y|z] [--check]
-Writes cad/out/spinning-mirror-150-nema17/ (assembly STEP, parts/<print|purchase>/), bom/bom-spinning-mirror-150-nema17.csv and previews in
+Writes cad/out/spinning-mirror/spinning-mirror-150-nema17/ (assembly STEP, parts/<print|purchase>/), bom/bom-spinning-mirror-150-nema17.csv and previews in
 cad/media/previews/spinning-mirror-150-nema17/.
 """
 import argparse
@@ -34,7 +34,7 @@ PRINT_C, STEEL, BRASS, MIRROR, MOTOR_C, RUBBER = sm.PRINT_C, sm.STEEL, sm.BRASS,
 
 CAD = HERE.parent
 TAG = "spinning-mirror-150-nema17"
-OUTD = CAD / "out" / TAG
+OUTD = CAD / "out" / "spinning-mirror" / TAG
 PARTS = OUTD / "parts"
 IMG = CAD / "media" / "previews" / TAG
 BOMF = CAD.parent / "bom" / f"bom-{TAG}.csv"

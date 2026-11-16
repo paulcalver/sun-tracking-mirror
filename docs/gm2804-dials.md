@@ -26,4 +26,4 @@ A flat wall piece with two 150 mm white discs. The left disc shows the Sun's ele
 python3 cad/src/gm2804_dials.py            # STEP, parts, DXF, BOM, previews (add --el 30 --az 135 to pose)
 python3 cad/src/gm2804_dials.py --check
 ```
-Outputs: `cad/out/gm2804-dials/`, `bom/bom-gm2804-dials.csv`, `cad/media/previews/gm2804-dials/`.
+Outputs: `cad/out/sun-dial/archive/gm2804-dials/`, `bom/bom-gm2804-dials.csv`, `cad/media/previews/gm2804-dials/`.

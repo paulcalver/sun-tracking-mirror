@@ -1,6 +1,6 @@
 # Wave version, print-in-place redesign (concept CAD, 2026-11-12)
 
-Status: concept model. Nothing printed, built or tested; the printed-joint clearances are unproven. Source: `cad/src/line_wave_pip.py` (CadQuery, reuses helpers from `line_mirrors.py`). STEP: `cad/out/line-mirrors/line-mirrors-wave-pip.step` (`--step`). Renders: `cad/media/previews/line-mirrors/pip-*.png` (`--render`). Checks: `--check`, `--sun`. The earlier design is unchanged in [line-mirrors-wave-full.md](line-mirrors-wave-full.md).
+Status: concept model. Nothing printed, built or tested; the printed-joint clearances are unproven. Source: `cad/src/line_wave_pip.py` (CadQuery, reuses helpers from `line_mirrors.py`). STEP: `cad/out/earlier-concepts/line-mirrors/line-mirrors-wave-pip.step` (`--step`). Renders: `cad/media/previews/line-mirrors/pip-*.png` (`--render`). Checks: `--check`, `--sun`. The earlier design is unchanged in [line-mirrors-wave-full.md](line-mirrors-wave-full.md).
 
 Same brief: 7 x 50 mm mirrors at 70 mm pitch, +/-25 deg cone, pan + tilt + travelling wave, 3 steppers. Printer assumed: Bambu P1S, 0.4 mm nozzle, AMS (support-interface material).
 
@@ -48,7 +48,7 @@ Strip: 730 x 96 x 52.5 mm (was 824 x 96 x 62). Glass front 74 mm from the wall (
 - **Tilt motor must stay powered** (holding current). Load is small, about 2 N cm.
 
 ## Printing notes (to test, not proven)
-- Test files (`--print`): `cad/out/line-mirrors/print/pip-cartridge-test.step` and `.stl` (pedestal, pan frame and carrier as three bodies in one file, crank side down, 34 x 65.5 x 40.7 mm) and `pip-mirror-disc.step` and `.stl` (glass face down). Import the cartridge as one object; do not let the slicer split or re-arrange the bodies.
+- Test files (`--print`): `cad/out/earlier-concepts/line-mirrors/print/pip-cartridge-test.step` and `.stl` (pedestal, pan frame and carrier as three bodies in one file, crank side down, 34 x 65.5 x 40.7 mm) and `pip-mirror-disc.step` and `.stl` (glass face down). Import the cartridge as one object; do not let the slicer split or re-arrange the bodies.
 - The tail pin presses into a 3 mm hole in a boss on the carrier, 8 mm deep. Ream or drill it to size after printing.
 - Print the cartridge upside down (crank on the bed), PETG or ASA, 0.2 mm layers, with support-interface material from the AMS under the pedestal column, the carrier and the spigot.
 - Print one cartridge first. If the joints fuse, raise `CLR` (0.25) in the script; if they rattle, the diamond bores should still seat them.

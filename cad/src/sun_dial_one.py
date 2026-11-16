@@ -25,7 +25,7 @@ cap and on a 15.8 mm circle in the back face). The SimpleFOC Mini is 26.1 x 21.0
 
 Usage (from the repo root):
   python3 cad/src/sun_dial_one.py [--az DEG] [--el DEG] [--check]
-Writes cad/out/sun-dial-one/ (assembly STEP, parts/<laser|print|purchase>/ with STEP and DXF), bom/bom-sun-dial-one.csv and
+Writes cad/out/sun-dial/archive/sun-dial-one/ (assembly STEP, parts/<laser|print|purchase>/ with STEP and DXF), bom/bom-sun-dial-one.csv and
 previews in cad/media/previews/sun-dial-one/.
 """
 import argparse
@@ -37,7 +37,7 @@ import cadquery as cq
 
 HERE = Path(__file__).resolve().parent
 CAD = HERE.parent
-OUTD = CAD / "out" / "sun-dial-one"
+OUTD = CAD / "out" / "sun-dial" / "archive" / "sun-dial-one"
 PARTS = OUTD / "parts"
 IMG = CAD / "media" / "previews" / "sun-dial-one"
 BOMF = CAD.parent / "bom" / "bom-sun-dial-one.csv"

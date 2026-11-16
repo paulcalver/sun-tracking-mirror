@@ -3,7 +3,8 @@
 azimuth GM2804 direct drive, no slip ring (CadQuery).
 Draft, nothing built or tested.
 
-World frame (mm): origin on the table at the centre of the round base, Z up. X is east and Y is north when the dial points at
+World frame (mm): origin on the table at the centre of the round base, Z up (the STEP files are written Y up by default, for Fusion;
+use --up z to keep Z up). X is east and Y is north when the dial points at
 az = 90. The frame turns about Z (azimuth). At yaw 0 the frame faces run along X: the disc line points along +X when the
 elevation is 0, the frame front looks towards -Y. Pose: yaw = 90 - az, so the line points at compass bearing az.
 
@@ -13,7 +14,10 @@ Groups:
              stator, its arm, the tray and frame boards, and the el group below
   el         turns about the disc axis (the elevation): rotor, adapter, two discs, strips, two posts, hub, pin
 
-Design: a 120 mm square, 44 mm deep frame (laser acrylic) with a 102 mm round window in each face holds two flush 100 mm discs.
+Design: a 120 mm square, 44 mm deep frame with a 102 mm round window in each face holds two flush 100 mm discs. The frame is
+printed in three pieces: a tub (front face and four sides in one), a back lid with the second window held by four corner
+screws, and an arm-and-tray piece carrying the motor bracket and the frame boards. The discs are printed in white with the
+black line as a 0.6 mm inlay printed in the first layers (outer face down), or laser cut with --discs laser.
 One GM2804 sits between the discs. Disc 1 rides on its rotor through a printed adapter, disc 2 is carried round the motor on two
 3 mm steel posts and centred by a 6 mm pin in the motor bore. A fixed printed arm rises from a tray on the frame floor to a bracket
 on the back of the motor. The posts stay on the top arc, so with the elevation within +/-90 deg they never reach the arm.
@@ -26,7 +30,7 @@ Motor outline is from the supplied STEP (35 mm across, 26.15 mm tall, bore 6.5 m
 cap and on a 15.8 mm circle in the back face). The SimpleFOC Mini is 26.1 x 21.0 x 7.6 mm from its STEP.
 
 Usage (from the repo root):
-  python3 cad/src/sun_dial_small.py [--az DEG] [--el DEG] [--check]
+  python3 cad/src/sun_dial_small.py [--az DEG] [--el DEG] [--up y|z] [--discs printed|laser] [--check]
 Writes cad/out/sun-dial-small/ (assembly STEP, parts/<laser|print|purchase>/ with STEP and DXF), bom/bom-sun-dial-small.csv and
 previews in cad/media/previews/sun-dial-small/.
 """
@@ -46,7 +50,7 @@ BOMF = CAD.parent / "bom" / "bom-sun-dial-small.csv"
 
 # ------------------------------------------------------------------ parameters (mm)
 DISC_D, DISC_T, SLOT_W = 100.0, 3.0, 3.0
-S, DF, FT = 120.0, 44.0, 3.0                   # frame square, depth, 3 mm acrylic
+S, DF, FT = 120.0, 44.0, 3.0                   # frame square, depth, 3 mm walls
 WIN_R = DISC_D / 2 + 1.0                       # 1 mm shadow gap round each disc
 INT = DF / 2 - FT                              # interior half depth, 19
 
@@ -68,10 +72,14 @@ BASE_R, BASE_WALL, BASE_FLOOR = 70.0, 3.0, 6.0
 AZ_FL_T, AZ_FL_R = 3.0, 25.0                   # az adapter flange between the rotor cap and the turntable
 AZ_CAP_Z = BASE_FLOOR + M_TOTAL                # az rotor cap front face, 32.15
 TT_Z0 = AZ_CAP_Z + AZ_FL_T                     # turntable bottom, 35.15
-TT_T, TT_R = 3.0, BASE_R - 1.0
+TT_T, TT_R = 5.0, BASE_R - 1.0                    # printed turntable, 5 mm so it can take inserts
 BASE_TOP = TT_Z0 - 1.15                        # wall top, 1.15 mm under the turntable (the shadow gap)
 SPOOL_RI, SPOOL_RO, SPOOL_Z1 = 19.0, 21.0, 30.0
-CABLE_R = 30.0                                 # cable hole in the turntable at 30 mm from the axis
+CABLE_X = -30.0                                # cable hole in the turntable and frame floor, 30 mm from the axis
+PD = 0.6                                       # printed discs: depth of the black line inlay on the outer face
+SCREW_PTS = ((38.0, 14.0), (-38.0, 14.0), (38.0, -14.0), (-38.0, -14.0))   # frame-local (x, z): M3 through tray and tub floor into the turntable
+CORNER = S / 2 - FT - 3.5                      # lid screw and corner boss positions
+PRINT_DISCS = True
 ZC = TT_Z0 + TT_T + S / 2                      # frame centre height above the table
 
 LASER_C, PRINT_C, BUY_C, DISC_C, STRIP_C, KEEP_C = "#f2f2ef", "#3a3a3a", "#6b6b68", "#ffffff", "#111111", "#e67e22"
@@ -89,6 +97,11 @@ def box(x0, x1, y0, y1, z0, z1):
 
 def cylz(r, z0, z1, x=0.0, y=0.0):
     return cq.Workplane("XY").workplane(offset=z0).center(x, y).circle(r).extrude(z1 - z0)
+
+
+def cyly(r, y0, y1, x=0.0, z=0.0):
+    """Cylinder along +Y from y0 to y1 at (x, z)."""
+    return cq.Workplane("XZ").workplane(offset=-y1).center(x, z).circle(r).extrude(y1 - y0)
 
 
 def ring_pts(cx, cy, r, angles):
@@ -136,25 +149,67 @@ def motor_L(cx, cy, zcap):
 
 
 # ------------------------------------------------------------------ frame and the elevation stack (frame-local, then W())
-def frame_face(zs):
-    z0, z1 = (INT, INT + FT) if zs > 0 else (-INT - FT, -INT)
-    return box(-S / 2, S / 2, -S / 2, S / 2, z0, z1).cut(cylz(WIN_R, z0 - 1, z1 + 1))
+def hub2_solid():
+    z0 = -INT
+    h2 = cq.Workplane("XY").workplane(offset=z0).circle(10).extrude(HUB2_T).union(box(-24, 24, 8, 23, z0, z0 + HUB2_T))
+    for x, y in ring_pts(0, 0, POST_R_POS, (45, 135)):
+        h2 = h2.cut(cylz(POST_D / 2 + 0.1, z0 - 1, z0 + HUB2_T + 1, x, y))
+    return h2.cut(cylz(PIN_R + 0.1, z0 - 1, z0 + HUB2_T + 1))
+
+
+def disc_parts(sgn):
+    """Disc and black line (frame-local). sgn +1 front, -1 back. Printed: line is a PD-deep inlay on the outer face; the back disc
+    carries hub 2 as one piece. Laser: a through slot and a full-thickness strip."""
+    z0 = INT if sgn > 0 else -INT - DISC_T
+    z1 = z0 + DISC_T
+    d = cylz(DISC_D / 2, z0, z1)
+    if PRINT_DISCS:
+        oz0, oz1 = (z1 - PD, z1) if sgn > 0 else (z0, z0 + PD)
+        d = d.cut(box(0, DISC_D / 2 + 1, -SLOT_W / 2, SLOT_W / 2, oz0 - (0 if sgn > 0 else 1), oz1 + (1 if sgn > 0 else 0)))
+        strip = box(0, DISC_D / 2, -SLOT_W / 2, SLOT_W / 2, oz0, oz1)
+        if sgn < 0:
+            d = d.union(hub2_solid())
+    else:
+        d = d.cut(box(0, DISC_D / 2 + 1, -SLOT_W / 2, SLOT_W / 2, z0 - 1, z1 + 1))
+        strip = box(0, DISC_D / 2, -SLOT_W / 2, SLOT_W / 2, z0, z1)
+    return d, strip
+
+
+def frame_tub():
+    outer = box(-S / 2, S / 2, -S / 2, S / 2, -INT, INT + FT)
+    cav = box(-S / 2 + FT, S / 2 - FT, -S / 2 + FT, S / 2 - FT, -INT - 1, INT)
+    tub = outer.cut(cav).cut(cylz(WIN_R, INT - 1, INT + FT + 1))
+    for sx in (1, -1):
+        for sy in (1, -1):
+            cx, cy = sx * CORNER, sy * CORNER
+            tub = tub.union(box(cx - 3.5, cx + 3.5, cy - 3.5, cy + 3.5, -INT, -INT + 14))
+            tub = tub.cut(cylz(2.1, -INT - 1, -INT + 8, cx, cy))                  # M3 heat-set insert
+    for x, z in SCREW_PTS:
+        tub = tub.cut(cyly(1.7, -S / 2 - 1, -S / 2 + FT + 1, x, z))
+    return tub.cut(cyly(5.0, -S / 2 - 1, -S / 2 + FT + 1, CABLE_X, 0))
+
+
+def frame_lid():
+    lid = box(-S / 2, S / 2, -S / 2, S / 2, -INT - FT, -INT).cut(cylz(WIN_R, -INT - FT - 1, -INT + 1))
+    for sx in (1, -1):
+        for sy in (1, -1):
+            lid = lid.cut(cylz(1.7, -INT - FT - 1, -INT + 1, sx * CORNER, sy * CORNER))
+    return lid
 
 
 def build():
     PARTS_L.clear()
-    # ---- laser acrylic frame and discs
-    add("frame_face_front_3mm", W(frame_face(+1)), "#2b2b2b", "yaw")
-    add("frame_face_back_3mm", W(frame_face(-1)), "#2b2b2b", "yaw")
-    add("frame_side_top_3mm", W(box(-S / 2, S / 2, S / 2 - FT, S / 2, -INT, INT)), "#2b2b2b", "yaw")
-    add("frame_side_bottom_3mm", W(box(-S / 2, S / 2, -S / 2, -S / 2 + FT, -INT, INT)), "#2b2b2b", "yaw")
-    add("frame_side_left_3mm", W(box(-S / 2, -S / 2 + FT, -S / 2 + FT, S / 2 - FT, -INT, INT)), "#2b2b2b", "yaw")
-    add("frame_side_right_3mm", W(box(S / 2 - FT, S / 2, -S / 2 + FT, S / 2 - FT, -INT, INT)), "#2b2b2b", "yaw")
+    # ---- printed frame (three pieces: tub, lid, arm and tray) and the discs
+    add("frame_tub", W(frame_tub()), "#2b2b2b", "yaw")
+    add("frame_lid", W(frame_lid()), "#2b2b2b", "yaw")
     for sgn, nm in ((1, "front"), (-1, "back")):
-        z0 = INT if sgn > 0 else -INT - DISC_T
-        d = cylz(DISC_D / 2, z0, z0 + DISC_T).cut(box(0, DISC_D / 2 + 1, -SLOT_W / 2, SLOT_W / 2, z0 - 1, z0 + DISC_T + 1))
-        add(f"disc_3mm_{nm}", W(d), DISC_C, "el")
-        add(f"strip_black_3mm_{nm}", W(box(0, DISC_D / 2, -SLOT_W / 2, SLOT_W / 2, z0, z0 + DISC_T)), STRIP_C, "el")
+        d, strip = disc_parts(sgn)
+        if PRINT_DISCS:
+            add(f"disc_{nm}_printed", W(d), DISC_C, "el")
+            add(f"strip_{nm}_printed", W(strip), STRIP_C, "el")
+        else:
+            add(f"disc_3mm_{nm}", W(d), DISC_C, "el")
+            add(f"strip_black_3mm_{nm}", W(strip), STRIP_C, "el")
 
     # ---- elevation GM2804, adapter, posts, hub, pin, arm
     st, ro = motor_L(0, 0, Z_CAP)
@@ -167,26 +222,24 @@ def build():
     for x, y in post_pts:
         ad = ad.cut(cylz(POST_D / 2 + 0.1, Z_CAP - 1, Z_CAP + FL_T + 1, x, y))
     add("adapter_hub_el", W(ad), ADAPT_C, "el")
-    z_hub2 = -INT
-    h2 = cq.Workplane("XY").workplane(offset=z_hub2).circle(10).extrude(HUB2_T).union(box(-24, 24, 8, 23, z_hub2, z_hub2 + HUB2_T))
-    for x, y in post_pts:
-        h2 = h2.cut(cylz(POST_D / 2 + 0.1, z_hub2 - 1, z_hub2 + HUB2_T + 1, x, y))
-    h2 = h2.cut(cylz(PIN_R + 0.1, z_hub2 - 1, z_hub2 + HUB2_T + 1))
-    add("hub2_el", W(h2), ADAPT_C, "el")
+    if not PRINT_DISCS:
+        add("hub2_el", W(hub2_solid()), ADAPT_C, "el")
     for k, (x, y) in enumerate(post_pts):
         add(f"post_3mm_{k + 1}", W(cylz(POST_D / 2, -INT, Z_CAP + FL_T, x, y)), BUY_C, "el")
     add("pin_6mm", W(cylz(PIN_R, -INT, 1.0)), BUY_C, "el")
     z_bk0 = Z_CAP - M_TOTAL - BR_T
-    arm = box(-BR_HALF, BR_HALF, -BR_HALF, BR_HALF, z_bk0, z_bk0 + BR_T).union(box(-4, 4, -(S / 2 - FT - 2.0), -BR_HALF + 0.5, z_bk0, z_bk0 + BR_T))
+    y_floor = -(S / 2 - FT)
+    arm = box(-BR_HALF, BR_HALF, -BR_HALF, BR_HALF, z_bk0, z_bk0 + BR_T).union(box(-4, 4, y_floor + 2.0, -BR_HALF + 0.5, z_bk0, z_bk0 + BR_T))
     arm = arm.cut(cylz(3.6, z_bk0 - 1, z_bk0 + BR_T + 1))
     for x, y in ring_pts(0, 0, BASE_PCD_R, BASE_ANGLES):
         arm = arm.cut(cylz(1.3, z_bk0 - 1, z_bk0 + BR_T + 1, x, y))
-    add("motor_arm", W(arm), PRINT_C, "yaw")
-    y_floor = -(S / 2 - FT)
-    tray = box(-45, 45, y_floor, y_floor + 2.0, -18, 18)
-    add("frame_tray", W(tray), PRINT_C, "yaw")
-    add("xiao_rp2040_keepout", W(box(-38.5, -17.5, y_floor + 2.0, y_floor + 2.0 + 7.0, -2, 15.8)), KEEP_C, "yaw")
-    add("simplefoc_mini_el_keepout", W(box(9, 35, y_floor + 2.0, y_floor + 2.0 + 7.6, -3.5, 17.5)), KEEP_C, "yaw")
+    tray = box(-45, 45, y_floor, y_floor + 2.0, -18, 18).union(arm)
+    for x, z in SCREW_PTS:
+        tray = tray.cut(cyly(1.7, y_floor - 1, y_floor + 3, x, z))
+    tray = tray.cut(cyly(5.0, y_floor - 1, y_floor + 3, CABLE_X, 0))
+    add("arm_tray", W(tray), PRINT_C, "yaw")
+    add("xiao_rp2040_keepout", W(box(-21, 0, y_floor + 2.0, y_floor + 2.0 + 7.0, -2, 15.8)), KEEP_C, "yaw")
+    add("simplefoc_mini_el_keepout", W(box(8, 34.1, y_floor + 2.0, y_floor + 2.0 + 7.6, -3.5, 17.5)), KEEP_C, "yaw")
 
     # ---- azimuth: GM2804 upright on the base axis, rotor carries the turntable through an adapter
     sta, rot = motor_L(0, 0, AZ_CAP_Z)
@@ -200,16 +253,17 @@ def build():
     add("az_adapter", ada, ADAPT_C, "yaw")
     tt = cylz(TT_R, TT_Z0, TT_Z0 + TT_T)
     for x, y in ring_pts(0, 0, 19.0, (45, 135, 225, 315)):
-        tt = tt.cut(cylz(1.7, TT_Z0 - 1, TT_Z0 + TT_T + 1, x, y))
-    tt = tt.cut(cylz(5.0, TT_Z0 - 1, TT_Z0 + TT_T + 1, CABLE_R, 0))           # hole for the four frame wires
-    add("turntable_3mm", tt, "#2b2b2b", "yaw")
-    spool = cylz(SPOOL_RO, BASE_FLOOR, SPOOL_Z1).cut(cylz(SPOOL_RI, BASE_FLOOR - 1, SPOOL_Z1 + 1))
-    spool = spool.cut(box(SPOOL_RO - 3, SPOOL_RO + 1, -3, 3, BASE_FLOOR - 1, BASE_FLOOR + 6))      # wire slot to the boards
-    add("cable_spool", spool, PRINT_C)
+        tt = tt.cut(cylz(1.7, TT_Z0 - 1, TT_Z0 + TT_T + 1, x, y))               # screws into the az adapter
+    for x, z in SCREW_PTS:
+        tt = tt.cut(cylz(2.1, TT_Z0 + TT_T - 4.5, TT_Z0 + TT_T + 1, x, -z))     # M3 heat-set inserts for the frame
+    tt = tt.cut(cylz(5.0, TT_Z0 - 1, TT_Z0 + TT_T + 1, CABLE_X, 0))             # hole for the four frame wires
+    add("turntable_print", tt, "#2b2b2b", "yaw")
 
-    # ---- base shell
+    # ---- base shell, with the cable spool printed in
     shell = cylz(BASE_R, 0, BASE_TOP).cut(cylz(BASE_R - BASE_WALL, BASE_FLOOR, BASE_TOP + 1))
-    shell = shell.cut(box(-5, 5, -BASE_R - 1, -BASE_R + BASE_WALL + 1, 10, 14))             # USB-C slot at the back (-Y)
+    spool = cylz(SPOOL_RO, BASE_FLOOR - 0.5, SPOOL_Z1).cut(cylz(SPOOL_RI, BASE_FLOOR - 1, SPOOL_Z1 + 1))
+    spool = spool.cut(box(SPOOL_RO - 3, SPOOL_RO + 1, -3, 3, BASE_FLOOR - 1, BASE_FLOOR + 6))      # wire slot to the boards
+    shell = shell.union(spool).cut(box(-5, 5, -BASE_R - 1, -BASE_R + BASE_WALL + 1, 10, 14))         # USB-C slot at the back (-Y)
     add("base_shell", shell, PRINT_C)
 
     # ---- base boards (keep-out volumes on 3 mm standoffs)
@@ -241,11 +295,13 @@ def cqc(h):
     return cq.Color(int(h[1:3], 16) / 255, int(h[3:5], 16) / 255, int(h[5:7], 16) / 255)
 
 
-def assemble(az, el):
+def assemble(az, el, yup=True):
     root = cq.Assembly(name="sun_dial_small")
     subs = {"fixed": "base_fixed", "yaw": "frame_and_turntable_yaw", "el": "discs_elevation"}
     sa = {g: cq.Assembly(name=n) for g, n in subs.items()}
     for nm, s, col, grp in posed(az, el):
+        if yup:
+            s = s.rotate((0, 0, 0), (1, 0, 0), -90)
         sa[grp].add(s, name=nm, color=cqc(col))
     for g, a in sa.items():
         root.add(a, name=subs[g])
@@ -272,8 +328,9 @@ def clashes(parts, tol=2.0, only_with=None):
     return found
 
 
-LASER = ("frame_face_", "frame_side_", "disc_3mm_", "strip_black_3mm_", "turntable_3mm")
-PRINT = ("motor_arm", "frame_tray", "adapter_hub_el", "hub2_el", "base_shell", "az_adapter", "cable_spool")
+LASER = ("disc_3mm_", "strip_black_3mm_")
+PRINT = ("arm_tray", "frame_tub", "frame_lid", "adapter_hub_el", "hub2_el", "base_shell", "az_adapter", "turntable_print",
+         "disc_front_printed", "disc_back_printed", "strip_front_printed", "strip_back_printed")
 
 
 def process_of(nm):
@@ -282,48 +339,71 @@ def process_of(nm):
     return "print" if nm.startswith(PRINT) else "purchase"
 
 
-def export_parts():
-    for sub in ("laser", "print", "purchase"):
+# print orientation, Z up for the slicer: rotation about X in degrees applied to the assembly-pose (world) shape
+PRINT_ROT = {"disc_front_printed": 90, "strip_front_printed": 90, "frame_tub": 90, "disc_back_printed": -90, "strip_back_printed": -90,
+             "frame_lid": -90, "adapter_hub_el": -90, "hub2_el": -90, "arm_tray": 0, "base_shell": 0, "turntable_print": 0, "az_adapter": 0}
+
+
+def lay_flat(sh, rot):
+    r = sh.rotate((0, 0, 0), (1, 0, 0), rot) if rot else sh
+    bb = r.BoundingBox()
+    return r.translate((-(bb.xmin + bb.xmax) / 2, -(bb.ymin + bb.ymax) / 2, -bb.zmin))
+
+
+def export_parts(yup=True):
+    for sub in ("laser", "print", "purchase", "print_ready"):
         d = PARTS / sub
         d.mkdir(parents=True, exist_ok=True)
         for old in list(d.glob("*.step")) + list(d.glob("*.dxf")):
             old.unlink()
     for nm, s, _, _ in PARTS_L:
-        cq.exporters.export(cq.Workplane(obj=s), str(PARTS / process_of(nm) / f"{nm}.step"))
+        sh = s.rotate((0, 0, 0), (1, 0, 0), -90) if yup else s
+        cq.exporters.export(cq.Workplane(obj=sh), str(PARTS / process_of(nm) / f"{nm}.step"))
+    # print-ready files: each printed part laid in its print orientation (Z up), flat on the bed
+    byname = {nm: s for nm, s, _, _ in PARTS_L}
+    n = 0
+    for nm, rot in PRINT_ROT.items():
+        if nm in byname:
+            cq.exporters.export(cq.Workplane(obj=lay_flat(byname[nm], rot)), str(PARTS / "print_ready" / f"{nm}.step")); n += 1
+    if PRINT_DISCS:                                  # two-body STEP so Bambu Studio loads each disc as one multi-colour object
+        for side in ("front", "back"):
+            rot = PRINT_ROT[f"disc_{side}_printed"]
+            disc, strip = byname[f"disc_{side}_printed"], byname[f"strip_{side}_printed"]
+            r = disc.rotate((0, 0, 0), (1, 0, 0), rot)
+            bb = r.BoundingBox()
+            tr = (-(bb.xmin + bb.xmax) / 2, -(bb.ymin + bb.ymax) / 2, -bb.zmin)
+            comp = cq.Compound.makeCompound([r.translate(tr), strip.rotate((0, 0, 0), (1, 0, 0), rot).translate(tr)])
+            cq.exporters.export(cq.Workplane(obj=comp), str(PARTS / "print_ready" / f"disc_{side}_2colour.step")); n += 1
     d = PARTS / "laser"
-    flat = {
-        "frame_face_3mm_x2": box(0, S, 0, S, 0, FT).cut(cylz(WIN_R, -1, FT + 1, S / 2, S / 2)),
-        "frame_side_long_3mm_x2": box(0, S, 0, 2 * INT, 0, FT),
-        "frame_side_short_3mm_x2": box(0, S - 2 * FT, 0, 2 * INT, 0, FT),
-        "disc_3mm_x2": cylz(DISC_D / 2, 0, DISC_T).cut(box(0, DISC_D / 2 + 1, -SLOT_W / 2, SLOT_W / 2, -1, DISC_T + 1)),
-        "strip_black_3mm_x2": box(0, DISC_D / 2, 0, SLOT_W, 0, DISC_T),
-        "turntable_3mm": cylz(TT_R, 0, TT_T),
-    }
-    tt = flat["turntable_3mm"]
-    for x, y in ring_pts(0, 0, 19.0, (45, 135, 225, 315)):
-        tt = tt.cut(cylz(1.7, -1, TT_T + 1, x, y))
-    tt = tt.cut(cylz(5.0, -1, TT_T + 1, CABLE_R, 0))
-    flat["turntable_3mm"] = tt
-    for nm, w in flat.items():
-        cq.exporters.exportDXF(cq.Workplane(obj=_shape(w)).faces("<Z").val(), str(d / f"{nm}.dxf"))
-    print("Wrote", len(PARTS_L), "part STEP files and", len(flat), "laser DXF outlines to", PARTS)
+    nflat = 0
+    if not PRINT_DISCS:
+        flat = {"disc_3mm_x2": cylz(DISC_D / 2, 0, DISC_T).cut(box(0, DISC_D / 2 + 1, -SLOT_W / 2, SLOT_W / 2, -1, DISC_T + 1)),
+                "strip_black_3mm_x2": box(0, DISC_D / 2, 0, SLOT_W, 0, DISC_T)}
+        for nm, w in flat.items():
+            cq.exporters.exportDXF(cq.Workplane(obj=_shape(w)).faces("<Z").val(), str(d / f"{nm}.dxf"))
+        nflat = len(flat)
+    print("Wrote", len(PARTS_L), "part STEP files,", n, "print-ready STEP files and", nflat, "laser DXF outlines to", PARTS)
 
 
 def write_bom():
-    rows = [
-        ("laser", f"Black acrylic 3 mm: 2 frame faces {S:.0f} mm square with a {2 * WIN_R:.0f} mm window, 2 long side strips {S:.0f} x {2 * INT:.0f}, 2 short {S - 2 * FT:.0f} x {2 * INT:.0f}", 6, "own cutter"),
-        ("laser", f"White acrylic 3 mm: disc {DISC_D:.0f} mm with a {SLOT_W:.0f} mm radial slot", 2, "own cutter"),
-        ("laser", f"Black acrylic 3 mm: strip {SLOT_W:.0f} x {DISC_D / 2:.0f}, pressed into the slot", 2, "own cutter"),
-        ("laser", f"Black acrylic 3 mm: turntable disc {2 * TT_R:.0f} mm with four screw holes and a 10 mm cable hole", 1, "own cutter"),
-        ("print", "PETG-CF: base shell (140 mm, 34 mm tall, USB-C slot), az adapter, cable spool", 3, "Bambu P1S, hardened nozzle"),
-        ("print", "PETG-CF: elevation adapter and hub, hub 2, motor arm with bracket, frame tray", 4, "Bambu P1S, hardened nozzle"),
+    rows = []
+    if PRINT_DISCS:
+        rows += [("print", f"White PETG or ASA, {DISC_D:.0f} mm disc with a {PD} mm black inlay line (printed outer face down, 2 colours via the AMS): front disc, and back disc with hub 2 in one piece", 2, "files: print_ready/disc_*_2colour.step"),
+                 ("print", "Black filament for the two line inlays (same print jobs)", 0, "")]
+    else:
+        rows += [("laser", f"White acrylic 3 mm: disc {DISC_D:.0f} mm with a {SLOT_W:.0f} mm radial slot", 2, "own cutter"),
+                 ("laser", f"Black acrylic 3 mm: strip {SLOT_W:.0f} x {DISC_D / 2:.0f}, pressed into the slot", 2, "own cutter"),
+                 ("print", "PETG-CF: hub 2", 1, "")]
+    rows += [
+        ("print", "PETG-CF: frame tub (front face and four sides), frame lid (back face), arm and tray with the motor bracket", 3, "Bambu P1S, hardened nozzle"),
+        ("print", "PETG-CF: turntable (5 mm), base shell with the cable spool (140 mm, 34 mm tall, USB-C slot), az adapter, elevation adapter and hub", 4, "Bambu P1S, hardened nozzle"),
         ("buy", "iPower GM2804 gimbal motor with AS5048A encoder (35 x 26.15 mm)", 2, "elevation and azimuth; confirm torque and screw size"),
         ("buy", "SimpleFOC Mini driver (26.1 x 21 x 7.6 mm)", 2, "one in the base, one in the frame"),
         ("buy", "XIAO ESP32-S3 (base) and XIAO RP2040 (frame)", 2, "ESP32 supplied"),
         ("buy", "Compass module about 12 mm square, small RTC clock breakout, USB-C PD 12 V trigger board with socket, buck converter to 5 V", 4, "sizes are placeholders"),
         ("buy", "Thin silicone wire, 4 cores (12 V, 5 V, ground, serial), about 400 mm", 1, "winds round the spool; no slip ring"),
         ("buy", "Steel rod 3 mm, 35 mm long (posts) and steel pin 6 mm, 20 mm long", 3, "cut from bars"),
-        ("buy", "M2, M3 screws, heat-set inserts, grub screws, thread-lock, acrylic cement, connectors", 1, "fasteners not modelled"),
+        ("buy", "M3 heat-set inserts x12 (4 tub corners, 4 turntable, 4 az adapter), M3 screws, M2 screws, grub screws, thread-lock, acrylic cement or CA glue for hubs", 1, "fasteners not modelled"),
     ]
     BOMF.parent.mkdir(exist_ok=True)
     with open(BOMF, "w", newline="") as f:
@@ -375,8 +455,12 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--az", type=float, default=90.0, help="azimuth, compass bearing in degrees (90 = line points along +X)")
     ap.add_argument("--el", type=float, default=0.0, help="elevation, degrees above horizontal (range +/-90)")
+    ap.add_argument("--up", choices=("y", "z"), default="y", help="up axis of the STEP files (y for Fusion)")
+    ap.add_argument("--discs", choices=("printed", "laser"), default="printed", help="printed two-colour discs (default) or laser-cut discs")
     ap.add_argument("--check", action="store_true", help="run interference checks, no export")
     a = ap.parse_args()
+    global PRINT_DISCS
+    PRINT_DISCS = a.discs == "printed"
     build()
     print(f"Base {2 * BASE_R:.0f} mm across, {BASE_TOP:.0f} mm tall; turntable top at {TT_Z0 + TT_T:.1f}; frame {S:.0f} x {S:.0f} x {DF:.0f}, centre {ZC:.0f} mm up, overall {ZC + S / 2:.0f} mm")
     print(f"Frame corner swing radius {math.hypot(S / 2, DF / 2):.1f} mm against a turntable radius of {TT_R:.0f} mm")
@@ -397,15 +481,15 @@ def main():
 
     OUTD.mkdir(parents=True, exist_ok=True)
     IMG.mkdir(parents=True, exist_ok=True)
-    export_parts()
+    export_parts(a.up == "y")
     write_bom()
-    assemble(a.az, a.el).save(str(OUTD / "sun-dial-small-assembly.step"))
+    assemble(a.az, a.el, a.up == "y").save(str(OUTD / "sun-dial-small-assembly.step"))
     print("Wrote", OUTD / "sun-dial-small-assembly.step")
     P = posed(a.az, a.el)
     keep = ("keepout",)
     render(P, IMG / "overview.png", [(14, -58, "Sun dial, 3/4 view"), (4, -90, "Front")], hide=())
     render(P, IMG / "section.png", [(0, 0, "Section through the axis, x > 0 removed")], cut=(0, 400, -400, 400, -10, 400), hide=(), zoom=1.4, box_=(-90, 90, -90, 90, 0, ZC + S / 2 + 10))
-    render(P, IMG / "base-plan.png", [(90, -90, "Base from above, turntable and frame hidden")], hide=("turntable", "frame_", "gm2804_stator_el", "gm2804_rotor_el", "adapter_hub_el", "hub2_el", "post_3mm", "pin_6mm", "disc_", "strip_", "motor_arm", "xiao_rp2040", "simplefoc_mini_el", "az_adapter", "gm2804_rotor_az"),
+    render(P, IMG / "base-plan.png", [(90, -90, "Base from above, turntable and frame hidden")], hide=("turntable", "frame_", "gm2804_stator_el", "gm2804_rotor_el", "adapter_hub_el", "hub2_el", "post_3mm", "pin_6mm", "disc_", "strip_", "arm_tray", "xiao_rp2040", "simplefoc_mini_el", "az_adapter", "gm2804_rotor_az"),
            box_=(-80, 80, -80, 80, 0, 50), zoom=1.7)
     print("Wrote previews to", IMG)
 

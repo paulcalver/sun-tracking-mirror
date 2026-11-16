@@ -1,14 +1,12 @@
 process,item,qty,note
-laser,"Black acrylic 3 mm: 2 frame faces 120 mm square with a 102 mm window, 2 long side strips 120 x 38, 2 short 114 x 38",6,own cutter
-laser,White acrylic 3 mm: disc 100 mm with a 3 mm radial slot,2,own cutter
-laser,"Black acrylic 3 mm: strip 3 x 50, pressed into the slot",2,own cutter
-laser,Black acrylic 3 mm: turntable disc 138 mm with four screw holes and a 10 mm cable hole,1,own cutter
-print,"PETG-CF: base shell (140 mm, 34 mm tall, USB-C slot), az adapter, cable spool",3,"Bambu P1S, hardened nozzle"
-print,"PETG-CF: elevation adapter and hub, hub 2, motor arm with bracket, frame tray",4,"Bambu P1S, hardened nozzle"
+print,"White PETG or ASA, 100 mm disc with a 0.6 mm black inlay line (printed outer face down, 2 colours via the AMS): front disc, and back disc with hub 2 in one piece",2,files: print_ready/disc_*_2colour.step
+print,Black filament for the two line inlays (same print jobs),0,
+print,"PETG-CF: frame tub (front face and four sides), frame lid (back face), arm and tray with the motor bracket",3,"Bambu P1S, hardened nozzle"
+print,"PETG-CF: turntable (5 mm), base shell with the cable spool (140 mm, 34 mm tall, USB-C slot), az adapter, elevation adapter and hub",4,"Bambu P1S, hardened nozzle"
 buy,iPower GM2804 gimbal motor with AS5048A encoder (35 x 26.15 mm),2,elevation and azimuth; confirm torque and screw size
 buy,SimpleFOC Mini driver (26.1 x 21 x 7.6 mm),2,"one in the base, one in the frame"
 buy,XIAO ESP32-S3 (base) and XIAO RP2040 (frame),2,ESP32 supplied
 buy,"Compass module about 12 mm square, small RTC clock breakout, USB-C PD 12 V trigger board with socket, buck converter to 5 V",4,sizes are placeholders
 buy,"Thin silicone wire, 4 cores (12 V, 5 V, ground, serial), about 400 mm",1,winds round the spool; no slip ring
 buy,"Steel rod 3 mm, 35 mm long (posts) and steel pin 6 mm, 20 mm long",3,cut from bars
-buy,"M2, M3 screws, heat-set inserts, grub screws, thread-lock, acrylic cement, connectors",1,fasteners not modelled
+buy,"M3 heat-set inserts x12 (4 tub corners, 4 turntable, 4 az adapter), M3 screws, M2 screws, grub screws, thread-lock, acrylic cement or CA glue for hubs",1,fasteners not modelled

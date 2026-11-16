@@ -1,0 +1,17 @@
+process,item,qty,note
+laser,"Black acrylic 3 mm: 2 frame faces 170 mm square with a 152 mm window, 2 long side strips 170 x 38, 2 short 164 x 38",6,own cutter
+laser,White acrylic 3 mm: disc 150 mm with a 3 mm radial slot,2,own cutter
+laser,"Black acrylic 3 mm: strip 3 x 75, pressed into the slot",2,own cutter
+laser,Black acrylic 3 mm: turntable disc 198 mm with a tube hole and three screw holes,1,own cutter
+print,"PETG-CF: base shell (200 mm, 66 mm tall, USB-C slot), bearing housing, az motor riser, az adapter, 60T pulley, tube collar, slip ring anchor",7,"Bambu P1S, hardened nozzle"
+print,"PETG-CF: elevation adapter and hub, hub 2, motor arm with bracket, frame tray",4,"Bambu P1S, hardened nozzle"
+buy,iPower GM2804 gimbal motor with AS5048A encoder (35 x 26.15 mm),2,elevation and azimuth; confirm torque and screw size
+buy,"iPower gimbal motor slip ring, 6.5 mm, 7 wires, 28.4 mm long",1,supplied; fit and which end is fixed to be checked
+buy,SimpleFOC Mini driver (26.1 x 21 x 7.6 mm),2,"one in the base, one in the frame"
+buy,XIAO ESP32-S3 (base) and XIAO RP2040 (frame),2,ESP32 supplied
+buy,"Compass module about 12 mm square, small RTC clock breakout, USB-C PD 12 V trigger board with socket, buck converter to 5 V",4,sizes are placeholders
+buy,"Aluminium tube 12 x 2 mm, about 63 mm",1,as the finger pointer
+buy,Bearing 6701 (12 x 18 x 4),2,standard
+buy,"GT2 pulley 20T, 6 mm belt, 6 mm bore, and GT2 closed belt 6 mm, 200 mm",2,belt not modelled
+buy,"Steel rod 3 mm, 35 mm long (posts) and steel pin 6 mm, 20 mm long",3,cut from bars
+buy,"M2, M3 screws, heat-set inserts, grub screws, thread-lock, acrylic cement, wire, connectors",1,fasteners not modelled

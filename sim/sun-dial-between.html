@@ -101,13 +101,13 @@
       </div>
       <div class="row" style="margin-bottom:0">
         <label><input type="checkbox" id="ray"> Show sun direction</label>
-        <label><input type="checkbox" id="xray"> X-ray: show gears</label>
+        <label><input type="checkbox" id="xray"> X-ray: show motors</label>
         <label><input type="checkbox" id="text" checked> Show text</label>
       </div>
     </section>
   </div>
   <p style="color:#777; font-size:12px; margin:12px 4px 0">
-    One dial, two faces. A hollow square frame stands flush on a round base and the whole frame turns to the sun's compass bearing (azimuth). A round window in each face holds a disc flush with the face. One GM2804 sits between the discs: disc 1 is on its rotor and disc 2 is carried on two posts round the motor, so both discs turn together about their centres and their inlaid lines point the same way in space. A fixed arm from the frame floor holds the motor and carries its cable down into the base. Tick X-ray to see inside. Gear motion is indicative. Drag to orbit, scroll to zoom.
+    One dial, two faces. A hollow square frame stands flush on a round base and the whole frame turns to the sun's compass bearing (azimuth). A round window in each face holds a disc flush with the face. One GM2804 sits between the discs: disc 1 is on its rotor and disc 2 is carried on two posts round the motor, so both discs turn together about their centres and their inlaid lines point the same way in space. A fixed arm from the frame floor holds the motor. A second GM2804 stands in the base and turns the frame directly, with no gears; its centre is closed, so the cable runs down beside it and loops slack to a fixed socket (the loop is not drawn). Tick X-ray to see inside. Drag to orbit, scroll to zoom.
   </p>
 </main>
 
@@ -350,16 +350,20 @@ const fixedMech = [
 ];
 const armTop = CY - 0.25, armBot = CY - S / 2 + WALL, armLen = armTop - armBot;
 fixedMech.push(put(pivot, box(0.14, armLen, 0.04, steel), 0, (armTop + armBot) / 2, statorZ0 - 0.02));
-const cableLen = armBot - 0.6;
-fixedMech.push(put(pivot, cylY(0.02, cableLen, black, 12), 0, 0.6 + cableLen / 2, statorZ0 - 0.02));
-const tube = put(pivot, cylY(0.17, 0.6, steel), 0, 1.0, 0); tube.material = steel.clone(); tube.material.transparent = true; tube.material.opacity = 0.45;
-const azBig = put(pivot, vgear(0.6, 60, 0.1, gearMat), 0, 0.95, 0);
+// cable: along the frame floor, then down beside the azimuth motor (x = 0.7) to a connector with a slack loop to the base
+const cz = statorZ0 - 0.02, cableX = 0.7;
+const cableAcross = new THREE.Mesh((() => { const g = new THREE.CylinderGeometry(0.02, 0.02, cableX, 12); g.rotateZ(Math.PI / 2); return g; })(), black);
+fixedMech.push(put(pivot, cableAcross, cableX / 2, armBot + 0.02, cz));
+fixedMech.push(put(pivot, cylY(0.02, armBot - 0.72, black, 12), cableX, 0.72 + (armBot - 0.72) / 2, cz));
+fixedMech.push(put(pivot, box(0.12, 0.12, 0.12, black), cableX, 0.7, cz));
 
-// Azimuth motor and 3:1 gears in the base
-const mech = new THREE.Group(); scene.add(mech);
-put(mech, box(0.84, 0.68, 0.84, motorMat), -0.8, 0.39, 0);
-put(mech, cylY(0.04, 0.3, steel), -0.8, 0.85, 0);
-const azPinion = put(mech, vgear(0.2, 20, 0.1, gearMat), -0.8, 0.95, 0);
+// Azimuth: a second GM2804 standing in the base, direct drive. Its rotor carries the turntable through a flange.
+const azMech = [
+  put(scene, cylY(0.3, 0.65, steel), 0, 0.325, 0),                    // pedestal
+  put(scene, cylY(0.35, 0.258, motorMat), 0, 0.65 + 0.129, 0),        // stator with encoder (fixed)
+  put(pivot, cylY(0.35, 0.255, rotorMat), 0, 0.908 + 0.1275, 0),      // rotor (turns with the frame)
+  put(pivot, cylY(0.5, 0.037, gearMat), 0, 1.163 + 0.0185, 0)         // flange under the turntable
+];
 
 // Sun-direction ray
 const ray = new THREE.Group(); ray.position.set(0, CY, 0); ray.visible = false; scene.add(ray);
@@ -367,7 +371,7 @@ const rayLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THR
 const rayDot = new THREE.Mesh(new THREE.SphereGeometry(0.09, 24, 16), new THREE.MeshBasicMaterial({ color: 0xe8a317 }));
 ray.add(rayLine, rayDot);
 
-const hidden = [...rotMech, ...fixedMech, tube, azBig, mech];
+const hidden = [...rotMech, ...fixedMech, ...azMech];
 const shellParts = [baseMesh, turntable, ...frameParts];
 hidden.forEach(g => g.traverse(o => { if (o.isMesh) o.visible = false; }));
 function setXray(on) {
@@ -397,7 +401,6 @@ function frame(now) {
   const yaw = (90 - p.az) * rad, alt = p.alt * rad;
   pivot.rotation.y = yaw;           // the whole frame faces the sun's azimuth
   rot.rotation.z = alt;             // both discs and the posts turn about the motor axis: the line sits at the true elevation
-  azPinion.rotation.y = -3 * yaw;   // 60:20 (indicative)
   const d = [cos(p.alt) * sin(p.az), sin(p.alt), -cos(p.alt) * cos(p.az)];
   rayLine.geometry.setFromPoints([new THREE.Vector3(), new THREE.Vector3(d[0] * 3, d[1] * 3, d[2] * 3)]);
   rayDot.position.set(d[0] * 3, d[1] * 3, d[2] * 3);

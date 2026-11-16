@@ -40,22 +40,23 @@ Biggest printed part is 211 mm (the hinge bar), so everything fits the bed. Soli
 | Item | Qty | Spec | Unit | Total | Confidence | Source or note |
 |---|---|---|---|---|---|---|
 | NEMA 17 stepper 42 x 34 mm, 1.5 A | 2 | 2.6 kg.cm, D shaft (length to check, model assumes 24 mm) | 11.00 | 22.00 | sourced 2026-11-03 | Pi Hut, in stock: https://thepihut.com/products/nema-17-stepper-motor-42mm-x-34mm |
-| Lazy Susan bearing, 9 inch | 1 | ID 114.3, OD 228.6, 8.33 thick, bolt pattern unknown | 10.61 | 10.61 | sourced 2026-11-03 | Bearing King, in stock: https://bearing-king.co.uk/products/9-inch-lazy-susan-turntable-bearing-round |
-| Slip ring with flange, 22 mm, 12 wire, 2 A | 1 | 44 mm flange, 6 inch wires, 300 rpm | 17.40 | 17.40 | sourced 2026-11-03 | Pi Hut, in stock: https://thepihut.com/products/slip-ring-with-flange-22mm-diameter-12-wires-max-240v-2a |
+| Lazy Susan bearing, 9 inch | 1 | ID 114.3, OD 228.6, 8.33 thick; holes INFERRED by Gemini from typical 9 inch bearings, not published; measure on arrival: top 4 x 3.8 on PCD 120 to 130, bottom 4 x 4.8 on PCD 210 to 215, one 19 mm access hole in the top ring | 10.61 | 10.61 | sourced 2026-11-03 | Bearing King, in stock: https://bearing-king.co.uk/products/9-inch-lazy-susan-turntable-bearing-round |
+| Slip ring with flange, 22 mm, 12 wire, 2 A | 1 | 44 mm flange, 6 inch wires, 300 rpm; flange 3 x 3.5 x 5.5 slots on PCD 36 (Gemini says standard for the SRC022A series, no drawing seen, measure); body length 26.5 (datasheet per Gemini round 2) | 17.40 | 17.40 | sourced 2026-11-03 | Pi Hut, in stock: https://thepihut.com/products/slip-ring-with-flange-22mm-diameter-12-wires-max-240v-2a |
 | GT2 pulley 20T, 5 mm bore, 6 mm belt | 1 | aluminium, two grub screws | 6.50 | 6.50 | earlier BOM, not rechecked | 123-3D |
-| GT2 closed belt loop 6 mm, 200 mm (100 teeth) | 1 | stock size | 3.50 | 3.50 | estimate | UK shop not confirmed; 380 and 400 mm sizes were found, 200 mm is a standard length |
-| TR8x2 lead screw, 2 mm lead, about 150 mm cut or 300 mm | 1 | single start, 8 mm | n/a | n/a | no UK source | Tinytronics (Netherlands): https://www.tinytronics.nl/en/mechanics-and-actuators/parts/lead-screws |
-| TR8x2 brass nut | 1 | 2 mm lead | n/a | n/a | no UK source | Tinytronics: https://www.tinytronics.nl/en/mechanics-and-actuators/parts/lead-screws/tr8x2-leadscrew-nut |
-| Shaft coupler 5 to 8 mm | 1 |  | 2.00 | 2.00 | estimate | not researched |
+| GT2 closed belt loop 6 mm, 200 mm (100 teeth) | 1 | stock size | 1.61 | 1.61 | UNVERIFIED: Gemini says 6001-376 is 200 mm but its URL says 360mm | Technobots Online, GBP 1.61; 220 mm said to be 6001-388. Page returned 403 to me. Open https://www.technobotsonline.com/6mm-wide-gt2-2gt-2mm-pitch-rounded-tooth-profile-360mm-closed-belt.html and confirm the length before ordering. Does the motor slot reach 200 or 220? |
+| TR8x2 lead screw, 2 mm lead, about 150 mm cut or 300 mm | 1 | single start, 8 mm | 8.50 | 8.50 | Gemini price; page exists, 2 mm lead seen, price not checked | Ooznest LS-TR8-2-2P-CTS https://resources.ooznest.co.uk/aluminium-extrusion-system/transmission/screw-drive-components/lead-screws/tr8x2-2p-lead-screw-cut-to-size-var-ls-tr8-2-2p-cts . Fallback: Tinytronics (NL) https://www.tinytronics.nl/en/mechanics-and-actuators/parts/lead-screws |
+| TR8x2 brass nut | 1 | 2 mm lead | 4.50 | 4.50 | Gemini price, not checked | Ooznest LSRFN-TR8-2-2P-B brass round flanged nut https://resources.ooznest.co.uk/aluminium-extrusion-system/transmission/screw-drive-components/lead-screw-nuts/flanged-nuts/tr8x2-2p-lead-screw-round-flanged-nut-brass-var-lsrfn-tr8-2-2p-b . Optional anti-backlash brass nut GBP 7.50 (POM 6.80). Fallback: Tinytronics https://www.tinytronics.nl/en/mechanics-and-actuators/parts/lead-screws/tr8x2-leadscrew-nut |
+| Shaft coupler 5 to 8 mm | 1 |  | 2.95 | 2.95 | Gemini basket figure, no SKU or link | Ooznest; find the 5 to 8 mm flexible coupling on their store |
 | Bearing 685ZZ (5 x 11 x 5) | 2 | hinge stubs | 2.00 | 4.00 | sourced, low confidence | eBay UK listing, 2 for 3.99 pounds; RS sells only bulk packs |
 | Bearing 688ZZ (8 x 16 x 5) | 1 | screw end | 1.00 | 1.00 | estimate | https://uk.rs-online.com/web/p/ball-bearings/0644241 |
 | Steel rod 5 mm, about 20 mm pieces | 2 | hinge stubs | 1.00 | 2.00 | estimate |  |
 | Steel rod 4 mm, 114 mm | 1 | guide rod | 1.00 | 1.00 | estimate |  |
 | M6 bolt, 25 mm, with nut | 1 | crank pin | 0.50 | 0.50 | estimate |  |
-| Magnet 5 x 2 mm | 2 | tilt home (arm) and azimuth home (drum floor) | 1.00 | 2.00 | estimate |  |
+| Magnet 5 x 2 mm, pack of 10 | 1 | need 2: tilt home (arm) and azimuth home (drum floor) | 3.50 | 3.50 | Gemini price, eBay search page only |  |
+| Electrolytic capacitor 100 uF, 35 V or more | 2 | one across VMOT/GND at each TMC2209 (Gemini action item 5; was missing from v4) | 0.50 | 1.00 | estimate |  |
 | Hall sensor board (digital) | 2 | tilt home and azimuth home | 2.00 | 4.00 | estimate | e.g. A3144 or similar breakout |
-| Raspberry Pi Pico (RP2040, no radio) | 1 |  | 4.00 | 4.00 | estimate |  |
-| DS3231 real-time clock module | 1 | with coin cell | 3.00 | 3.00 | estimate |  |
+| Raspberry Pi Pico (RP2040, no radio) | 1 |  | 3.80 | 3.80 | Gemini price | Pi Hut SC0915 https://thepihut.com/products/raspberry-pi-pico |
+| DS3231 real-time clock module | 1 | with coin cell | 3.99 | 3.99 | Gemini price | Kunkune https://kunkune.co.uk/shop/arduino-sensors/ds3231-at24c32-iic-module-precision-clock-module-ds3231sn-memory-module/ |
 | TMC2209 stepper driver (StepStick) | 2 |  | 4.45 | 8.90 | earlier BOM, not rechecked | Kunkune |
 | Buck converter (24 V to 5 V) | 1 |  | 2.00 | 2.00 | estimate |  |
 | GY-271 compass module (I2C) | 1 | chip varies (HMC5883L or QMC5883L clones) | 3.00 | 3.00 | estimate | test in place; coarse check only |
@@ -63,8 +64,8 @@ Biggest printed part is 211 mm (the hinge bar), so everything fits the bed. Soli
 | Mirror glass, 6 mm silvered, polished edge | 1 | 200 x 267 mm, cut to size, back painted matt black | 31.00 | 31.00 | from a listing, size not confirmed | UK made to measure (Mirrorworld, BuyGlass has a minimum charge, eBay from about 31 pounds) |
 | PETG or ASA filament, 1 kg | 1 |  | 15.30 | 15.30 | earlier BOM | The Pi Hut |
 | Ply or acrylic sheet, 6 mm, about 0.4 m2 plus 3 mm and 2 mm offcuts | 1 | for the laser parts | n/a | n/a | not looked up | check what the lab stocks |
-| Fasteners, heat-set inserts, glue, wire, connectors | 1 | not modelled yet: M3 and M4 screws, M3 inserts, glass adhesive | 15.00 | 15.00 | estimate |  |
+| Fasteners, heat-set inserts, glue, wire, connectors | 1 | not modelled yet: M3 and M4 screws, M3 inserts, glass adhesive, felt, wire, connectors | 28.50 | 28.50 | Gemini line prices summed, no links | inserts 6.50, screws 8.00, wire 7.50, silicone 4.50, felt 2.00 |
 | Ballast about 1.5 kg | 1 | e.g. steel washers or bolts, not modelled | n/a | n/a | not looked up | free space in the base corners |
 
-Priced lines add up to about 178 pounds: 135 from listings or the earlier BOM, 43 estimated. Not priced yet: TR8x2 lead screw, 2 mm lead, about 150 mm cut or 300 mm; TR8x2 brass nut; Ply or acrylic sheet, 6 mm, about 0.4 m2 plus 3 mm and 2 mm offcuts; Ballast about 1.5 kg.
+Priced lines add up to about 206 pounds: 135 from listings or the earlier BOM, 72 estimated. Not priced yet: Ply or acrylic sheet, 6 mm, about 0.4 m2 plus 3 mm and 2 mm offcuts; Ballast about 1.5 kg.
 Prices of 2026-11-03 or earlier, not rechecked at order time. Nothing is ordered.

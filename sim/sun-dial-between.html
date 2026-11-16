@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sun Dial, One Motor Two Faces</title>
+<style>
+  :root {
+    --wall: #e9e9e7;
+    --wall-hi: #f1f1ef;
+    --disc: #f7f7f5;
+    --ink: #111;
+    --muted: #8a8a86;
+    --panel: #ffffff;
+    --line: #d9d9d5;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--wall); color: #333;
+    font: 14px/1.4 -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; }
+  main { max-width: 1100px; margin: 0 auto; padding: 24px 16px 40px; }
+  .wall {
+    background: linear-gradient(160deg, var(--wall-hi), var(--wall) 60%, #e3e3e0);
+    box-shadow: 0 1px 0 #fff inset, 0 0 0 1px rgba(0,0,0,.04), 0 12px 30px rgba(0,0,0,.10);
+    border-radius: 2px;
+  }
+  .label.rowtitle { text-anchor: start; }
+  .wall { position: relative; overflow: hidden; }
+  #read { position: absolute; left: 16px; top: 12px; font: 300 15px -apple-system, "Helvetica Neue", Arial, sans-serif; color: #66665f; line-height: 1.5; pointer-events: none; }
+  #readM { position: absolute; right: 16px; top: 12px; text-align: right; font: 300 15px -apple-system, "Helvetica Neue", Arial, sans-serif; color: #66665f; line-height: 1.5; pointer-events: none; }
+  #readM b { font-weight: 500; letter-spacing: .14em; font-size: 10px; text-transform: uppercase; color: #8a8a86; margin-right: 6px; }
+  #read b { font-weight: 500; letter-spacing: .14em; font-size: 10px; text-transform: uppercase; color: #8a8a86; margin-right: 6px; }
+  canvas { display: block; }
+  svg { display: block; width: 100%; height: auto; }
+  .label { font: 500 11px -apple-system, "Helvetica Neue", Arial, sans-serif; letter-spacing: .18em;
+    fill: var(--muted); text-anchor: middle; text-transform: uppercase; }
+  .read { font: 300 22px -apple-system, "Helvetica Neue", Arial, sans-serif; fill: #55554f; text-anchor: middle; }
+  .sub { font: 400 12px -apple-system, "Helvetica Neue", Arial, sans-serif; fill: var(--muted); text-anchor: middle; }
+
+  .controls { margin-top: 20px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: 16px; display: grid; gap: 16px 24px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .controls h3 { margin: 0 0 8px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+  label { display: flex; gap: 6px; align-items: center; }
+  input[type=date], input[type=number] { font: inherit; padding: 5px 7px; border: 1px solid var(--line); border-radius: 5px; background: #fff; color: #222; }
+  input[type=number] { width: 74px; }
+  input[type=range] { width: 100%; accent-color: #222; }
+  button { font: inherit; padding: 5px 10px; border: 1px solid var(--line); border-radius: 5px; background: #fff; color: #222; cursor: pointer; }
+  button:hover { background: #f3f3f1; }
+  button.on { background: #222; color: #fff; border-color: #222; }
+  .big { font-size: 15px; padding: 7px 16px; }
+  .val { color: #222; font-variant-numeric: tabular-nums; }
+  @media (prefers-color-scheme: dark) { /* wall piece stays white by design */ body { background: #cfcfcc; } }
+</style>
+</head>
+<body>
+<main>
+  <div class="wall" id="stage"><div id="read"></div></div>
+
+  <div class="controls">
+    <section>
+      <h3>Date &amp; time</h3>
+      <div class="row">
+        <input type="date" id="date">
+        <button id="now">Now</button>
+      </div>
+      <div class="row">
+        <button data-d="03-20">Equinox Mar</button>
+        <button data-d="06-21">Solstice Jun</button>
+        <button data-d="09-22">Equinox Sep</button>
+        <button data-d="12-21">Solstice Dec</button>
+      </div>
+      <div class="row" style="margin-bottom:0"><span>Time of day</span><span class="val" id="timeLbl"></span></div>
+      <input type="range" id="tod" min="0" max="1439" step="1">
+    </section>
+
+    <section>
+      <h3>Speed</h3>
+      <div class="row">
+        <button id="play" class="big on">Pause</button>
+        <label><input type="checkbox" id="rev"> Reverse</label>
+      </div>
+      <input type="range" id="speed" min="0" max="100" step="0.5" value="0">
+      <div class="row" style="margin:6px 0 8px"><span class="val" id="speedLbl"></span></div>
+      <div class="row" style="margin-bottom:0">
+        <button data-s="1">Real time</button>
+        <button data-s="600">10 min/s</button>
+        <button data-s="3600">1 h/s</button>
+        <button data-s="86400">1 day/s</button>
+        <button data-s="2551443">Lunar month / s</button>
+      </div>
+    </section>
+
+    <section>
+      <h3>Place &amp; display</h3>
+      <div class="row">
+        <label>Lat <input type="number" id="lat" value="51.5" step="0.1" min="-90" max="90"></label>
+        <label>Lon <input type="number" id="lon" value="-0.1" step="0.1" min="-180" max="180"></label>
+      </div>
+      <div class="row">
+        <label>UTC offset <input type="number" id="tz" step="0.5" min="-12" max="14"></label>
+      </div>
+      <div class="row" style="margin-bottom:0">
+        <label><input type="checkbox" id="ray"> Show sun direction</label>
+        <label><input type="checkbox" id="xray"> X-ray: show gears</label>
+        <label><input type="checkbox" id="text" checked> Show text</label>
+      </div>
+    </section>
+  </div>
+  <p style="color:#777; font-size:12px; margin:12px 4px 0">
+    One dial, two faces. A hollow square frame stands flush on a round base and the whole frame turns to the sun's compass bearing (azimuth). A round window in each face holds a disc flush with the face. One GM2804 sits between the discs: disc 1 is on its rotor and disc 2 is carried on two posts round the motor, so both discs turn together about their centres and their inlaid lines point the same way in space. A fixed arm from the frame floor holds the motor and carries its cable down into the base. Tick X-ray to see inside. Gear motion is indicative. Drag to orbit, scroll to zoom.
+  </p>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+const rad = Math.PI / 180, deg = 180 / Math.PI;
+const $ = id => document.getElementById(id);
+const sin = x => Math.sin(x * rad), cos = x => Math.cos(x * rad);
+const norm = x => ((x % 360) + 360) % 360;
+
+// JPL approximate Keplerian elements (Standish, 1800-2050): [a, da, e, de, I, dI, L, dL, varpi, dvarpi, Omega, dOmega] per century
+const ELEM = {
+  mercury: [0.38709927,0.00000037,0.20563593,0.00001906,7.00497902,-0.00594749,252.25032350,149472.67411175,77.45779628,0.16047689,48.33076593,-0.12534081],
+  venus:   [0.72333566,0.00000390,0.00677672,-0.00004107,3.39467605,-0.00078890,181.97909950,58517.81538729,131.60246718,0.00268329,76.67984255,-0.27769418],
+  earth:   [1.00000261,0.00000562,0.01671123,-0.00004392,-0.00001531,-0.01294668,100.46457166,35999.37244981,102.93768193,0.32327364,0,0],
+  mars:    [1.52371034,0.00001847,0.09339410,0.00007882,1.84969142,-0.00813131,-4.55343205,19140.30268499,-23.94362959,0.44441088,49.55953891,-0.29257343],
+  jupiter: [5.20288700,-0.00011607,0.04838624,-0.00013253,1.30439695,-0.00183714,34.39644051,3034.74612775,14.72847983,0.21252668,100.47390909,0.20469106],
+  saturn:  [9.53667594,-0.00125060,0.05386179,-0.00050991,2.48599187,0.00193609,49.95424423,1222.49362201,92.59887831,-0.41897216,113.66242448,-0.28867794],
+  uranus:  [19.18916464,-0.00196176,0.04725744,-0.00004397,0.77263783,-0.00242939,313.23810451,428.48202785,170.95427630,0.40805281,74.01692503,0.04240589],
+  neptune: [30.06992276,0.00026291,0.00859048,0.00005105,1.77004347,0.00035372,-55.12002969,218.45945325,44.96476227,-0.32241464,131.78422574,-0.00508664]
+};
+function helio(el, T) {
+  const a = el[0] + el[1] * T, e = el[2] + el[3] * T, I = el[4] + el[5] * T, L = el[6] + el[7] * T,
+        wb = el[8] + el[9] * T, Om = el[10] + el[11] * T;
+  const w = wb - Om; let M = norm(L - wb); if (M > 180) M -= 360;
+  let E = M + e * deg * sin(M);
+  for (let i = 0; i < 8; i++) E -= (E - e * deg * sin(E) - M) / (1 - e * cos(E));
+  const xp = a * (cos(E) - e), yp = a * Math.sqrt(1 - e * e) * sin(E);
+  return [
+    (cos(w) * cos(Om) - sin(w) * sin(Om) * cos(I)) * xp + (-sin(w) * cos(Om) - cos(w) * sin(Om) * cos(I)) * yp,
+    (cos(w) * sin(Om) + sin(w) * cos(Om) * cos(I)) * xp + (-sin(w) * sin(Om) + cos(w) * cos(Om) * cos(I)) * yp,
+    (sin(w) * sin(I)) * xp + (cos(w) * sin(I)) * yp
+  ];
+}
+const PLANETS = ["mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune"];
+
+// ---------- astronomy ----------
+function positions(ms, latD, lonD) {
+  const jd = ms / 86400000 + 2440587.5;
+  const n = jd - 2451545.0, T = n / 36525;
+  const eps = 23.439 - 0.0000004 * n;
+  const gmst = 280.46061837 + 360.98564736629 * n;
+
+  function toHoriz(ra, dec) {
+    const H = norm(gmst + lonD - ra);
+    const alt = Math.asin(sin(latD) * sin(dec) + cos(latD) * cos(dec) * cos(H)) * deg;
+    // azimuth from north, clockwise
+    const az = norm(Math.atan2(sin(H), cos(H) * sin(latD) - Math.tan(dec * rad) * cos(latD)) * deg + 180);
+    return { alt, az, H };
+  }
+
+  // Sun
+  const L = 280.460 + 0.9856474 * n, g = 357.528 + 0.9856003 * n;
+  const lamS = L + 1.915 * sin(g) + 0.020 * sin(2 * g);
+  const raS = norm(Math.atan2(cos(eps) * sin(lamS), cos(lamS)) * deg);
+  const decS = Math.asin(sin(eps) * sin(lamS)) * deg;
+  const sun = toHoriz(raS, decS);
+
+  // Moon
+  const lamM = 218.32 + 481267.881 * T + 6.29 * sin(135.0 + 477198.87 * T) - 1.27 * sin(259.3 - 413335.36 * T)
+    + 0.66 * sin(235.7 + 890534.22 * T) + 0.21 * sin(269.9 + 954397.74 * T) - 0.19 * sin(357.5 + 35999.05 * T)
+    - 0.11 * sin(186.5 + 966404.03 * T);
+  const betM = 5.13 * sin(93.3 + 483202.02 * T) + 0.28 * sin(228.2 + 960400.89 * T)
+    - 0.28 * sin(318.3 + 6003.15 * T) - 0.17 * sin(217.6 - 407332.21 * T);
+  const parM = 0.9508 + 0.0518 * cos(135.0 + 477198.87 * T) + 0.0095 * cos(259.3 - 413335.36 * T)
+    + 0.0078 * cos(235.7 + 890534.22 * T) + 0.0028 * cos(269.9 + 954397.74 * T);
+  const x = cos(betM) * cos(lamM);
+  const y = cos(eps) * cos(betM) * sin(lamM) - sin(eps) * sin(betM);
+  const z = sin(eps) * cos(betM) * sin(lamM) + cos(eps) * sin(betM);
+  const raM = norm(Math.atan2(y, x) * deg), decM = Math.asin(z) * deg;
+  const moon = toHoriz(raM, decM);
+  moon.alt -= parM * cos(moon.alt); // parallax
+
+  const elong = norm(lamM - lamS);
+  const illum = (1 - cos(elong)) / 2;
+
+  // Planets: geocentric ecliptic (J2000) -> precess to date -> equatorial of date
+  const earth = helio(ELEM.earth, T), pa = 1.39697 * T;
+  const bodies = { sun, moon };
+  for (const k of PLANETS) {
+    const q = helio(ELEM[k], T), gx = q[0] - earth[0], gy = q[1] - earth[1], gz = q[2] - earth[2];
+    const x1 = gx * cos(pa) - gy * sin(pa), y1 = gx * sin(pa) + gy * cos(pa);
+    const ye = y1 * cos(eps) - gz * sin(eps), ze = y1 * sin(eps) + gz * cos(eps);
+    bodies[k] = toHoriz(norm(Math.atan2(ye, x1) * deg), Math.asin(ze / Math.hypot(x1, ye, ze)) * deg);
+  }
+  return { bodies, sun, moon, elong, illum };
+}
+
+function phaseName(e) {
+  const names = ["New moon", "Waxing crescent", "First quarter", "Waxing gibbous", "Full moon", "Waning gibbous", "Last quarter", "Waning crescent"];
+  return names[Math.round(e / 45) % 8];
+}
+
+// ---------- state ----------
+let t = Date.now();          // simulated UTC ms
+let playing = true;
+let speed = 1;               // simulated seconds per real second
+let last = performance.now();
+
+function defaultOffset(ms) { return -new Date(ms).getTimezoneOffset() / 60; }
+$("tz").value = defaultOffset(t);
+
+const tzMs = () => (parseFloat($("tz").value) || 0) * 3600000;
+const localDate = () => new Date(t + tzMs());   // use getUTC* for local wall-clock
+const pad = n => String(n).padStart(2, "0");
+
+function setLocalYMD(y, m, d) {
+  const L = localDate();
+  const ms = Date.UTC(y, m - 1, d, L.getUTCHours(), L.getUTCMinutes(), L.getUTCSeconds()) - tzMs();
+  t = ms;
+}
+
+// ---------- speed slider (log, 1x .. 1e7x) ----------
+const sliderToSpeed = v => Math.pow(10, v / 100 * 7);
+const speedToSlider = s => Math.log10(Math.max(1, s)) / 7 * 100;
+function fmtSpeed(s) {
+  const units = [[86400 * 30.44, "months"], [86400, "days"], [3600, "hours"], [60, "minutes"], [1, "seconds"]];
+  if (s < 1.5) return "Real time (1×)";
+  for (const [u, name] of units) if (s >= u * 0.95) return `${(s / u).toFixed(s / u < 10 ? 1 : 0)} ${name} per second`;
+  return `${s.toFixed(0)}×`;
+}
+function setSpeed(s) { speed = s; $("speed").value = speedToSlider(s); $("speedLbl").textContent = fmtSpeed(s) + "  (" + (s >= 10 ? Math.round(s).toLocaleString() : s.toFixed(1)) + "×)"; }
+$("speed").addEventListener("input", e => setSpeed(sliderToSpeed(+e.target.value)));
+document.querySelectorAll("button[data-s]").forEach(b => b.onclick = () => setSpeed(+b.dataset.s));
+setSpeed(1);
+
+// ---------- controls ----------
+$("play").onclick = () => { playing = !playing; $("play").textContent = playing ? "Pause" : "Play"; $("play").classList.toggle("on", playing); };
+$("now").onclick = () => { t = Date.now(); setSpeed(1); };
+document.querySelectorAll("button[data-d]").forEach(b => b.onclick = () => {
+  const [m, d] = b.dataset.d.split("-").map(Number);
+  setLocalYMD(localDate().getUTCFullYear(), m, d);
+});
+$("date").addEventListener("change", e => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(e.target.value);
+  if (m) setLocalYMD(+m[1], +m[2], +m[3]);
+});
+$("tod").addEventListener("input", e => {
+  const mins = +e.target.value, L = localDate();
+  t = Date.UTC(L.getUTCFullYear(), L.getUTCMonth(), L.getUTCDate(), 0, mins, 0) - tzMs();
+});
+
+// ---------- 3D scene: one motor between two discs, in a square frame on a round base ----------
+// The frame is a hollow square box with a round window in each face; a disc sits flush in each window. One GM2804 sits
+// between the discs: disc 1 is on its rotor, disc 2 is carried on two posts round the motor. A fixed arm rises from the
+// frame floor to a bracket on the motor back, with the cable inside it. The posts live on the top arc, so as the discs
+// turn through 180 degrees they never reach the arm at the bottom. Units: 1 = 50 mm (disc 150 mm, frame 170 mm square, 40 mm deep).
+const R = 1.5, TH = 0.08;
+const BASE_R = 1.8, BASE_H = 1.2, TT_H = 0.1, WB = BASE_H + TT_H;
+const S = 3.4, D = 0.8, CY = WB + S / 2, WALL = 0.08;
+const stage = $("stage");
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+stage.appendChild(renderer.domElement);
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0xdadad6);
+const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
+camera.position.set(6.2, 5.0, 11.0);
+const orbit = new THREE.OrbitControls(camera, renderer.domElement);
+orbit.target.set(0, 2.7, 0); orbit.enableDamping = true; orbit.maxPolarAngle = Math.PI * 0.56;
+orbit.update();
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0xc8c8c3, 0.9));
+const key = new THREE.DirectionalLight(0xffffff, 0.5);
+key.position.set(-4, 7, 6); key.castShadow = true;
+key.shadow.mapSize.set(4096, 4096); key.shadow.radius = 5; key.shadow.bias = -0.0004;
+Object.assign(key.shadow.camera, { left: -9, right: 9, top: 9, bottom: -9, near: 1, far: 30 });
+scene.add(key);
+
+const white = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9, side: THREE.DoubleSide });
+const black = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.6 });
+const shell = new THREE.MeshStandardMaterial({ color: 0x2b2b2b, roughness: 0.7 });
+const gearMat = new THREE.MeshStandardMaterial({ color: 0xb89b3c, roughness: 0.5, metalness: 0.3 });
+const steel = new THREE.MeshStandardMaterial({ color: 0x9a9a96, roughness: 0.4, metalness: 0.6 });
+const motorMat = new THREE.MeshStandardMaterial({ color: 0x4a4a48, roughness: 0.6 });
+const rotorMat = new THREE.MeshStandardMaterial({ color: 0x1c1c1b, roughness: 0.5 });
+const wallMat = new THREE.MeshStandardMaterial({ color: 0xc4c4c0, roughness: 1 });
+
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(60, 40), wallMat);
+floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+const wall = new THREE.Mesh(new THREE.PlaneGeometry(60, 40), wallMat);
+wall.position.set(0, 0, -4); wall.receiveShadow = true; scene.add(wall);
+
+function gearGeo(r, n, w) {
+  const s = new THREE.Shape(), a = Math.PI * 2 / n, tooth = Math.PI * r / n * 0.7, ri = r - tooth, ro = r + tooth * 0.2;
+  for (let i = 0; i < n; i++) {
+    const t0 = i * a;
+    [[ri, 0], [ro, 0.15], [ro, 0.4], [ri, 0.55]].forEach(([rr, f], k) => {
+      const x = rr * Math.cos(t0 + f * a), y = rr * Math.sin(t0 + f * a);
+      if (i === 0 && k === 0) s.moveTo(x, y); else s.lineTo(x, y);
+    });
+  }
+  const g = new THREE.ExtrudeGeometry(s, { depth: w, bevelEnabled: false }); g.translate(0, 0, -w / 2); return g;
+}
+const put = (parent, mesh, x, y, z, shadow = true) => { mesh.position.set(x, y, z); mesh.castShadow = shadow; mesh.receiveShadow = true; parent.add(mesh); return mesh; };
+const cylY = (r, h, mat, seg = 40) => new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, seg), mat);
+const cylZ = (r, h, mat) => { const g = new THREE.CylinderGeometry(r, r, h, 40); g.rotateX(Math.PI / 2); return new THREE.Mesh(g, mat); };
+const vgear = (r, n, w, mat) => { const g = gearGeo(r, n, w); g.rotateX(Math.PI / 2); return new THREE.Mesh(g, mat); };
+const box = (w, h, d, mat) => new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+
+// Fixed round base and the turntable on top (yaws to the azimuth)
+const baseMesh = put(scene, cylY(BASE_R, BASE_H, shell, 80), 0, BASE_H / 2, 0);
+const pivot = new THREE.Group(); scene.add(pivot);
+const turntable = put(pivot, cylY(BASE_R, TT_H, shell, 80), 0, BASE_H + TT_H / 2, 0);
+
+// Square frame: a round window in each face, four thin sides
+const zf = D / 2 - WALL / 2;
+function facePlate(z) {
+  const sh = new THREE.Shape(); sh.moveTo(-S / 2, -S / 2); sh.lineTo(S / 2, -S / 2); sh.lineTo(S / 2, S / 2); sh.lineTo(-S / 2, S / 2); sh.closePath();
+  const hole = new THREE.Path(); hole.absarc(0, 0, R + 0.03, 0, Math.PI * 2, true); sh.holes.push(hole);
+  const g = new THREE.ExtrudeGeometry(sh, { depth: WALL, bevelEnabled: false }); g.translate(0, 0, -WALL / 2);
+  return put(pivot, new THREE.Mesh(g, shell), 0, CY, z);
+}
+const frameParts = [facePlate(zf), facePlate(-zf),
+  put(pivot, box(S, WALL, D, shell), 0, CY + S / 2 - WALL / 2, 0), put(pivot, box(S, WALL, D, shell), 0, CY - S / 2 + WALL / 2, 0),
+  put(pivot, box(WALL, S - 2 * WALL, D, shell), S / 2 - WALL / 2, CY, 0), put(pivot, box(WALL, S - 2 * WALL, D, shell), -S / 2 + WALL / 2, CY, 0)];
+
+// Rotating group: disc 1, disc 2, hub, flange, rotor and the two posts (turns with the elevation)
+const rot = new THREE.Group(); rot.position.set(0, CY, 0); pivot.add(rot);
+const dGeo = new THREE.CylinderGeometry(R, R, TH, 120); dGeo.rotateX(Math.PI / 2);
+[zf, -zf].forEach(z => {
+  put(rot, new THREE.Mesh(dGeo, white), 0, 0, z);
+  put(rot, box(R, 0.05, TH + 0.012, black), R / 2, 0, z);        // inlaid line, flush on both faces
+});
+const rotorZ1 = 0.26;                                              // rotor cap front face
+const rotMech = [
+  put(rot, cylZ(0.16, 0.06, gearMat), 0, 0, 0.29),                 // hub bonded to disc 1
+  put(rot, cylZ(0.5, 0.03, gearMat), 0, 0, 0.275),                 // adapter flange carrying the posts
+  put(rot, cylZ(0.35, 0.255, rotorMat), 0, 0, rotorZ1 - 0.1275),   // GM2804 rotor (outer bell)
+  put(rot, cylZ(0.05, 0.3, steel), 0, 0, -0.17)                    // centring pin from disc 2 into the motor bore
+];
+[45, 135].forEach(a => rotMech.push(put(rot, cylZ(0.04, 0.6, steel), 0.44 * cos(a), 0.44 * sin(a), -0.0225)));   // posts to disc 2
+
+// Fixed inside the frame: stator with its encoder, bracket, arm, cable
+const statorZ0 = rotorZ1 - 0.523;
+const fixedMech = [
+  put(pivot, cylZ(0.35, 0.258, motorMat), 0, CY, statorZ0 + 0.129),
+  put(pivot, box(0.5, 0.5, 0.04, steel), 0, CY, statorZ0 - 0.02),
+];
+const armTop = CY - 0.25, armBot = CY - S / 2 + WALL, armLen = armTop - armBot;
+fixedMech.push(put(pivot, box(0.14, armLen, 0.04, steel), 0, (armTop + armBot) / 2, statorZ0 - 0.02));
+const cableLen = armBot - 0.6;
+fixedMech.push(put(pivot, cylY(0.02, cableLen, black, 12), 0, 0.6 + cableLen / 2, statorZ0 - 0.02));
+const tube = put(pivot, cylY(0.17, 0.6, steel), 0, 1.0, 0); tube.material = steel.clone(); tube.material.transparent = true; tube.material.opacity = 0.45;
+const azBig = put(pivot, vgear(0.6, 60, 0.1, gearMat), 0, 0.95, 0);
+
+// Azimuth motor and 3:1 gears in the base
+const mech = new THREE.Group(); scene.add(mech);
+put(mech, box(0.84, 0.68, 0.84, motorMat), -0.8, 0.39, 0);
+put(mech, cylY(0.04, 0.3, steel), -0.8, 0.85, 0);
+const azPinion = put(mech, vgear(0.2, 20, 0.1, gearMat), -0.8, 0.95, 0);
+
+// Sun-direction ray
+const ray = new THREE.Group(); ray.position.set(0, CY, 0); ray.visible = false; scene.add(ray);
+const rayLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3(0, 0, -1)]), new THREE.LineBasicMaterial({ color: 0x999990 }));
+const rayDot = new THREE.Mesh(new THREE.SphereGeometry(0.09, 24, 16), new THREE.MeshBasicMaterial({ color: 0xe8a317 }));
+ray.add(rayLine, rayDot);
+
+const hidden = [...rotMech, ...fixedMech, tube, azBig, mech];
+const shellParts = [baseMesh, turntable, ...frameParts];
+hidden.forEach(g => g.traverse(o => { if (o.isMesh) o.visible = false; }));
+function setXray(on) {
+  hidden.forEach(g => g.traverse(o => { if (o.isMesh) o.visible = on; }));
+  shell.transparent = on; shell.opacity = on ? 0.12 : 1; shell.depthWrite = !on; shell.needsUpdate = true;
+  white.transparent = on; white.opacity = on ? 0.45 : 1; white.depthWrite = !on; white.needsUpdate = true;
+  shellParts.forEach(m => { m.castShadow = !on; });
+}
+$("xray").addEventListener("change", e => setXray(e.target.checked));
+$("ray").addEventListener("change", e => { ray.visible = e.target.checked; });
+$("text").addEventListener("change", e => { $("read").style.display = e.target.checked ? "" : "none"; });
+
+function resize() {
+  const w = stage.clientWidth, h = Math.max(420, Math.round(w * 0.62));
+  renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+window.addEventListener("resize", resize); resize();
+
+function frame(now) {
+  const dt = Math.min(0.25, (now - last) / 1000); last = now;
+  if (playing) t += dt * speed * 1000 * ($("rev").checked ? -1 : 1);
+
+  const lat = Math.max(-90, Math.min(90, parseFloat($("lat").value) || 0));
+  const lon = parseFloat($("lon").value) || 0;
+  const P = positions(t, lat, lon), p = P.sun;
+
+  const yaw = (90 - p.az) * rad, alt = p.alt * rad;
+  pivot.rotation.y = yaw;           // the whole frame faces the sun's azimuth
+  rot.rotation.z = alt;             // both discs and the posts turn about the motor axis: the line sits at the true elevation
+  azPinion.rotation.y = -3 * yaw;   // 60:20 (indicative)
+  const d = [cos(p.alt) * sin(p.az), sin(p.alt), -cos(p.alt) * cos(p.az)];
+  rayLine.geometry.setFromPoints([new THREE.Vector3(), new THREE.Vector3(d[0] * 3, d[1] * 3, d[2] * 3)]);
+  rayDot.position.set(d[0] * 3, d[1] * 3, d[2] * 3);
+
+  const f = v => (v < 0 ? "−" : "") + Math.abs(v).toFixed(1) + "°";
+  $("read").innerHTML = `<b>Elevation</b>${f(p.alt)}<br><b>Azimuth</b>${p.az.toFixed(1)}°`;
+
+  const L = localDate();
+  const dstr = `${L.getUTCFullYear()}-${pad(L.getUTCMonth() + 1)}-${pad(L.getUTCDate())}`;
+  const mins = L.getUTCHours() * 60 + L.getUTCMinutes();
+  if (document.activeElement !== $("date") && $("date").value !== dstr) $("date").value = dstr;
+  if (document.activeElement !== $("tod")) $("tod").value = mins;
+  $("timeLbl").textContent = `${pad(L.getUTCHours())}:${pad(L.getUTCMinutes())}`;
+
+  orbit.update();
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

@@ -90,9 +90,9 @@ R_IN, R_OUT = MIR_R + 4.0, MIR_R + (9.0 if M100 else 8.0)
 RING_W = 12.0 if M100 else 9.0
 BRG = (4.0, 9.0, 4.0) if M100 else (3.0, 7.0, 3.0)      # hinge bearing: 684ZZ for 100 mm, 683ZZ for 50 mm (the 150 mm unit's 684ZZ is too big for the 9 mm ring)
 BOSS_D, BOSS_X0 = (14.0, MIR_R + 1.5) if M100 else (11.0, MIR_R + 1.5)
-HUB_D, AXLE_D = (5.0, 4.0) if M100 else (4.0, 3.0)
+HUB_D, AXLE_D = (5.4, 4.0) if M100 else (4.0, 3.0)      # 100 mm hub 5.4 mm: fits inside the 684ZZ inner-race face and leaves wall round the bore
 MIR_T, MIR_MAT = (1.5, "acrylic") if M100 else (1.0, "glass")      # 100 mm: 1.5 mm acrylic (lighter than glass); 50 mm: 1 mm glass
-CAR_T, RIM_W, BAR_W = (5.0, 3.5, 6.0) if M100 else (4.0, 2.5, 5.0)  # carrier thick enough that the axle and hubs stay inside it
+CAR_T, RIM_W, BAR_W = (6.0, 3.5, 6.0) if M100 else (4.0, 2.5, 5.0)  # carrier thick enough that the axle and hubs stay inside it
 # mirror retention (100 mm only): a printed bezel on each face clamps the disc under a 2 mm lip and twist-locks (bayonet) onto four pegs on the carrier edge, no screws
 BEZEL = M100
 R_C = MIR_R + 1.0 if BEZEL else MIR_R          # carrier radius (1 mm bigger than the mirror so the bezel skirt has an edge to grip)
@@ -101,6 +101,7 @@ BZ_R, BZ_WALL_IN = R_C + 2.2, R_C + 0.2        # bezel outer radius (0.8 mm insi
 BZ_Z0 = 0.15                                   # skirt bottom above the carrier mid-plane (the two bezels leave a 0.3 mm gap at the equator)
 PEG_Z, PEG_ANG, PEG_R, PEG_OUT = 1.5, (50.0, 120.0, 250.0, 300.0), 0.8, 1.0   # carrier pegs: height above the mid-plane, entry angles, radius, length beyond the carrier edge
 GROOVE_R, TWIST = R_C + 1.2, 16.0              # L-groove floor radius in the bezel skirt (1 mm of wall left outside) and twist angle to lock
+BORE_D = AXLE_D + 0.15 if M100 else AXLE_D     # carrier axle bore: 100 mm gets 0.15 mm of slip (printed holes shrink; glue the rod in)
 ZC = FOOT_Z0 + FOOT_H + R_OUT                  # ring and mirror centre height
 SPIN_TIP = FOOT_Z0 + FOOT_H + 2.5 - 0.5        # rod tip, 0.5 mm short of the end of the bore
 INSERT_D = u.INSERT_D                          # M3 heat-set insert hole (box)
@@ -196,7 +197,11 @@ def build_unit():
         car = car.union(box(-BAR_W / 2, BAR_W / 2, -MIR_R + 1, MIR_R - 1, ZC - CAR_T / 2, ZC + CAR_T / 2))   # second bar; the 100 mm carrier needs only the rim and one bar (both bezels clamp the disc)
     hub_len = BOSS_X0 - 0.1
     car = car.union(cylx(HUB_D / 2, MIR_R - 1, hub_len, 0, ZC)).union(cylx(HUB_D / 2, -hub_len, -MIR_R + 1, 0, ZC))
-    car = car.cut(cylx(AXLE_D / 2, -hub_len - 1, hub_len + 1, 0, ZC))
+    car = car.cut(cylx(BORE_D / 2, -hub_len - 1, hub_len + 1, 0, ZC))
+    if M100:                                                                         # teardrop roof (flat-topped, 45 degree sides) through the carrier body so the sideways bore does not sag when printed flat
+        r_b = BORE_D / 2
+        pts = [(-r_b * 0.7071, ZC + r_b * 0.7071), (-0.48, ZC + 2.45), (0.48, ZC + 2.45), (r_b * 0.7071, ZC + r_b * 0.7071)]
+        car = car.cut(cq.Workplane("YZ").workplane(offset=-R_C - 1).polyline(pts).close().extrude(2 * R_C + 2))
     if BEZEL:
         for a in PEG_ANG:                                                            # bayonet pegs: front ones at z +PEG_Z, back ones (the front turned over about X) at z -PEG_Z and mirrored angles
             peg = cylx(PEG_R, R_C - 0.5, R_C + PEG_OUT, 0, ZC + PEG_Z)
@@ -467,7 +472,7 @@ def write_bom():
     amp = 5 if multi else 3
     rows = [
         ("print", "Ring with foot: PETG or ASA, matt black, print flat with the +Y face up, 4 walls", U, (f"ream the two {BRG[1] + 0.05:.2f} mm bearing pockets and the {SPIN_D + 0.1:.1f} mm spindle bore")),
-        ("print", "Mirror carrier: print flat, 4 walls", U, "four small bayonet pegs on the rim edge on each face; handle gently" if BEZEL else ""),
+        ("print", "Mirror carrier: print flat, 4 walls", U, "four small bayonet pegs on the rim edge on each face; handle gently; axle bore is 4.15 mm with a teardrop roof, glue the 4 mm rod in, ream with a 4.0 mm drill if it is tight" if BEZEL else ""),
         *([("print", "Mirror bezel: print lip face down (cup opening up), 4 walls", 2 * U, "one per face; holds the disc under a 2 mm lip and twist-locks (about 16 degrees) onto the four carrier pegs; the back one is the same part; test-fit one first, the click is a 0.04 mm interference")] if BEZEL else []),
         ("print", "Spindle bearing block: print upright, 4 walls", U, f"ream the two {BRG_S[1]:g} mm pockets so a {BRG_S_NAME.upper()} presses in"),
         ("print", "Motor bracket: print upside down on its flat top face", R, ("one per motor; the right-hand one (print_motor_bracket_2) is the mirror image" if DUAL else "one per row") if multi else "one motor"),

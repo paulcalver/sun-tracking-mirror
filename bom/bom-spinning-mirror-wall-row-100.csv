@@ -1,6 +1,6 @@
 process,item,qty_needed,unit_ex_vat_gbp,qty_bought,cost_ex_vat_gbp,supplier,note
 print,"Ring with foot: PETG or ASA, matt black, print flat with the +Y face up, 4 walls",8,,,,,ream the two 9.05 mm bearing pockets and the 8.1 mm spindle bore
-print,"Mirror carrier: print flat, 4 walls",8,,,,,four small bayonet pegs on the rim edge on each face; handle gently
+print,"Mirror carrier: print flat, 4 walls",8,,,,,"four small bayonet pegs on the rim edge on each face; handle gently; axle bore is 4.15 mm with a teardrop roof, glue the 4 mm rod in, ream with a 4.0 mm drill if it is tight"
 print,"Mirror bezel: print lip face down (cup opening up), 4 walls",16,,,,,"one per face; holds the disc under a 2 mm lip and twist-locks (about 16 degrees) onto the four carrier pegs; the back one is the same part; test-fit one first, the click is a 0.04 mm interference"
 print,"Spindle bearing block: print upright, 4 walls",8,,,,,ream the two 22 mm pockets so a 608ZZ presses in
 print,Motor bracket: print upside down on its flat top face,2,,,,,one per motor; the right-hand one (print_motor_bracket_2) is the mirror image

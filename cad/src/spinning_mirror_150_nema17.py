@@ -68,16 +68,17 @@ BORE_R = 2.55
 FOOT_H, FOOT_X, FOOT_SCREW_X, FOOT_NEST = 6.0, 12.0, 8.0, 4.5     # the foot nests 4.5 mm into a pocket in the hub top
 
 MIR_R, MIR_T = 75.0, 1.5                        # 150 mm acrylic discs, 1.5 mm
-CAR_T, RIM_W, BAR_W = 5.0, 3.5, 8.0             # carrier thickness, rim width, bar width
+CAR_T, RIM_W, BAR_W = 6.0, 3.5, 8.0             # carrier thickness (6 mm leaves a 1 mm wall round the axle bore), rim width, bar width
 SUP_R = round(0.5 * MIR_R)                      # inner support ring that keeps the thin discs flat
-PAD_Y, PAD_R, SLUG_D, SLUG_T = round(0.72 * MIR_R), 9.0, 8.0, CAR_T      # weight pad off axis, brass slug 8 x 5 (flush with the carrier)
+PAD_Y, PAD_R, SLUG_D, SLUG_T = round(0.72 * MIR_R), 9.0, 8.0, 5.0      # weight pad off axis, brass slug 8 x 5 (centred in the 6 mm carrier, 0.5 mm recessed each side)
 R_IN = MIR_R + 4.0                              # 3.9 mm clearance to the carrier at its worst
 R_OUT, RING_W = R_IN + 5.5, 12.0
 ZC = HUB_Z1 + FOOT_H + R_OUT                    # ring and mirror centre height
 AXLE_D, AXLE_L = 4.0, 2 * R_OUT                 # 4 mm axle, flush with the outer boss faces
 BOSS_D, BOSS_X0 = 14.0, R_IN - 2.5              # axle bosses on the ring, inner face 1.5 mm from the mirror rim
 BRG = (4.0, 9.0, 4.0)                           # 684ZZ: bore, outer diameter, width
-HUB_D = 5.0                                     # carrier hub that touches the inner race
+HUB_D = 5.4                                     # carrier hub next to the inner race (5.4 leaves a wall round the 4.15 bore)
+BORE_D = AXLE_D + 0.15                          # carrier axle bore: 0.15 mm of slip because printed holes shrink; glue the rod in
 FOOT_SCREW_D = 3.4
 
 RHO = {"print": 1.25e-3, "steel": 7.85e-3, "brass": 8.5e-3, "acrylic": 1.19e-3, "stator": 4.7e-3}      # g per mm3 (stator: 0.5 kg motor)
@@ -192,7 +193,10 @@ def build():
     car = car.cut(cylz(SLUG_D / 2, ZC - CAR_T, ZC + CAR_T, 0, PAD_Y))
     hub_len = BOSS_X0 - 0.1
     car = car.union(cylx(HUB_D / 2, MIR_R - 1, hub_len, 0, ZC)).union(cylx(HUB_D / 2, -hub_len, -MIR_R + 1, 0, ZC))
-    car = car.cut(cylx(AXLE_D / 2, -hub_len - 1, hub_len + 1, 0, ZC))
+    car = car.cut(cylx(BORE_D / 2, -hub_len - 1, hub_len + 1, 0, ZC))
+    r_b = BORE_D / 2                                                                 # flat-topped teardrop roof through the carrier body so the sideways bore does not sag when printed flat
+    pts = [(-r_b * 0.7071, ZC + r_b * 0.7071), (-0.48, ZC + 2.45), (0.48, ZC + 2.45), (r_b * 0.7071, ZC + r_b * 0.7071)]
+    car = car.cut(cq.Workplane("YZ").workplane(offset=-MIR_R - 1).polyline(pts).close().extrude(2 * MIR_R + 2))
     add("print_mirror_carrier", car, PRINT_C, "tilt", "print")
     add("axle_4mm_steel_rod", cylx(AXLE_D / 2, -AXLE_L / 2, AXLE_L / 2, 0, ZC), STEEL, "tilt", "steel")
     add(f"mirror_front_acrylic_{int(2 * MIR_R)}", cylz(MIR_R, ZC + CAR_T / 2, ZC + CAR_T / 2 + MIR_T), MIRROR, "tilt", "acrylic")

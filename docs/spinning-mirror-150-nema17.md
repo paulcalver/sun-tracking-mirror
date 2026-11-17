@@ -41,3 +41,6 @@ Draft CAD, nothing built or tested. `--check` runs the clash checks (8 random po
 - Files: `cad/out/spinning-mirror/spinning-mirror-150-nema17-trio/`, `bom/bom-spinning-mirror-150-nema17-trio.csv`, previews in `cad/media/previews/spinning-mirror-150-nema17-trio/`.
 
 Not in the trio yet (the brushless trio has both): the clear acrylic hood and the top bar. The rings are 169 mm across and reach about 2.7 m/s at their edge at 300 rpm, so until a hood is added keep hands and cables clear. A hood for this size would be about 590 x 190 x 290 mm of 5 mm acrylic; say if you want it. If a ring wobbles on its 5 mm shaft, a top pin and bar like the brushless trio is the fix.
+
+
+Update (2026-11-17): the carrier is now 6 mm thick with a 4.15 mm axle bore (flat-topped teardrop roof so the sideways bore does not sag) and a 5.4 mm hub, so the 4 mm rod slides in and is glued; the ring, pedestal, hub and bearings are unchanged, so only `print_mirror_carrier` needs reprinting. The brass slug stays 8 x 5 and sits centred (0.5 mm recessed each side). The clearance to the ring is unchanged at about 3.9 mm.

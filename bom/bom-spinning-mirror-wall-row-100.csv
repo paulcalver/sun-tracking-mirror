@@ -1,0 +1,47 @@
+process,item,qty_needed,unit_ex_vat_gbp,qty_bought,cost_ex_vat_gbp,supplier,note
+print,"Ring with foot: PETG or ASA, matt black, print flat with the +Y face up, 4 walls",8,,,,,ream the two 9.05 mm bearing pockets and the 8.1 mm spindle bore
+print,"Mirror carrier: print flat, 4 walls",8,,,,,four small bayonet pegs on the rim edge on each face; handle gently
+print,"Mirror bezel: print lip face down (cup opening up), 4 walls",16,,,,,"one per face; holds the disc under a 2 mm lip and twist-locks (about 16 degrees) onto the four carrier pegs; the back one is the same part; test-fit one first, the click is a 0.04 mm interference"
+print,"Spindle bearing block: print upright, 4 walls",8,,,,,ream the two 22 mm pockets so a 608ZZ presses in
+print,Motor bracket: print upside down on its flat top face,2,,,,,one per motor; the right-hand one (print_motor_bracket_2) is the mirror image
+print,Wall standoff: print with the flange on the bed,6,,,,,3 per rail; holds the rail off the wall; M5 into a back-slot T-nut
+print,"Electronics box: print upside down on the flat top plate; 124 x 78 x 44 mm, hangs under the bottom rail",1,,,,,inside 118 x 72 x 35 mm
+print,Electronics box lid: print flat; carries the perfboard posts,1,,,,,
+buy,"Aluminium extrusion 2020 (T-slot, 6 mm slot, 20 x 20 mm), cut to 1150 mm",1,12.890,1,12.89,"extrusion shop, AEP-TV-2020-B-CTS (12.89 is the basket price for 1180 mm, so 1150 should be slightly less)",the rail; deburr the ends
+buy,"NEMA 17 stepper 42/60 (The Pi Hut, 60 mm body): 1.68 A, 0.64 N m holding, 5 mm D shaft, 0.5 kg",2,15.000,2,30.00,"The Pi Hut (3 for 54.00 inc VAT, divided by 1.2)","one per motor; check the shaft length (24 mm assumed) and the front-face thread depth; each motor drives 4 units, see the doc"
+buy,Adafruit TMC2209 stepper driver breakout (DigiKey 1528-6121-ND); set the current about 1.2 to 1.5 A,3,6.690,3,20.07,DigiKey UK 1528-6121-ND (ex VAT),one per motor plus a spare
+buy,"Aluminium SMT heat sink 6.35 x 6.35 x 3.8 mm (0.25 x 0.25 x 0.15 in), 10 pack, stuck on each TMC2209 chip",3,0.400,10,4.00,The Pi Hut (10-pack 4.80 inc VAT),one per driver; check it fits the chip
+buy,"ESP32 dev board (38-pin); 2 step/dir outputs from the RMT or timers, acceleration limited",1,,,,,serial or OSC control from Max is possible
+buy,"24 V 5 A DC supply, 5.5 x 2.1 mm plug",1,,,,,2 motors at 1.2 to 1.5 A
+buy,Inline fuse holder with 5 A blade fuses,1,,,,,fuse in the 24 V lead
+buy,"Electrolytic capacitor 100 uF, 35 V or higher",3,,,,,"one across each driver's + and GND terminals, plus a spare"
+buy,Lever connectors 5-way (Wago 221-415) for 24 V and GND distribution,2,,,,,
+buy,4-pin 2.54 mm motor extension cable: 0.5 m (x2): the leads must reach the box from each end,3,,,,,the motor leads are short; run extensions up the wall
+buy,"Wire 22 AWG silicone red/black and 26 AWG logic, ferrules, heat shrink, cable ties",1,,,,,set
+buy,"Perfboard 70 x 90 mm, mounting holes 82 x 62 mm, with female header sockets for the ESP32 and drivers",1,,,,,check the hole spacing of your board
+buy,"Female DC power adapter, 2.1 mm jack to screw terminal block (The Pi Hut)",1,1.250,1,1.25,The Pi Hut (3 for 4.50 inc VAT),"no panel flange: it sits behind the 12 mm hole in the left wall, so glue or clip it in; check the socket diameter"
+buy,USB-C panel-mount extension cable (11 x 4.6 mm slot),1,,,,,right-hand end wall of the box
+buy,Rubber grommet for a 14 mm hole,2,,,,,"one per motor lead, one in each end wall of the box"
+buy,GT2 20T 8 mm bore double-head pulley for 6 mm belt (Technobots 6001-073),10,1.470,10,14.70,Technobots 6001-073,"two toothed bands, set screw in the centre boss, about 28 mm long (check on arrival); 2 spare"
+buy,GT2 20T 5 mm bore single pulley for 6 mm belt (Technobots 6001-002),3,1.480,3,4.44,Technobots 6001-002,motor pulleys plus a spare
+buy,"GT2 6 mm closed belt, 320 mm (Technobots 6001-442)",10,1.840,10,18.40,Technobots 6001-442,4 loops per motor; 2 spare
+buy,"Bearing 608ZZ (8 x 22 x 7), spindles",20,0.691,20,13.82,"Amazon UK, sourcing map 10-packs (inc VAT, divided by 1.2)",2 per unit plus 4 spare
+buy,"Bearing 684ZZ (4 x 9 x 4), mirror hinges",20,0.362,20,7.24,"Amazon UK, sourcing map 20-pack (inc VAT, divided by 1.2)",2 per unit plus 4 spare
+buy,"Stainless rod 8 mm x 300 mm (OFFCUP, pack of 2), each cut into 3 spindles of 80 mm",3,2.913,4,11.65,"Amazon UK, OFFCUP 2-packs (inc VAT, divided by 1.2)","flat ground for the grub screws; drawn rod can run oversize, test-fit a bearing"
+buy,"Stainless rod 4 mm, cut into 8 hinge axles of 118 mm",1,,,,,"glue into the carrier; already owned, about 950 mm needed"
+buy,"Acrylic mirror 100 mm round, 1.5 mm thick (cut from sheet or bought as discs)",20,,,,,"2 per unit plus 4 spare; held under the bezel lips, with an optional 0.3 mm double-sided tape"
+buy,"M5 slide-in T-nut for a 6 mm slot (20 series, zinc plated)",32,0.653,32,20.90,"extrusion shop, SIN-20-M5 (the 32-off price)","2 per unit, 2 per motor bracket, 1 per standoff (rail back slot), 2 for the box, spares; load them into the slot from the rail end before building"
+buy,"M5 x 35 button head screw, stainless",33,0.505,33,16.67,"extrusion shop, BHB-M5-35","2 per unit (block into the T-nuts) plus 2 per motor bracket, spares; also 1 per standoff and 1 spare"
+buy,"M5 x 12 button head screw, stainless",6,0.149,6,0.89,"extrusion shop, BHB-M5-12",2 hold the electronics box to the rail; 4 spare
+buy,"M8 flat washer 16 x 8.4 x 1.6 mm, stainless",10,0.220,10,2.20,M8 form A washer 16 x 8.4 x 1.6 (ex VAT),1 per spindle as a spacer on the inner race of the upper bearing; spares; check the 16 mm OD does not rub the 608ZZ outer race
+buy,"M3 x 6 socket cap head screw, stainless",10,0.154,10,1.54,"extrusion shop, CHB-M3-6",4 per motor into the front face; check the thread depth first
+buy,"M4 x 6 cup-point grub screw, stainless",10,0.156,10,1.56,"extrusion shop, GS-M4-6","1 per ring foot, clamps the ring to the spindle on a flat; thread-lock"
+buy,"M3 x 8 pan head screw, stainless",6,,,,,4 hold the electronics box lid; 2 spare
+buy,"M3 x 6 pan head screw, stainless",6,,,,,4 hold the perfboard to the lid posts; 2 spare
+buy,M4 x 40 wall screw with plug to suit your wall,14,,,,,2 per standoff flange; choose the plug for the wall type
+buy,Heat-set insert M4 x 6,10,0.069,60,4.14,"Amazon UK, mawmuaw M4x4x6 60-pack (inc VAT, divided by 1.2)","1 per ring foot, spares"
+buy,Heat-set insert M3 x 5.7,12,,,,,"4 box corners, 4 perfboard posts, spares"
+buy,Thread-locking compound (medium),1,,,,,grub screws and pulley set screws
+buy,Cyanoacrylate glue or retaining compound,1,,,,,glue the hinge axles into the carriers
+shipping,"Technobots UK shipping, zone 1 (ex VAT, from the 3 x 8 cart; assumed the same)",,,,5.95,Technobots,other shops' delivery not included
+total,"Priced lines above, ex VAT, with Technobots shipping",,,,192.31,,lines with no price are not in this total

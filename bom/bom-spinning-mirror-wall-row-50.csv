@@ -35,7 +35,7 @@ buy,"M5 x 35 screw, stainless",10,0.606,10,6.06,"extrusion shop, BHB-M5-35","1 p
 buy,"M5 x 12 button head screw, stainless",6,0.149,10,1.49,"extrusion shop, BHB-M5-12",2 hold the electronics box to the rail; 4 spare
 buy,"M5 panel/slot washer 12.5 x 5.3 x 1 mm, stainless",50,0.216,50,10.80,"extrusion shop, PSW-M5","2 per spindle as a 2 mm spacer on the inner race of the upper bearing; spares; 12.5 mm just clears the bearing's outer-race shoulder (about 13 mm), so check it does not rub"
 buy,"M3 x 6 socket cap head screw, stainless",14,,,,,4 per motor into the front face; check the thread depth first
-buy,"M3 x 5 cup-point grub screw, stainless",26,,,,,"1 per ring foot, clamps the ring to the spindle; thread-lock"
+buy,"M3 x 5 cup-point grub screw, stainless",26,,,,,"1 per ring foot, clamps the ring to the spindle on a flat; thread-lock"
 buy,"M3 x 8 pan head screw, stainless",6,,,,,4 hold the electronics box lid; 2 spare
 buy,"M3 x 6 pan head screw, stainless",6,,,,,4 hold the perfboard to the lid posts; 2 spare
 buy,M4 x 40 wall screw with plug to suit your wall,20,,,,,2 per standoff flange; choose the plug for the wall type

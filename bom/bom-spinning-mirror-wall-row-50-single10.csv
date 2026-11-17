@@ -3,7 +3,7 @@ print,"Ring with foot: PETG or ASA, matt black, print flat with the +Y face up, 
 print,"Mirror carrier: print flat, 4 walls",10,,,,,
 print,"Spindle bearing block: print upright, 4 walls",10,,,,,ream the two 16 mm pockets so a 625ZZ presses in
 print,Motor bracket: print upside down on its flat top face,1,,,,,one motor
-print,Wall standoff: print with the flange on the bed,3,,,,,holds the rail off the wall; M5 into a back-slot T-nut
+print,Wall standoff: print with the flange on the bed,3,,,,,3 per rail; holds the rail off the wall; M5 into a back-slot T-nut
 print,"Electronics box: print upside down on the flat top plate; 124 x 78 x 44 mm, hangs under the bottom rail",1,,,,,inside 118 x 72 x 35 mm
 print,Electronics box lid: print flat; carries the perfboard posts,1,,,,,
 buy,"Aluminium extrusion 2020 (T-slot, 6 mm slot, 20 x 20 mm), cut to 850 mm",1,9.283,1,9.28,"extrusion shop, AEP-TV-2020-B-CTS cut to 850",the rail; deburr the ends
@@ -30,10 +30,10 @@ buy,"Glass mirror 50 mm round, 1 mm thick, seamed edges, rear silvered",24,0.133
 buy,"M5 slide-in T-nut for a 6 mm slot (20 series, zinc plated)",31,0.461,31,14.30,"extrusion shop, SIN-20-M5 (the 100-off price)","2 per unit, 2 per motor bracket, 1 per standoff (rail back slot), 2 for the box, spares; load them into the slot from the rail end before building"
 buy,"M5 x 25 button head screw, stainless",28,0.156,28,4.36,"extrusion shop, BHB-M5-25","2 per unit (block into the T-nuts) plus 2 per motor bracket, spares"
 buy,"M5 x 35 screw, stainless",4,0.606,4,2.42,"extrusion shop, BHB-M5-35","1 per standoff, into the back-slot T-nut; 1 spare"
-buy,"M5 x 12 button head screw, stainless",6,0.149,6,0.89,"extrusion shop, BHB-M5-12","2 for the electronics box, spares"
+buy,"M5 x 12 button head screw, stainless",6,0.149,6,0.89,"extrusion shop, BHB-M5-12",2 hold the electronics box to the rail; 4 spare
 buy,"M5 panel/slot washer 12.5 x 5.3 x 1 mm, stainless",22,0.216,22,4.75,"extrusion shop, PSW-M5","2 per spindle as a 2 mm spacer on the inner race of the upper bearing; spares; 12.5 mm just clears the bearing's outer-race shoulder (about 13 mm), so check it does not rub"
 buy,"M3 x 6 socket cap head screw, stainless",6,,,,,4 per motor into the front face; check the thread depth first
-buy,"M3 x 5 cup-point grub screw, stainless",12,,,,,"1 per ring foot, clamps the ring to the spindle; thread-lock"
+buy,"M3 x 5 cup-point grub screw, stainless",12,,,,,"1 per ring foot, clamps the ring to the spindle on a flat; thread-lock"
 buy,"M3 x 8 pan head screw, stainless",6,,,,,4 hold the electronics box lid; 2 spare
 buy,"M3 x 6 pan head screw, stainless",6,,,,,4 hold the perfboard to the lid posts; 2 spare
 buy,M4 x 40 wall screw with plug to suit your wall,8,,,,,2 per standoff flange; choose the plug for the wall type

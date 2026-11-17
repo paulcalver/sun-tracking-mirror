@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """CAD assembly: wall-mounted piece of 3 rows of eight 50 mm spinning mirrors, one NEMA 17 per row (CadQuery). Draft, nothing built or tested.
+With --single10 it builds the alternative: one row of ten units on one NEMA 17, held off the wall by three printed standoffs (own output folder and BOM).
 
-One 2020 aluminium extrusion per row runs along the wall, tied back to three vertical 2020 uprights standing in the gaps between units. Each unit is a printed bearing block that bolts into the top T-slot
+One 2020 aluminium extrusion per row runs along the wall on three printed standoffs. Each unit is a printed bearing block that bolts into the top T-slot
 (two M5 T-nuts) so it can slide along the rail to set its belt tension. The 5 mm spindle runs in two 625ZZ bearings in the block and carries a
 double-head GT2 pulley (two toothed bands, 28 mm long) and, above it, a ring with a free hinge (3 mm axle on two 683ZZ bearings) holding a 50 mm x 1 mm
 glass mirror on each face of a printed carrier. The pulley's lower band drives the belt on one side and its upper band the belt on the other, so eight short
@@ -10,7 +11,7 @@ shaft up, and drives the first loop through a single GT2 pulley. All rings are f
 
 World frame (mm): wall plane at Y = 0, the viewer on +Y, X along the row, Z up with the rail bottom at Z = 0. Spindle line at Y = 45.
 Usage (from the repo root):
-  python3 cad/src/spinning_mirror_wall_row_50.py [--check] [--up y|z] [--seed N]
+  python3 cad/src/spinning_mirror_wall_row_50.py [--single10] [--check] [--up y|z] [--seed N]
 Writes cad/out/spinning-mirror/spinning-mirror-wall-row-50/ (assembly STEP, parts/<print|print_ready|purchase>/),
 bom/bom-spinning-mirror-wall-row-50.csv and previews in cad/media/previews/spinning-mirror-wall-row-50/.
 """
@@ -29,7 +30,8 @@ import spinning_mirror as sm                       # noqa: E402  (helpers)
 import spinning_mirror_150_nema17 as u             # noqa: E402  (STEP writer, NEMA 17 numbers)
 
 CAD = HERE.parent
-TAG = "spinning-mirror-wall-row-50"
+SINGLE10 = "--single10" in sys.argv                # alternative: one row of ten units on one NEMA 17
+TAG = "spinning-mirror-wall-row-50-single10" if SINGLE10 else "spinning-mirror-wall-row-50"
 OUTD = CAD / "out" / "spinning-mirror" / TAG
 PARTS = OUTD / "parts"
 IMG = CAD / "media" / "previews" / TAG
@@ -40,22 +42,17 @@ PRINT_C, STEEL, MIRROR, MOTOR_C = sm.PRINT_C, sm.STEEL, sm.MIRROR, sm.MOTOR_C
 ALU, BELT_C, WALL_C = "#a9b0b8", "#3a3a3a", "#e8e4dc"
 
 # ------------------------------------------------------------------ parameters (mm)
-N = 8                                          # mirrors per row
-ROWS = 3                                       # rows, one NEMA 17 each
+N = 10 if SINGLE10 else 8                      # mirrors per row
+ROWS = 1 if SINGLE10 else 3                    # rows, one NEMA 17 each
 ROW_PITCH = 200.0                              # vertical distance between rails (ring top is 150 above its rail bottom)
 PITCH = 80.0                                   # centre distance, set by a 200 mm GT2 loop on 20-tooth pulleys (pitch dia 12.73)
 Y_R = 45.0                                     # spindle line and rail centre, out from the wall
 RAIL_TOP = 20.0                                # 2020 extrusion, Z 0..20
 XS = [i * PITCH for i in range(N)]
 X_MOTOR = -PITCH
-RAIL_X0, RAIL_L = -56.0, 680.0
+RAIL_X0, RAIL_L = -56.0, (850.0 if SINGLE10 else 680.0)
 RAIL_X1 = RAIL_X0 + RAIL_L
-UPRIGHT_X = (40.0, 360.0, 600.0)               # vertical 2020 uprights in the gaps between units (and one past the last unit)
-UPRIGHT_Y0, UPRIGHT_Y1 = 5.0, 25.0             # 20 mm deep, 5 mm off the wall; the ring sweep stays 6 mm clear of it
-UPRIGHT_Z0 = 0.0
-UPRIGHT_Z1 = (ROWS - 1) * ROW_PITCH + 40.0      # 440
-TIE_Y1 = 58.0                                  # rail tie reaches from the upright face (25) to 3 mm past the rail front (55)
-WALL_PLATE_Z = (60.0, 360.0)                   # two printed wall plates per upright
+STANDOFF_X = (40.0, 400.0, 765.0) if SINGLE10 else (40.0, 360.0, 600.0)     # printed wall standoffs behind each rail, in the gaps between units
 
 # spindle block and bearings (625ZZ: 5 x 16 x 5)
 BRG_S = (5.0, 16.0, 5.0)
@@ -93,7 +90,7 @@ BR_THICK_X0 = RAIL_X0                          # the 22 mm thick part sits on th
 BR_TNUT = (-50.0, -34.0)
 
 # electronics box, hung under the rail by two M5 screws into slide-in T-nuts in the bottom slot; the lid carries a 7 x 9 cm perfboard
-EB_X0, EB_X1, EB_Y0, EB_Y1 = -46.0, 78.0, 6.0, 84.0        # 124 x 78 outside, clear of the wall plates and the uprights (the box top touches the upright ends)
+EB_X0, EB_X1, EB_Y0, EB_Y1 = -46.0, 78.0, 6.0, 84.0        # 124 x 78 outside, 1 mm clear of the wall standoff flanges
 EB_TOP_T, EB_WALL, EB_LID_T = 6.0, 3.0, 3.0
 EB_Z_LID = -44.0                                           # lid bottom; box top flush against the rail bottom at Z = 0
 EB_ZIN0, EB_ZIN1 = EB_Z_LID + EB_LID_T, -EB_TOP_T          # interior floor (lid top) -41, ceiling -6
@@ -179,7 +176,7 @@ def build_unit():
     add(UNIT, "mirror_back_glass_50", cylz(MIR_R, ZC - CAR_T / 2 - MIR_T, ZC - CAR_T / 2), MIRROR, "tilt", "glass")
 
 
-# ------------------------------------------------------------------ the frame: rail, ties, uprights, motor end, belts
+# ------------------------------------------------------------------ the frame: rail, standoffs, motor end, belts
 def rail():
     x0, x1 = RAIL_X0, RAIL_X1
     r = box(x0, x1, Y_R - 10, Y_R + 10, 0, RAIL_TOP)
@@ -194,40 +191,13 @@ def rail():
     return r
 
 
-def upright2020(xc, z0, z1):
-    """Vertical 2020 extrusion centred at x = xc, y = 15 (simplified T-slot profile, slot opening 6.2, cavity 11 x 6.1 deep)."""
-    yc = (UPRIGHT_Y0 + UPRIGHT_Y1) / 2
-    r = box(xc - 10, xc + 10, yc - 10, yc + 10, z0, z1).cut(cylz(2.1, z0 - 1, z1 + 1, xc, yc))
-    for sy in (-1, 1):
-        yf = yc + sy * 10.0
-        ya, yb = sorted((yf - sy * 1.8, yf + sy * 1.0))
-        yg, yh = sorted((yf - sy * 6.1, yf - sy * 1.8))
-        r = r.cut(box(xc - 3.1, xc + 3.1, ya, yb, z0 - 1, z1 + 1)).cut(box(xc - 5.5, xc + 5.5, yg, yh, z0 - 1, z1 + 1))
-    for sx in (-1, 1):
-        xf = xc + sx * 10.0
-        xa, xb = sorted((xf - sx * 1.8, xf + sx * 1.0))
-        xg, xh = sorted((xf - sx * 6.1, xf - sx * 1.8))
-        r = r.cut(box(xa, xb, yc - 3.1, yc + 3.1, z0 - 1, z1 + 1)).cut(box(xg, xh, yc - 5.5, yc + 5.5, z0 - 1, z1 + 1))
-    return r
-
-
-def rail_tie(xu):
-    """Printed block on top of a rail in the gap between two units: two M5 x 12 down into the rail's top-slot T-nuts, one M5 x 35 along Y
-    into a T-nut in the upright's front slot (heads recessed)."""
-    t = box(xu - 13, xu + 13, UPRIGHT_Y1, TIE_Y1, RAIL_TOP, RAIL_TOP + 10)
-    for dx in (-6.0, 6.0):
-        t = t.cut(cylz(2.75, RAIL_TOP - 1, RAIL_TOP + 11, xu + dx, Y_R)).cut(cylz(5.0, RAIL_TOP + 7.2, RAIL_TOP + 11, xu + dx, Y_R))
-    t = t.cut(cyly(2.75, UPRIGHT_Y1 - 1, TIE_Y1 + 1, xu, RAIL_TOP + 4.0)).cut(cyly(5.0, TIE_Y1 - 3.0, TIE_Y1 + 1, xu, RAIL_TOP + 4.0))
-    return t
-
-
-def wall_plate(xu, zc):
-    """Printed plate between the wall and an upright: one M5 x 12 from the wall side into a T-nut in the upright's back slot, two M4 wall screws either side."""
-    w = box(xu - 28, xu + 28, 0.0, 5.0, zc - 20, zc + 20)
-    w = w.cut(cyly(2.75, -1, 6, xu, zc)).cut(cyly(5.0, -1, 3.0, xu, zc))
-    for dx in (-22.0, 22.0):
-        w = w.cut(cyly(2.25, -1, 6, xu + dx, zc)).cut(cyly(4.5, 3.0, 6, xu + dx, zc))
-    return w
+def standoff():
+    """Arm from the wall to the rail's back face with a wall flange; M5 into a back-slot T-nut, head recessed on the wall side."""
+    st = box(-10, 10, 5, Y_R - 10, 0, RAIL_TOP).union(box(-15, 15, 0, 5, 10 - 25, 10 + 25))
+    st = st.cut(cyly(2.75, -1, Y_R - 10 + 1, 0, 10)).cut(cyly(5.0, -1, 10, 0, 10))
+    for sz in (-1, 1):
+        st = st.cut(cyly(2.25, -1, 6, 0, 10 + sz * 18))
+    return st
 
 
 def motor_bracket():
@@ -264,7 +234,7 @@ def electronics_box():
         b = b.cut(cylz(2.75, EB_ZIN1 - 1, 1.0, x, Y_R)).cut(cylz(5.0, EB_ZIN1 - 1, EB_ZIN1 + 3.5, x, Y_R))
     b = b.cut(cylx(6.0, EB_X1 - w - 1, EB_X1 + 1, Y_R - 18, EB_CUT_Z))            # DC barrel jack, 12 mm
     b = b.cut(box(EB_X1 - w - 1, EB_X1 + 1, Y_R + 18 - 5.5, Y_R + 18 + 5.5, EB_CUT_Z - 2.3, EB_CUT_Z + 2.3))   # USB-C panel socket, 11 x 4.6
-    for dy in (-20.0, 0.0, 20.0):                                                # three motor leads with their plugs, 14 mm holes
+    for dy in {1: (0.0,), 2: (-10.0, 10.0), 3: (-20.0, 0.0, 20.0)}[ROWS]:        # one motor lead per row with its plug, 14 mm holes
         b = b.cut(cylx(7.0, EB_X0 - 1, EB_X0 + w + 1, Y_R + dy, EB_CUT_Z))
     return b
 
@@ -284,8 +254,8 @@ def build_frame():
     ROW.clear()
     ELEC.clear()
     add(ROW, f"rail_2020_aluminium_{int(RAIL_L)}mm", rail(), ALU, "frame", "alu")
-    for k, x in enumerate(UPRIGHT_X):
-        add(ROW, f"print_rail_tie_{k + 1}", rail_tie(x), PRINT_C, "frame", "print")
+    for k, x in enumerate(STANDOFF_X):
+        add(ROW, f"print_wall_standoff_{k + 1}", standoff().translate((x, 0, 0)), PRINT_C, "frame", "print")
     add(ROW, "print_motor_bracket", motor_bracket(), PRINT_C, "frame", "print")
     mz1 = WEB_Z0
     body = box(X_MOTOR - u.N_W / 2, X_MOTOR + u.N_W / 2, Y_R - u.N_W / 2, Y_R + u.N_W / 2, mz1 - u.N_L, mz1).edges("|Z").chamfer(u.N_CH)
@@ -303,16 +273,12 @@ def build_frame():
         add(ROW, f"belt_gt2_6mm_200_loop_{k + 1}", belt(xs[k], xs[k + 1], Z_BAND_LO if k % 2 == 0 else Z_BAND_HI), BELT_C, "frame", "belt")
 
 
-    for k, x in enumerate(UPRIGHT_X):
-        add(ELEC, f"upright_2020_aluminium_{int(UPRIGHT_Z1 - UPRIGHT_Z0)}mm_{k + 1}", upright2020(x, UPRIGHT_Z0, UPRIGHT_Z1), ALU, "frame", "alu")
-        for j, zc in enumerate(WALL_PLATE_Z):
-            add(ELEC, f"print_wall_plate_{k + 1}{'ab'[j]}", wall_plate(x, zc), PRINT_C, "frame", "print")
     add(ELEC, "print_electronics_box", electronics_box(), PRINT_C, "frame", "print")
     add(ELEC, "print_electronics_lid", electronics_lid(), PRINT_C, "frame", "print")
     zb = EB_ZIN0 + BOARD_POST_H
     add(ELEC, "placeholder_perfboard_70x90", box(BOARD_CX - BOARD_L / 2, BOARD_CX + BOARD_L / 2, Y_R - BOARD_W / 2, Y_R + BOARD_W / 2, zb, zb + BOARD_T), "#2e6f4e", "frame", "ph")
     add(ELEC, "placeholder_esp32_55x28x22", box(BOARD_CX - 42, BOARD_CX + 13, Y_R - 33, Y_R - 5, zb + BOARD_T, zb + BOARD_T + 22), "#2e6f4e", "frame", "ph")
-    for k in range(3):                                                           # one TMC2209 per row
+    for k in range(ROWS):                                                        # one TMC2209 per row
         x0 = BOARD_CX - 44 + k * 28.0
         add(ELEC, f"placeholder_tmc2209_25x20x16_{k + 1}", box(x0, x0 + 25, Y_R + 5, Y_R + 25, zb + BOARD_T, zb + BOARD_T + 16), "#2e6f4e", "frame", "ph")
 
@@ -381,8 +347,8 @@ def print_oriented(nm, s):
         s = s.rotate((0, 0, 0), (1, 0, 0), 90)                      # flat, +Y face up
     elif nm in ("print_motor_bracket", "print_electronics_box"):
         s = s.rotate((0, 0, 0), (1, 0, 0), 180)                     # upside down, the flat top on the bed
-    elif nm.startswith("print_wall_plate"):
-        s = s.rotate((0, 0, 0), (1, 0, 0), 90)                      # flat on the bed
+    elif nm.startswith("print_wall_standoff"):
+        s = s.rotate((0, 0, 0), (1, 0, 0), 90)                      # flange on the bed
     bb = s.BoundingBox()
     return s.translate((-(bb.xmin + bb.xmax) / 2, -(bb.ymin + bb.ymax) / 2, -bb.zmin))
 
@@ -402,16 +368,14 @@ def export_all(yup):
     for nm, s, *_ in UNIT:
         put(nm, s)
     for nm, s, *_ in ROW + ELEC:
-        if (nm.startswith("print_rail_tie_") and not nm.endswith("_1")) or (nm.startswith("print_wall_plate_") and not nm.endswith("1a")) \
-                or (nm.startswith("upright_2020") and not nm.endswith("_1")):
-            continue                                                  # the ties, plates and uprights are identical
+        if nm.startswith("print_wall_standoff_") and not nm.endswith("_1"):
+            continue                                                  # the standoffs are identical
         if nm.startswith("belt_gt2") and not nm.endswith("_1"):
             continue
         if nm.startswith("placeholder_tmc2209") and not nm.endswith("_1"):
             continue
-        dx = UPRIGHT_X[0] if nm in ("print_rail_tie_1", "print_wall_plate_1a") or nm.startswith("upright_2020") else 0.0
-        put(nm.replace("print_rail_tie_1", "print_rail_tie").replace("print_wall_plate_1a", "print_wall_plate").replace("belt_gt2_6mm_200_loop_1", "belt_gt2_6mm_200_loop")
-            .replace("upright_2020_aluminium_440mm_1", "upright_2020_aluminium_440mm"), s.translate((-dx, 0, 0)))
+        dx = STANDOFF_X[0] if nm == "print_wall_standoff_1" else 0.0
+        put(nm.replace("print_wall_standoff_1", "print_wall_standoff").replace("belt_gt2_6mm_200_loop_1", "belt_gt2_6mm_200_loop"), s.translate((-dx, 0, 0)))
     print("Wrote part STEP files to", PARTS)
 
 
@@ -429,83 +393,94 @@ def assemble(poses, yup):
 
 def write_bom():
     U, R = N * ROWS, ROWS                                      # units, rows
-    UPR = len(UPRIGHT_X)
-    TIES, PLATES = UPR * R, 2 * UPR                            # rail ties, wall plates
+    SO = len(STANDOFF_X) * R                                   # wall standoffs, three per rail
+    multi = ROWS > 1
+    amp = 5 if multi else 3
     rows = [
         ("print", "Ring with foot: PETG or ASA, matt black, print flat with the +Y face up, 4 walls", U, "ream the two 7.05 mm bearing pockets and the 5.1 mm spindle bore"),
         ("print", "Mirror carrier: print flat, 4 walls", U, ""),
         ("print", "Spindle bearing block: print upright, 4 walls", U, "ream the two 16 mm pockets so a 625ZZ presses in"),
-        ("print", "Motor bracket: print upside down on its flat top face", R, "one per row"),
-        ("print", "Rail tie: print as modelled; sits on a rail in a gap between units and bolts to an upright", TIES, f"{UPR} per rail"),
-        ("print", "Wall plate: print flat; goes between the wall and an upright", PLATES, "2 per upright"),
+        ("print", "Motor bracket: print upside down on its flat top face", R, "one per row" if multi else "one motor"),
+    ]
+    rows += [("print", "Wall standoff: print with the flange on the bed", SO, f"{len(STANDOFF_X)} per rail; holds the rail off the wall; M5 into a back-slot T-nut")]
+    rows += [
         ("print", "Electronics box: print upside down on the flat top plate; 124 x 78 x 44 mm, hangs under the bottom rail", 1, "inside 118 x 72 x 35 mm"),
         ("print", "Electronics box lid: print flat; carries the perfboard posts", 1, ""),
-        ("buy", f"Aluminium extrusion 2020 (T-slot, 6 mm slot, 20 x 20 mm), cut to {int(RAIL_L)} mm", R, "one rail per row; deburr the ends"),
-        ("buy", f"Aluminium extrusion 2020 (T-slot, 6 mm slot, 20 x 20 mm), cut to {int(UPRIGHT_Z1 - UPRIGHT_Z0)} mm", UPR, "vertical uprights behind the rails, 5 mm off the wall; deburr the ends"),
-        ("buy", "NEMA 17 stepper 42/60 (The Pi Hut, 60 mm body): 1.68 A, 0.64 N m holding, 5 mm D shaft, 0.5 kg", R, "one per row; check the shaft length (24 mm assumed) and the front-face thread depth"),
-        ("buy", "Adafruit TMC2209 stepper driver breakout (DigiKey 1528-6121-ND); set the current about 1.2 to 1.5 A", R + 1, "one per row plus a spare"),
+        ("buy", f"Aluminium extrusion 2020 (T-slot, 6 mm slot, 20 x 20 mm), cut to {int(RAIL_L)} mm", R, "one rail per row; deburr the ends" if multi else "the rail; deburr the ends"),
+    ]
+    rows += [
+        ("buy", "NEMA 17 stepper 42/60 (The Pi Hut, 60 mm body): 1.68 A, 0.64 N m holding, 5 mm D shaft, 0.5 kg", R, ("one per row; " if multi else "") + "check the shaft length (24 mm assumed) and the front-face thread depth"),
+        ("buy", "Adafruit TMC2209 stepper driver breakout (DigiKey 1528-6121-ND); set the current about 1.2 to 1.5 A", R + 1, "one per row plus a spare" if multi else "one plus a spare"),
         ("buy", "Aluminium SMT heat sink 6.35 x 6.35 x 3.8 mm (0.25 x 0.25 x 0.15 in), 10 pack, stuck on each TMC2209 chip", R + 1, "one per driver; check it fits the chip"),
-        ("buy", "ESP32 dev board (38-pin); three step/dir outputs from the RMT or timers, acceleration limited", 1, "serial or OSC control from Max is possible"),
-        ("buy", "24 V 5 A DC supply, 5.5 x 2.1 mm plug", 1, "3 motors at 1.2 to 1.5 A"),
-        ("buy", "Inline fuse holder with 5 A blade fuses", 1, "fuse in the 24 V lead"),
-        ("buy", "Electrolytic capacitor 100 uF, 35 V or higher", R + 1, "one across each driver's + and GND terminals, plus a spare"),
-        ("buy", "Lever connectors 5-way (Wago 221-415) for 24 V and GND distribution", 2, ""),
-        ("buy", "4-pin 2.54 mm motor extension cable: 1 m (x2) for rows 2 and 3, 0.5 m (x1) for row 1", 3, "the motor leads are short; run extensions up the wall"),
+        ("buy", f"ESP32 dev board (38-pin); {'three step/dir outputs' if multi else 'one step/dir output'} from the RMT or timers, acceleration limited", 1, "serial or OSC control from Max is possible"),
+        ("buy", f"24 V {amp} A DC supply, 5.5 x 2.1 mm plug", 1, f"{R} motor{'s' if multi else ''} at 1.2 to 1.5 A"),
+        ("buy", f"Inline fuse holder with {amp} A blade fuses", 1, "fuse in the 24 V lead"),
+        ("buy", "Electrolytic capacitor 100 uF, 35 V or higher", R + 1, "one across each driver's + and GND terminals, plus a spare" if multi else "across the driver's + and GND terminals, plus a spare"),
+    ]
+    if multi:
+        rows += [
+            ("buy", "Lever connectors 5-way (Wago 221-415) for 24 V and GND distribution", 2, ""),
+            ("buy", "4-pin 2.54 mm motor extension cable: 1 m (x2) for rows 2 and 3, 0.5 m (x1) for row 1", 3, "the motor leads are short; run extensions up the wall"),
+        ]
+    rows += [
         ("buy", "Wire 22 AWG silicone red/black and 26 AWG logic, ferrules, heat shrink, cable ties", 1, "set"),
         ("buy", "Perfboard 70 x 90 mm, mounting holes 82 x 62 mm, with female header sockets for the ESP32 and drivers", 1, "check the hole spacing of your board"),
         ("buy", "Female DC power adapter, 2.1 mm jack to screw terminal block (The Pi Hut)", 1, "no panel flange: it sits behind the 12 mm hole in the right-hand wall, so glue or clip it in; check the socket diameter"),
         ("buy", "USB-C panel-mount extension cable (11 x 4.6 mm slot)", 1, "right-hand end wall of the box"),
         ("buy", "Rubber grommet for a 14 mm hole", R, "one per motor lead, left-hand wall of the box"),
         ("buy", "GT2 20T 5 mm bore double-head pulley for 6 mm belt (Technobots 6001-071)", U + 2, "two toothed bands, set screw in the centre boss, about 28 mm long (check on arrival); 2 spare"),
-        ("buy", "GT2 20T 5 mm bore single pulley for 6 mm belt (Technobots 6001-002)", R + 1, "motor pulleys plus a spare"),
+        ("buy", "GT2 20T 5 mm bore single pulley for 6 mm belt (Technobots 6001-002)", R + 1, "motor pulleys plus a spare" if multi else "motor pulley plus a spare"),
         ("buy", "GT2 6 mm closed belt, 200 mm (Technobots 6001-376)", U + 2, f"{N} loops per row; 2 spare"),
         ("buy", "Bearing 625ZZ (5 x 16 x 5), spindles", 2 * U + 4, "2 per unit plus 4 spare"),
         ("buy", "Bearing 683ZZ (3 x 7 x 3), mirror hinges", 2 * U + 4, "2 per unit plus 4 spare"),
         ("buy", f"Stainless rod 5 mm x 300 mm (AOOSU, pack of 4), each cut into 4 spindles of 67 mm", -(-U // 4), "flat ground for the grub screws; drawn rod can run oversize, test-fit a bearing"),
-        ("buy", f"Stainless rod 3 mm x 1 m, cut into {U} hinge axles of 66 mm", 2, "glue into the carrier"),
+        ("buy", f"Stainless rod 3 mm x 1 m, cut into {U} hinge axles of 66 mm", 2 if multi else 1, "glue into the carrier"),
         ("buy", "Glass mirror 50 mm round, 1 mm thick, seamed edges, rear silvered", 2 * U + 4, "2 per unit plus 4 spare; mount with mirror-safe tape or neutral silicone"),
-        ("buy", "M5 slide-in T-nut for a 6 mm slot (20 series, zinc plated)", 2 * U + 2 * R + 3 * TIES + PLATES + 2 + 4, "2 per unit, 2 per motor bracket, 3 per rail tie (2 in the rail, 1 in the upright front slot), 1 per wall plate (upright back slot), 2 for the box, spares; load them into the slot from the rail end before building"),
+        ("buy", "M5 slide-in T-nut for a 6 mm slot (20 series, zinc plated)", 2 * U + 2 * R + SO + 2 + 4,
+         "2 per unit, 2 per motor bracket, 1 per standoff (rail back slot), 2 for the box, spares; load them into the slot from the rail end before building"),
         ("buy", "M5 x 25 button head screw, stainless", 2 * U + 2 * R + 6, "2 per unit (block into the T-nuts) plus 2 per motor bracket, spares"),
-        ("buy", "M5 x 35 screw, stainless", TIES + 1, "1 per rail tie, along Y into the upright front-slot T-nut; 1 spare"),
-        ("buy", "M5 x 12 button head screw, stainless", 2 * TIES + PLATES + 2 + 4, "2 per rail tie (into the rail), 1 per wall plate (into the upright), 2 for the electronics box, spares"),
+        ("buy", "M5 x 35 screw, stainless", SO + 1, "1 per standoff, into the back-slot T-nut; 1 spare"),
+        ("buy", "M5 x 12 button head screw, stainless", 2 + 4, "2 hold the electronics box to the rail; 4 spare"),
         ("buy", "M5 panel/slot washer 12.5 x 5.3 x 1 mm, stainless", 2 * U + 2, "2 per spindle as a 2 mm spacer on the inner race of the upper bearing; spares; 12.5 mm just clears the bearing's outer-race shoulder (about 13 mm), so check it does not rub"),
         ("buy", "M3 x 6 socket cap head screw, stainless", 4 * R + 2, "4 per motor into the front face; check the thread depth first"),
         ("buy", "M3 x 5 cup-point grub screw, stainless", U + 2, "1 per ring foot, clamps the ring to the spindle; thread-lock"),
         ("buy", "M3 x 8 pan head screw, stainless", 6, "4 hold the electronics box lid; 2 spare"),
         ("buy", "M3 x 6 pan head screw, stainless", 6, "4 hold the perfboard to the lid posts; 2 spare"),
-        ("buy", "M4 x 40 wall screw with plug to suit your wall", 2 * PLATES + 2, "2 per wall plate; choose the plug for the wall type"),
+        ("buy", "M4 x 40 wall screw with plug to suit your wall", 2 * SO + 2, "2 per standoff flange; choose the plug for the wall type"),
         ("buy", "Heat-set insert M3 x 5.7", U + 8 + 4, "1 per ring foot, 4 box corners, 4 perfboard posts, spares"),
         ("buy", "Thread-locking compound (medium)", 1, "grub screws and pulley set screws"),
         ("buy", "Cyanoacrylate glue or retaining compound", 1, "glue the hinge axles into the carriers"),
         ("buy", "Double-sided foam mounting tape 1 mm and neutral-cure silicone", 1, "mirrors onto the carriers"),
     ]
     VAT = 1.2
-    # (substring of the item, unit price per piece ex VAT, quantity bought, supplier). Technobots and the extrusion shop show ex VAT; Amazon UK shows
-    # inc VAT, so those are divided by 1.2. Pack prices: 625ZZ 20 for 8.59, 683ZZ 10 for 6.59, 5 mm rods 4 for 5.99.
+    # (substring of the item, unit price per piece ex VAT, quantity in the 3x8 baskets, pack size, supplier). Technobots and the extrusion shop show ex VAT; Amazon UK
+    # and the Pi Hut show inc VAT, so those are divided by 1.2. For the single-row variant the quantity bought is the need rounded up to whole packs.
     prices = [
-        ("NEMA 17 stepper 42/60", 54.00 / VAT / 3, 3, "The Pi Hut (3 for 54.00 inc VAT, divided by 1.2)"),
-        ("Adafruit TMC2209", 6.69, 7, "DigiKey UK 1528-6121-ND (ex VAT)"),
-        ("Aluminium SMT heat sink", 4.80 / VAT / 10, 10, "The Pi Hut (10-pack 4.80 inc VAT)"),
-        ("Female DC power adapter", 4.50 / VAT / 3, 3, "The Pi Hut (3 for 4.50 inc VAT)"),
-        ("GT2 6 mm closed belt", 1.34, 26, "Technobots 6001-376"),
-        ("double-head pulley", 1.47, 26, "Technobots 6001-071"),
-        ("GT2 20T 5 mm bore single pulley", 1.48, 4, "Technobots 6001-002"),
-        ("Bearing 625ZZ", 8.59 / VAT / 20, 60, "Amazon UK, sourcing map 20-pack x 3"),
-        ("Bearing 683ZZ", 6.59 / VAT / 10, 50, "Amazon UK, sourcing map 10-pack x 5"),
-        ("Stainless rod 5 mm", 5.99 / VAT / 4, 8, "Amazon UK, AOOSU 4-pack x 2"),
-        ("cut to 680 mm", 22.27 / 3, 3, "extrusion shop, AEP-TV-2020-B-CTS cut to 680"),
-        ("Glass mirror 50 mm round", 3.99 / VAT / 25, 75, "eBay, 25 for 3.99 (assumed inc VAT) x 3 packs"),
-        ("M5 slide-in T-nut", 46.12 / 100, 100, "extrusion shop, SIN-20-M5"),
-        ("M5 x 25 button head", 9.35 / 60, 60, "extrusion shop, BHB-M5-25"),
-        ("M5 x 35 screw", 6.06 / 10, 10, "extrusion shop, BHB-M5-35"),
-        ("M5 x 12 button head", 1.49 / 10, 10, "extrusion shop, BHB-M5-12"),
-        ("M5 panel/slot washer", 10.80 / 50, 50, "extrusion shop, PSW-M5"),
+        ("NEMA 17 stepper 42/60", 54.00 / VAT / 3, 3, 1, "The Pi Hut (3 for 54.00 inc VAT, divided by 1.2)"),
+        ("Adafruit TMC2209", 6.69, 7, 1, "DigiKey UK 1528-6121-ND (ex VAT)"),
+        ("Aluminium SMT heat sink", 4.80 / VAT / 10, 10, 10, "The Pi Hut (10-pack 4.80 inc VAT)"),
+        ("Female DC power adapter", 4.50 / VAT / 3, 3, 1, "The Pi Hut (3 for 4.50 inc VAT)"),
+        ("GT2 6 mm closed belt", 1.34, 26, 1, "Technobots 6001-376"),
+        ("double-head pulley", 1.47, 26, 1, "Technobots 6001-071"),
+        ("GT2 20T 5 mm bore single pulley", 1.48, 4, 1, "Technobots 6001-002"),
+        ("Bearing 625ZZ", 8.59 / VAT / 20, 60, 20, "Amazon UK, sourcing map 20-packs"),
+        ("Bearing 683ZZ", 6.59 / VAT / 10, 50, 10, "Amazon UK, sourcing map 10-packs"),
+        ("Stainless rod 5 mm", 5.99 / VAT / 4, 8, 4, "Amazon UK, AOOSU 4-packs"),
+        ("cut to 680 mm", 22.27 / 3, 3, 1, "extrusion shop, AEP-TV-2020-B-CTS cut to 680"),
+        ("cut to 850 mm", 27.85 / 3, 3, 1, "extrusion shop, AEP-TV-2020-B-CTS cut to 850"),
+        ("Glass mirror 50 mm round", 3.99 / VAT / 25, 75, 25, "eBay, 25 for 3.99 (assumed inc VAT)"),
+        ("M5 slide-in T-nut", 46.12 / 100, 100, 1, "extrusion shop, SIN-20-M5 (the 100-off price)"),
+        ("M5 x 25 button head", 9.35 / 60, 60, 1, "extrusion shop, BHB-M5-25"),
+        ("M5 x 35 screw", 6.06 / 10, 10, 1, "extrusion shop, BHB-M5-35"),
+        ("M5 x 12 button head", 1.49 / 10, 10, 1, "extrusion shop, BHB-M5-12"),
+        ("M5 panel/slot washer", 10.80 / 50, 50, 1, "extrusion shop, PSW-M5"),
     ]
     out, total = [], 0.0
     for pr, item, qty, note in rows:
         hit = next((x for x in prices if x[0] in item), None)
         if hit:
-            _, unit, bought, sup = hit
+            _, unit, bought3, pack, sup = hit
+            bought = bought3 if multi else -(-qty // pack) * pack
             cost = round(unit * bought, 2)
             total += cost
             if bought < qty:
@@ -513,7 +488,7 @@ def write_bom():
             out.append((pr, item, qty, f"{unit:.3f}", bought, f"{cost:.2f}", sup, note))
         else:
             out.append((pr, item, qty, "", "", "", "", note))
-    out.append(("shipping", "Technobots UK shipping, zone 1 (ex VAT, from the cart)", "", "", "", "5.95", "Technobots", "other shops' delivery not included"))
+    out.append(("shipping", "Technobots UK shipping, zone 1 (ex VAT, from the 3 x 8 cart; assumed the same)", "", "", "", "5.95", "Technobots", "other shops' delivery not included"))
     total += 5.95
     out.append(("total", "Priced lines above, ex VAT, with Technobots shipping", "", "", "", f"{total:.2f}", "", "lines with no price are not in this total"))
     BOMF.parent.mkdir(exist_ok=True)
@@ -529,6 +504,7 @@ def main():
     ap.add_argument("--up", choices=("y", "z"), default="y")
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--seed", type=int, default=3)
+    ap.add_argument("--single10", action="store_true")
     a = ap.parse_args()
     build()
     i_lo, i_hi = inertia_unit(0), inertia_unit(90)
@@ -577,7 +553,7 @@ def main():
     P = all_parts(P0)
     top = (ROWS - 1) * ROW_PITCH + 190
     bx = (-130, RAIL_X1 + 40, 0, 160, -30, top)
-    sm.render(P, IMG / "overview.png", [(14, 62, "3 rows of eight 50 mm mirrors, one NEMA 17 per row")], box_=(-130, RAIL_X1 + 40, 0, 140, -60, top), zoom=1.55)
+    sm.render(P, IMG / "overview.png", [(14, 62, f"{N * ROWS} mirrors of 50 mm, {ROWS} row{'s' if ROWS > 1 else ''} of {N}, one NEMA 17 per row")], box_=(-130, RAIL_X1 + 40, 0, 140, -60, top), zoom=1.55)
     sm.render(P, IMG / "front.png", [(0, 90, "View from the room (X runs right to left)")], box_=bx, zoom=1.7)
     sm.render(P, IMG / "motor-end.png", [(18, 40, "Motor end of the bottom row: bracket, NEMA 17, first units")], box_=(-120, 200, 0, 100, -30, 190), zoom=1.2, only=("r1", "electronics"))
     sm.render(P, IMG / "unit-section.png", [(4, 90, "Section through the bottom row (y > 45 cut away)")], box_=(-120, 200, 0, 100, -30, 190), zoom=1.2, cut_y=Y_R, only=("r1",))

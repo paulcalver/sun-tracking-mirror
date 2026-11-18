@@ -98,6 +98,7 @@ CAR_T, RIM_W, BAR_W = (6.0, 3.5, 6.0) if M100 else (4.0, 2.5, 5.0)  # carrier th
 # mirror retention (100 mm): no bezel; the two discs are glued flat to the carrier faces, with the carrier edge 0.5 mm inside the disc so no printed edge shows
 R_C = MIR_R - 0.5 if M100 else MIR_R             # carrier radius
 POCKET_BACK = 0.4 if M100 else 0.1               # pocket depth beyond the bearing width (100 mm: 0.4, so the bearing never bottoms on the first layers)
+PAD_W, PAD_D = 20.0, 14.0                      # 100 mm carrier weight pad: width along the axle, depth in from the rim (solid PLA; keep it to one side)
 PK_R = BRG[1] / 2 + (0.125 if M100 else 0.05)  # bearing pocket radius: 100 mm 9.25 mm across (a slip fit: a printed hole shrinks 0.1 mm or more and a 684ZZ outer race is only 0.85 mm thick, so a pressed fit squeezes it and adds drag; hold it with a drop of retaining compound)
 PK_CH, PK_TOP = 0.4, 4.9                       # 100 mm: lead-in chamfer at the pocket mouth, and the height of the flat top of the teardrop roof above the pocket axis (the ring prints with +Y up)
 RELIEF_D, RELIEF_DEPTH = (7.2 if M100 else 6.4), 1.5              # 100 mm: counterbore in the pocket floor, wider than the 684ZZ inner race (about 6 mm), so only the outer race touches the floor
@@ -211,6 +212,8 @@ def build_unit():
     rim = cylz(R_C, ZC - CAR_T / 2, ZC + CAR_T / 2).cut(cylz(MIR_R - RIM_W, ZC - CAR_T, ZC + CAR_T))
     bar = box(-MIR_R + 1, MIR_R - 1, -BAR_W / 2, BAR_W / 2, ZC - CAR_T / 2, ZC + CAR_T / 2)
     car = rim.union(bar)
+    if M100:                                                                         # weight pad at the carrier's -Y edge, hidden between the discs: the mirror hangs flat in the ring at rest (about 1.7 g at 41 mm, about 0.7 mN m)
+        car = car.union(box(-PAD_W / 2, PAD_W / 2, -(R_C - 1.5), -(R_C - 1.5) + PAD_D, ZC - CAR_T / 2, ZC + CAR_T / 2))
     if not M100:
         car = car.union(box(-BAR_W / 2, BAR_W / 2, -MIR_R + 1, MIR_R - 1, ZC - CAR_T / 2, ZC + CAR_T / 2))   # second bar; the 100 mm carrier needs only the rim and one bar (a 1.5 mm disc glued on a 3 mm rim sags about 0.06 mm at 10 g)
     hub_len = BOSS_X0 - 0.1
@@ -460,7 +463,7 @@ def write_bom():
     amp = 5 if multi else 3
     rows = [
         ("print", ("Ring with foot: matt PLA, print flat with the +Y face up, 4 walls" if M100 else "Ring with foot: PETG or ASA, matt black, print flat with the +Y face up, 4 walls"), U, (f"ream the two {2 * PK_R:.2f} mm bearing pockets (slip fit; a drop of retaining compound on the outer race holds each bearing) and the {SPIN_D + 0.1:.1f} mm spindle bore")),
-        ("print", "Mirror carrier: print flat, 4 walls", U, ("rimless: the rim edge is 0.5 mm inside the disc; discs are glued on, see the doc; axle bore is 4.15 mm with a teardrop roof, glue the 4 mm rod in, ream with a 4.0 mm drill if it is tight") if M100 else ""),
+        ("print", "Mirror carrier: print flat, 4 walls", U, ("rimless: the rim edge is 0.5 mm inside the disc; discs are glued on, see the doc; a solid 20 x 14 mm weight pad on one edge makes the mirror hang flat at rest; axle bore is 4.15 mm with a teardrop roof, glue the 4 mm rod in, ream with a 4.0 mm drill if it is tight") if M100 else ""),
         ("print", "Spindle bearing block: print upright, 4 walls" + (" (matt PLA, or PLA-CF for less creep under belt tension)" if M100 else ""), U, f"ream the two {BRG_S[1]:g} mm pockets so a {BRG_S_NAME.upper()} presses in"),
         ("print", "Motor bracket: print upside down on its flat top face" + (" in PLA-CF (stiffer, creeps less; it carries the motor and belt pull and sits against the warm motor face)" if M100 else ""), R, ("one per motor; the right-hand one (print_motor_bracket_2) is the mirror image" if DUAL else "one per row") if multi else "one motor"),
     ]

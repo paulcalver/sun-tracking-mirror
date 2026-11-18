@@ -1,6 +1,6 @@
 process,item,qty_needed,unit_ex_vat_gbp,qty_bought,cost_ex_vat_gbp,supplier,note
 print,"Ring with foot: matt PLA, print flat with the +Y face up, 4 walls",8,,,,,ream the two 9.25 mm bearing pockets (slip fit; a drop of retaining compound on the outer race holds each bearing) and the 8.1 mm spindle bore
-print,"Mirror carrier: print flat, 4 walls",8,,,,,"rimless: the rim edge is 0.5 mm inside the disc; discs are glued on, see the doc; axle bore is 4.15 mm with a teardrop roof, glue the 4 mm rod in, ream with a 4.0 mm drill if it is tight"
+print,"Mirror carrier: print flat, 4 walls",8,,,,,"rimless: the rim edge is 0.5 mm inside the disc; discs are glued on, see the doc; a solid 20 x 14 mm weight pad on one edge makes the mirror hang flat at rest; axle bore is 4.15 mm with a teardrop roof, glue the 4 mm rod in, ream with a 4.0 mm drill if it is tight"
 print,"Spindle bearing block: print upright, 4 walls (matt PLA, or PLA-CF for less creep under belt tension)",8,,,,,ream the two 22 mm pockets so a 608ZZ presses in
 print,"Motor bracket: print upside down on its flat top face in PLA-CF (stiffer, creeps less; it carries the motor and belt pull and sits against the warm motor face)",2,,,,,one per motor; the right-hand one (print_motor_bracket_2) is the mirror image
 print,Wall standoff: print with the flange on the bed,3,,,,,3 per rail; holds the rail off the wall; M5 into a back-slot T-nut

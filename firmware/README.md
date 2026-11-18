@@ -39,7 +39,7 @@ One command per line (or separated by `;`). In Max use `[serial]` at 115200 and 
 | `start` | same as `enable 1` |
 | `stop` | ramp to zero at the acceleration limit, then release drivers after 300 ms |
 | `estop` | release drivers now, clear rpm and jitter |
-| `rpm <0..300>` | target speed magnitude (a negative value also sets direction -1) |
+| `rpm <0..cap>` | target speed magnitude, clamped to `MAX_SPINDLE_RPM` (reply says `CLAMPED`) (a negative value also sets direction -1) |
 | `dir 1` / `dir -1` (`cw` / `ccw`) | direction; a reversal ramps through zero |
 | `accel <rad/s2>` | acceleration limit, clamped to 5..300, default 100 |
 | `jitter 0` / `jitter 1` | random speed shifts off / on |
@@ -57,7 +57,8 @@ Typical first run: `rpm 60`, `enable 1`, then `rpm 120`, `stop`. Boot state is d
 - `DIR_INVERT[]`: per-motor physical direction. Both wall motors must turn the same way in the room, and they sit at opposite rail ends, so one probably needs inverting. Check with `dir 1` on each motor alone.
 - `TIE_STEP_PINS`: 1 drives only GPIO 25 and you wire both drivers' STEP inputs to it.
 - `MICROSTEPS` (8) and `FULL_STEPS_PER_REV` (200): must match the driver's MS pins.
-- `MAX_RPM` (300), `ACCEL_DEFAULT` (100 rad/s2), `ACCEL_MAX` (300 rad/s2): from the torque budget in the docs. 100 rad/s2 is about 0.06 N m on the wall piece, 300 is about 0.19 N m of roughly 0.25 N m available at 24 V.
+- `MAX_SPINDLE_RPM` (300): hard speed cap in spindle rpm, converted with the actual steps/rev, microstepping and `PULLEY_RATIO` (1.0). Every path is held to it: ramp target, jitter picks, `rpm`/`jrange` commands (clamped, and the reply says `CLAMPED`) and a final clamp before the step-rate conversion; all motors share the one capped value. It is printed at boot. Keep it below the speed the bench test has proved (a mirror letting go is about 1 J at 600 rpm, 3 J at 1000 rpm).
+- `ACCEL_DEFAULT` (100 rad/s2), `ACCEL_MAX` (300 rad/s2, acceleration is always limited by the ramp and `accel` is clamped to this): from the torque budget in the docs. 100 rad/s2 is about 0.06 N m on the wall piece, 300 is about 0.19 N m of roughly 0.25 N m available at 24 V.
 - `JITTER_*` defaults, `TICK_HZ` (step timing resolution; the step rate must stay under `TICK_HZ / 2.5`, checked at compile time).
 
 ## How lock-step works
@@ -69,7 +70,7 @@ One 100 kHz timer interrupt runs a phase accumulator per motor and raises every 
 - Compile: not built. Core 3.x API names (`timerBegin(freq)`, `timerAlarm`, `ARDUINO_ISR_ATTR`) were written from memory.
 - Nothing has been run: no step pulses, direction, ramp feel or jitter behaviour observed.
 - 10 us step quantisation may make the TMC2209 audibly rougher than a smoothly timed pulse train; raise `TICK_HZ` if so (200 kHz is likely fine).
-- Real torque at 300 rpm and 24 V is the docs' estimate, not measured; lower `ACCEL_MAX` or `MAX_RPM` if the motor stalls, and note a stall under open loop is silent.
+- Real torque at 300 rpm and 24 V is the docs' estimate, not measured; lower `ACCEL_MAX` or `MAX_SPINDLE_RPM` if the motor stalls, and note a stall under open loop is silent.
 - Direction on each wall motor, and whether the TMC2209's MS pins give 1/8 on your board, need checking.
 - No watchdog: if Max stops sending, the motors keep their last command. Use `stop` / `estop`.
 - OSC over WiFi was not requested; serial only.

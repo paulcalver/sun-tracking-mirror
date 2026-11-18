@@ -66,13 +66,22 @@ const float MOTOR_SCALE[3] = {1.0f, 1.0f, 1.0f};
 // board's table and set MICROSTEPS to 16.
 #define MICROSTEPS 8
 #define FULL_STEPS_PER_REV 200
-constexpr float STEPS_PER_REV = (float)(FULL_STEPS_PER_REV * MICROSTEPS);
+// Motor revolutions per spindle (ring) revolution. The belts are 1:1 20T GT2
+// pulleys on both wall pieces. Change this if a different pulley pair is used.
+constexpr float PULLEY_RATIO = 1.0f;
+// Driver steps per SPINDLE revolution; all rpm in this sketch are spindle rpm.
+constexpr float STEPS_PER_REV = (float)(FULL_STEPS_PER_REV * MICROSTEPS) * PULLEY_RATIO;
 
 // Step generator tick (Hz). Max step rate is TICK_HZ / 2.
 #define TICK_HZ 100000UL
 
-// Speed ceiling (rpm, magnitude). 300 rpm is the design limit.
-constexpr float MAX_RPM = 300.0f;
+// HARD SPEED CAP, in SPINDLE (ring) rpm. Every path that sets speed (ramp
+// target, random shifts, serial commands, final step-rate conversion) is held
+// to this. It exists because a mirror that let go of its pegs carries energy
+// that scales with speed squared (about 1 J at 600 rpm, 3 J at 1000 rpm for a
+// 63 g mirror 0.1 m out). It MUST stay below whatever speed the bench test has
+// actually proved safe; do not raise it just because the motor can go faster.
+constexpr float MAX_SPINDLE_RPM = 300.0f;
 
 // Acceleration (rad/s^2). Budget from the docs: about 100 is comfortable
 // (0.06 N m for the wall piece), 300 is the absolute ceiling (0.19 N m of
@@ -101,8 +110,8 @@ constexpr uint32_t ENABLE_SETTLE_MS = 20;
 // Compile-time checks
 // ----------------------------------------------------------------------------
 static_assert(NUM_MOTORS >= 1 && NUM_MOTORS <= 3, "NUM_MOTORS must be 1..3");
-static_assert(MAX_RPM / 60.0f * STEPS_PER_REV < (float)TICK_HZ / 2.5f,
-              "Step rate at MAX_RPM too high for TICK_HZ; raise TICK_HZ or lower MICROSTEPS");
+static_assert(MAX_SPINDLE_RPM / 60.0f * STEPS_PER_REV < (float)TICK_HZ / 2.5f,
+              "Step rate at MAX_SPINDLE_RPM too high for TICK_HZ; raise TICK_HZ or lower MICROSTEPS");
 
 // ----------------------------------------------------------------------------
 // Step generator (ISR side)
@@ -159,6 +168,14 @@ static float  jCurrentRpm  = 0.0f;
 static uint32_t lastRampUs = 0;
 
 constexpr float RPM_TO_RAD = 2.0f * PI / 60.0f;
+constexpr float MAX_SPINDLE_RAD = MAX_SPINDLE_RPM * RPM_TO_RAD;
+
+// Clamp an rpm magnitude to the hard cap; *clamped is set if it was reduced.
+static float capRpm(float rpm, bool *clamped) {
+  rpm = fabsf(rpm);
+  if (rpm > MAX_SPINDLE_RPM) { if (clamped) *clamped = true; return MAX_SPINDLE_RPM; }
+  return rpm;
+}
 
 // ---- helpers ---------------------------------------------------------------
 
@@ -175,6 +192,10 @@ static void driversEnable(bool on) {
 
 // Push the current speed to every motor atomically.
 static void applySpeed() {
+  // Last line of defence: whatever got here, never exceed the cap. One value
+  // is computed once and used for every motor, so they stay in lock-step.
+  if (velRad > MAX_SPINDLE_RAD) velRad = MAX_SPINDLE_RAD;
+  else if (velRad < -MAX_SPINDLE_RAD) velRad = -MAX_SPINDLE_RAD;
   float stepsPerSec = fabsf(velRad) / (2.0f * PI) * STEPS_PER_REV;
   bool forward = velRad >= 0.0f;
   uint32_t inc[NUM_MOTORS];
@@ -199,7 +220,7 @@ static void scheduleJitter(uint32_t now) {
 }
 
 static void pickJitterTarget() {
-  jCurrentRpm = randomFloat(jRpmLo, jRpmHi);
+  jCurrentRpm = capRpm(randomFloat(jRpmLo, jRpmHi), nullptr);
 }
 
 // ---- Hall / phase-check hook (NOT IMPLEMENTED) ------------------------------
@@ -240,6 +261,9 @@ static void rampStep() {
   } else {
     targetRad = dirSign * manualRpm * RPM_TO_RAD;
   }
+
+  if (targetRad > MAX_SPINDLE_RAD) targetRad = MAX_SPINDLE_RAD;
+  else if (targetRad < -MAX_SPINDLE_RAD) targetRad = -MAX_SPINDLE_RAD;
 
   // Trapezoid ramp: move velRad toward targetRad by at most accel * dt.
   float maxDelta = accelLimit * dt;
@@ -311,7 +335,7 @@ static void printHelp() {
     "  start             enable and apply rpm/jitter (soft start)\n"
     "  stop              ramp to zero, then release drivers\n"
     "  estop             release drivers now, clear rpm and jitter\n"
-    "  rpm <0..300>      target speed magnitude\n"
+    "  rpm <0..cap>      target speed magnitude (clamped to MAX_SPINDLE_RPM)\n"
     "  dir <1|-1|cw|ccw> direction (reversal ramps through zero)\n"
     "  accel <rad/s2>    acceleration limit (5..300, default 100)\n"
     "  jitter 0|1        random speed shifts on/off\n"
@@ -345,10 +369,12 @@ static void handleLine(char *line) {
   } else if (!strcmp(cmd, "rpm")) {
     if (!a1) { Serial.println("err rpm needs a number"); return; }
     float v = atof(a1);
-    manualRpm = constrain(fabsf(v), 0.0f, MAX_RPM);
+    bool clamped = false;
+    manualRpm = capRpm(v, &clamped);
     // A negative number is accepted as a direction change too.
     if (v < 0.0f) dirSign = -1;
-    Serial.printf("ok rpm %.1f\n", manualRpm);
+    if (clamped) Serial.printf("ok rpm %.1f CLAMPED (asked %.1f, cap %.0f)\n", manualRpm, v, MAX_SPINDLE_RPM);
+    else Serial.printf("ok rpm %.1f\n", manualRpm);
   } else if (!strcmp(cmd, "dir")) {
     if (!a1) { Serial.println("err dir needs 1, -1, cw or ccw"); return; }
     if (!strcasecmp(a1, "cw")) dirSign = 1;
@@ -366,11 +392,12 @@ static void handleLine(char *line) {
     Serial.printf("ok jitter %d\n", jitterOn);
   } else if (!strcmp(cmd, "jrange")) {
     if (!a1 || !a2) { Serial.println("err jrange needs lo hi"); return; }
-    float lo = constrain(fabsf(atof(a1)), 0.0f, MAX_RPM);
-    float hi = constrain(fabsf(atof(a2)), 0.0f, MAX_RPM);
+    bool clamped = false;
+    float lo = capRpm(atof(a1), &clamped);
+    float hi = capRpm(atof(a2), &clamped);
     if (hi < lo) { float t = lo; lo = hi; hi = t; }
     jRpmLo = lo; jRpmHi = hi;
-    Serial.printf("ok jrange %.0f %.0f\n", jRpmLo, jRpmHi);
+    Serial.printf("ok jrange %.0f %.0f%s\n", jRpmLo, jRpmHi, clamped ? " CLAMPED (cap applied)" : "");
   } else if (!strcmp(cmd, "jtime")) {
     if (!a1 || !a2) { Serial.println("err jtime needs min max"); return; }
     float lo = max(0.1f, atof(a1));
@@ -437,7 +464,9 @@ void setup() {
   lastRampUs = micros();
   jCurrentRpm = JITTER_RPM_LO_DEFAULT;
 
-  Serial.println("spinning-mirror firmware ready; drivers DISABLED. Type 'help'.");
+  Serial.printf("spinning-mirror firmware ready; drivers DISABLED. Type 'help'.\n"
+                "speed cap MAX_SPINDLE_RPM=%.0f spindle rpm (%.0f steps/s), accel cap %.0f rad/s2, %d motor(s)\n",
+                MAX_SPINDLE_RPM, MAX_SPINDLE_RPM / 60.0f * STEPS_PER_REV, ACCEL_MAX, NUM_MOTORS);
   printStatus();
 }
 

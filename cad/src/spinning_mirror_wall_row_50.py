@@ -471,11 +471,11 @@ def write_bom():
     multi = MOTORS > 1
     amp = 5 if multi else 3
     rows = [
-        ("print", "Ring with foot: PETG or ASA, matt black, print flat with the +Y face up, 4 walls", U, (f"ream the two {BRG[1] + 0.05:.2f} mm bearing pockets and the {SPIN_D + 0.1:.1f} mm spindle bore")),
+        ("print", ("Ring with foot: matt PLA, print flat with the +Y face up, 4 walls" if M100 else "Ring with foot: PETG or ASA, matt black, print flat with the +Y face up, 4 walls"), U, (f"ream the two {BRG[1] + 0.05:.2f} mm bearing pockets and the {SPIN_D + 0.1:.1f} mm spindle bore")),
         ("print", "Mirror carrier: print flat, 4 walls", U, "four small bayonet pegs on the rim edge on each face; handle gently; axle bore is 4.15 mm with a teardrop roof, glue the 4 mm rod in, ream with a 4.0 mm drill if it is tight" if BEZEL else ""),
         *([("print", "Mirror bezel: print lip face down (cup opening up), 4 walls", 2 * U, "one per face; holds the disc under a 2 mm lip and twist-locks (about 16 degrees) onto the four carrier pegs; the back one is the same part; test-fit one first, the click is a 0.04 mm interference")] if BEZEL else []),
-        ("print", "Spindle bearing block: print upright, 4 walls", U, f"ream the two {BRG_S[1]:g} mm pockets so a {BRG_S_NAME.upper()} presses in"),
-        ("print", "Motor bracket: print upside down on its flat top face", R, ("one per motor; the right-hand one (print_motor_bracket_2) is the mirror image" if DUAL else "one per row") if multi else "one motor"),
+        ("print", "Spindle bearing block: print upright, 4 walls" + (" (matt PLA, or PLA-CF for less creep under belt tension)" if M100 else ""), U, f"ream the two {BRG_S[1]:g} mm pockets so a {BRG_S_NAME.upper()} presses in"),
+        ("print", "Motor bracket: print upside down on its flat top face" + (" in PLA-CF (stiffer, creeps less; it carries the motor and belt pull and sits against the warm motor face)" if M100 else ""), R, ("one per motor; the right-hand one (print_motor_bracket_2) is the mirror image" if DUAL else "one per row") if multi else "one motor"),
     ]
     rows += [("print", "Wall standoff: print with the flange on the bed", SO, f"{len(STANDOFF_X)} per rail; holds the rail off the wall; M5 into a back-slot T-nut")]
     rows += [

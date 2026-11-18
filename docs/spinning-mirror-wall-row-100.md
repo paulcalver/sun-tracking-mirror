@@ -19,6 +19,12 @@ Each face has a printed **bezel**: a shallow cup over the carrier edge with a **
 
 The bezel is 5.4 g, the carrier 12.9 g (it dropped the second cross bar; the rim and one bar are enough because both bezels clamp the disc, and a 1.5 mm acrylic disc supported on its rim deflects only about 0.06 mm at 10 g). Measured clearance from the bezel to the ring and hinge bearings is 0.5 mm. Print the bezel lip face down (the cup opens upward, no supports); the groove legs are short bridges.
 
+## Printing material (2026-11-18)
+Matt PLA throughout is fine for this prototype: indoors, out of daylight, short runs. PETG or ASA would add nothing here, so there is no need to buy PETG. Two cautions with plain PLA, which softens at about 55 to 60 C and creeps under steady load:
+- **Motor bracket in PLA-CF** (needs a hardened nozzle): it carries the 0.5 kg motor about 55 mm past the rail end plus the belt pull, and bolts to the warm motor face. The spindle blocks can be PLA-CF too, for the belt tension. Keep the TMC2209 at the low end of 1.2 to 1.5 A with idle current reduction on.
+- **Plain PLA for the bezels, carriers and rings**: PLA-CF is more brittle, and the 0.8 mm bezel pegs and thin L-groove walls need some give. Print the bezel test in plain PLA.
+- Press heat-set inserts in gently and a little cooler than for PETG; thread-lock the M4 grub screws and recheck them, as PLA relaxes under clamp load over time.
+
 ## Checks and load
 No clashes at any of three random tumble poses or two poses with random ring angles, none in the static pose, and every printed part is a single solid; the bezel passes through its whole twist without touching the carrier except for the intentional click bump. Frame, motors and box about 2.0 kg plus 8 units about 1.8 kg: about 3.8 kg on the wall.
 
@@ -28,5 +34,10 @@ One unit turns about 138 g (mirror group 63 g, bezels included) with spin inerti
 - 320 mm GT2 loops and 8 mm bore double-head pulleys are not in the baskets; check they exist before committing to the pitch.
 - Bezel test first: print one carrier and two bezels and check the push-and-twist fit and the click (the 0.04 mm bump and 0.15 mm groove play are tight for FDM; the numbers `PEG_R`, `TWIST` and the groove radius are at the top of the script). Clearance to the ring is only about 0.5 mm, so an oversize print will rub.
 - 1.5 mm acrylic discs at 100 mm: dish and finish are unknown, so order one first. The M8 washer (16 mm) and the 608ZZ outer race (about 18 mm inside) leave little room: check it does not rub.
-- The 4 mm ring walls and the 0.95 to 1.5 mm walls around the hinge bearing pockets are thin: use PETG and press the bearings gently.
+- The 4 mm ring walls and the 0.95 to 1.5 mm walls around the hinge bearing pockets are thin: press the bearings in gently (PLA is stiff but brittle, so ream the pockets rather than forcing them).
 - Everything else (pulley length, motor shaft length, thread depth) is as in the 50 mm doc.
+
+## Option: open low-drag hinge bearings (saved 2026-11-18, not adopted)
+If the 684ZZ hinge bearings (medium friction from shields and grease) hold back the tumble, an open version is the upgrade route: [Ashley Bearings, budget 684 open miniature ball bearing 4 x 9 x 2.5 mm](https://www.ashleybearings.co.uk/budget-684-open-miniature-ball-bearing-4mm-x-9mm-x-25mm), £18.40 ex VAT for 20 plus about £7 postage.
+- It is 2.5 mm wide, not 4 mm, so the CAD (`BRG = (4.0, 9.0, 4.0)` in the 100 mm variant) needs the pocket depth and axial positions changed. Radial fit (4 mm bore, 9 mm OD) is unchanged. **No CAD change made**: test the cheaper 684ZZ first (degrease, light oil) and decide after.
+- Check whether they arrive oiled or dry; add a drop of light oil. The 608ZZ spindle bearings stay as they are.

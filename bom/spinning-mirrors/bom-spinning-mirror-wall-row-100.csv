@@ -18,9 +18,8 @@ buy,Lever connectors 5-way (Wago 221-415) for 24 V and GND distribution,2,0.000,
 buy,4-pin 2.54 mm motor extension cable: 0.5 m (x2): the leads must reach the box from each end,3,,,,,the motor leads are short; run extensions up the wall; price TBC (£0 in the total for now)
 buy,"Wire 22 AWG silicone red/black and 26 AWG logic, ferrules, heat shrink, cable ties",1,,,,,set; price TBC (£0 in the total for now)
 buy,"Perfboard 70 x 90 mm, mounting holes 82 x 62 mm, with female header sockets for the ESP32 and drivers",1,,,,,check the hole spacing of your board; price TBC (£0 in the total for now)
-buy,"Female DC power adapter, 2.1 mm jack to screw terminal block (The Pi Hut)",1,1.250,1,1.25,The Pi Hut (3 for 4.50 inc VAT),"no panel flange: it sits behind the 12 mm hole in the left wall, so glue or clip it in; check the socket diameter"
+buy,"Female DC power adapter, 2.1 mm jack to screw terminal block (The Pi Hut)",1,1.250,1,1.25,The Pi Hut (3 for 4.50 inc VAT),"no panel flange: it sits behind the 12 mm hole in the back (wall side) wall, so glue or clip it in; check the socket diameter; the box is only 31 mm from the wall, so a long barrel plug will not fit: use a right-angle plug, or cut the plug off the supply lead and wire it to the terminal directly"
 buy,USB-C panel-mount extension cable (11 x 4.6 mm slot),1,,,,,right-hand end wall of the box; price TBC (£0 in the total for now)
-buy,Rubber grommet for a 14 mm hole,2,,,,,"one per motor lead, one in each end wall of the box; price TBC (£0 in the total for now)"
 buy,GT2 20T 8 mm bore double-head pulley for 6 mm belt (Technobots 6001-073),10,1.470,10,14.70,Technobots 6001-073,"two toothed bands, set screw in the centre boss, about 28 mm long (check on arrival); 2 spare"
 buy,GT2 20T 5 mm bore single pulley for 6 mm belt (Technobots 6001-002),3,1.480,3,4.44,Technobots 6001-002,motor pulleys plus a spare
 buy,"GT2 6 mm closed belt, 320 mm (Technobots 6001-442)",10,1.840,10,18.40,Technobots 6001-442,4 loops per motor; 2 spare

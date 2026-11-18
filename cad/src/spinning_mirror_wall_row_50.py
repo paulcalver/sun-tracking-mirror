@@ -247,6 +247,10 @@ def rail():
 def standoff():
     """Arm from the wall to the rail's back face with a wall flange; M5 into a back-slot T-nut, head recessed on the wall side."""
     st = box(-10, 10, 5, Y_R - 10, 0, RAIL_TOP).union(box(-15, 15, 0, 5, 10 - 25, 10 + 25))
+    if M100:                                                                       # four 4 mm ribs from the flange onto the arm, above and below it, either side of the screw line (the wall screw heads at x = 0 stay reachable): they stiffen the root against the rail's weight and sideways knocks
+        for x0, x1 in ((-10.0, -6.0), (6.0, 10.0)):
+            for pts in (((5, RAIL_TOP), (5, 35), (28, RAIL_TOP)), ((5, 0), (5, -15), (22, 0))):
+                st = st.union(cq.Workplane("YZ").workplane(offset=x0).polyline(list(pts)).close().extrude(x1 - x0))
     st = st.cut(cyly(2.75, -1, Y_R - 10 + 1, 0, 10)).cut(cyly(5.0, -1, SO_SEAT, 0, 10))
     for sz in (-1, 1):
         st = st.cut(cyly(2.25, -1, 6, 0, 10 + sz * 18))
@@ -286,10 +290,11 @@ def electronics_box():
         b = b.cut(cylz(INSERT_D / 2, EB_ZIN0 - 1, EB_ZIN0 + 8.0, x, y))
     for x in EB_MOUNT_X:                                                         # M5 up into the T-nuts in the rail's bottom slot, head recessed
         b = b.cut(cylz(2.75, EB_ZIN1 - 1, 1.0, x, Y_R)).cut(cylz(5.0, EB_ZIN1 - 1, EB_ZIN1 + 3.5, x, Y_R))
-    if DUAL:                                                                     # motor leads on both end walls; DC jack on the left wall, USB-C on the right
-        b = b.cut(cylx(6.0, EB_X0 - 1, EB_X0 + w + 1, Y_R - 18, EB_CUT_Z))
+    if DUAL:                                                                     # motor leads through the top plate; power in through the back wall, USB-C on the right wall
+        b = b.cut(cyly(6.0, EB_Y0 - 1, EB_Y0 + w + 1, EB_X0 + 28.0, EB_CUT_Z))      # power in: a 12 mm hole in the back wall (the wall side), so the supply cable leaves the box and runs down the wall
         b = b.cut(box(EB_X1 - w - 1, EB_X1 + 1, Y_R + 18 - 5.5, Y_R + 18 + 5.5, EB_CUT_Z - 2.3, EB_CUT_Z + 2.3))
-        b = b.cut(cylx(7.0, EB_X0 - 1, EB_X0 + w + 1, Y_R + 14, EB_CUT_Z)).cut(cylx(7.0, EB_X1 - w - 1, EB_X1 + 1, Y_R - 14, EB_CUT_Z))
+        for xc in (EB_X0 + 14.5, EB_X1 - 11.5):                                  # motor leads leave through the top plate, straight up into the rail's bottom slot: a 13 x 7 mm slot hole (the 4-pin plug passes through), clear of the M5 mounts
+            b = b.cut(cq.Workplane("XY").workplane(offset=EB_ZIN1 - 1).center(xc, Y_R).slot2D(13.0, 7.0).extrude(8.0))
         return b
     b = b.cut(cylx(6.0, EB_X1 - w - 1, EB_X1 + 1, Y_R - 18, EB_CUT_Z))            # DC barrel jack, 12 mm
     b = b.cut(box(EB_X1 - w - 1, EB_X1 + 1, Y_R + 18 - 5.5, Y_R + 18 + 5.5, EB_CUT_Z - 2.3, EB_CUT_Z + 2.3))   # USB-C panel socket, 11 x 4.6
@@ -490,9 +495,9 @@ def write_bom():
     rows += [
         ("buy", "Wire 22 AWG silicone red/black and 26 AWG logic, ferrules, heat shrink, cable ties", 1, "set"),
         ("buy", "Perfboard 70 x 90 mm, mounting holes 82 x 62 mm, with female header sockets for the ESP32 and drivers", 1, "check the hole spacing of your board"),
-        ("buy", "Female DC power adapter, 2.1 mm jack to screw terminal block (The Pi Hut)", 1, "no panel flange: it sits behind the 12 mm hole in the " + ("left" if DUAL else "right-hand") + " wall, so glue or clip it in; check the socket diameter"),
+        ("buy", "Female DC power adapter, 2.1 mm jack to screw terminal block (The Pi Hut)", 1, "no panel flange: it sits behind the 12 mm hole in the " + ("back (wall side)" if DUAL else "right-hand") + " wall, so glue or clip it in; check the socket diameter" + ("; the box is only 31 mm from the wall, so a long barrel plug will not fit: use a right-angle plug, or cut the plug off the supply lead and wire it to the terminal directly" if DUAL else "")),
         ("buy", "USB-C panel-mount extension cable (11 x 4.6 mm slot)", 1, "right-hand end wall of the box"),
-        ("buy", "Rubber grommet for a 14 mm hole", R, "one per motor lead, " + ("one in each end wall of the box" if DUAL else "left-hand wall of the box")),
+        *([] if M100 else [("buy", "Rubber grommet for a 14 mm hole", R, "one per motor lead, " + ("one in each end wall of the box" if DUAL else "left-hand wall of the box"))]),
         ("buy", f"GT2 20T {int(SPIN_D)} mm bore double-head pulley for 6 mm belt" + (" (Technobots 6001-073)" if M100 else " (Technobots 6001-071)"), U + 2, "two toothed bands, set screw in the centre boss, about 28 mm long (check on arrival); 2 spare"),
         ("buy", "GT2 20T 5 mm bore single pulley for 6 mm belt (Technobots 6001-002)", R + 1, "motor pulleys plus a spare" if multi else "motor pulley plus a spare"),
         ("buy", f"GT2 6 mm closed belt, {320 if M100 else 200} mm" + (" (Technobots 6001-442)" if M100 else " (Technobots 6001-376)"), U + 2, f"{NM} loops per motor; 2 spare"),

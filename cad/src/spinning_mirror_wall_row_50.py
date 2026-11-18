@@ -78,7 +78,7 @@ Z_P0 = BLK_Z1 + SPACER                         # pulley bottom
 
 # double-head GT2 20T pulley (assumed from the photo and listings: 28 mm long, grub screw in the centre boss)
 P_FL, P_BAND, P_BOSS = 1.0, 8.0, 10.0
-P_R_FL, P_R_TEETH, P_R_BOSS = 8.0, 6.0, 7.0
+P_R_FL, P_R_TEETH, P_R_BOSS = 8.0, 6.0, (8.0 if M100 else 7.0)    # 100 mm: 16 mm centre boss (the listings' 8 g and 6 g weights match a 16 mm hub)
 P_LEN = 2 * P_FL + 2 * P_BAND + P_BOSS         # 28
 Z_BAND_LO = Z_P0 + P_FL + P_BAND / 2           # lower belt centre
 Z_BAND_HI = Z_P0 + P_FL + P_BAND + P_BOSS + P_BAND / 2   # upper belt centre
@@ -126,7 +126,8 @@ EB_CORNERS = [(x, y) for x in (EB_X0 + EB_WALL + EB_POST / 2, EB_X1 - EB_WALL - 
 EB_CUT_Z = (EB_ZIN0 + EB_ZIN1) / 2                         # connector height, -23.5
 
 RHO = dict(u.RHO, glass=2.5e-3, alu=2.7e-3, belt=1.1e-3, ph=0.3e-3)
-SPIN_LEN = SPIN_TIP - RAIL_TOP                 # spindle rod length
+SPIN_BOT = RAIL_TOP + (0.5 if M100 else 0.0)  # rod bottom: 100 mm 0.5 mm clear of the rail so the turning rod never rubs it
+SPIN_LEN = SPIN_TIP - SPIN_BOT                 # spindle rod length
 
 UNIT = []
 ROW = []                                       # one row of frame parts (rail, ties, bracket, motor, belts) at Z = 0
@@ -147,17 +148,22 @@ def build_unit():
     UNIT.clear()
     rp = BRG_S[1] / 2 + 0.05
     blk = box(-BLK_X, BLK_X, -BLK_Y, BLK_Y, RAIL_TOP, BLK_Z1).edges("|Z").chamfer(4.0)
-    blk = blk.cut(cylz(rp, RAIL_TOP - 1, RAIL_TOP + BRG_S[2]))                                         # lower bearing pocket, opens onto the rail
-    blk = blk.cut(cone(rp, ROD_CLR, RAIL_TOP + BRG_S[2], RAIL_TOP + BRG_S[2] + (rp - ROD_CLR)))        # 45 degree ceiling, so it prints without a bridge
+    ledge = 0.5 if M100 else 0.0                                                                       # 100 mm: the lower bearing sits on a 0.5 mm ledge, so its turning inner race clears the rail
+    blk = blk.cut(cylz(rp, RAIL_TOP + ledge - (0.0 if ledge else 1.0), RAIL_TOP + ledge + BRG_S[2]))   # lower bearing pocket, opens onto the rail
+    if M100:
+        blk = blk.cut(cylz(9.0, RAIL_TOP - 1, RAIL_TOP + ledge + 0.1))                                 # opening in the ledge, wider than the 608ZZ inner race, so only the outer race rests on it
+    blk = blk.cut(cone(rp, ROD_CLR, RAIL_TOP + ledge + BRG_S[2], RAIL_TOP + ledge + BRG_S[2] + (rp - ROD_CLR)))        # 45 degree ceiling, so it prints without a bridge
     blk = blk.cut(cylz(ROD_CLR, RAIL_TOP - 1, BLK_Z1 + 1))                                             # rod clearance
     blk = blk.cut(cylz(rp, BLK_Z1 - BRG_S[2], BLK_Z1 + 1))                                             # upper bearing pocket, opens upward
+    if M100:
+        blk = blk.cut(cylz(7.0, BLK_Z1 - BRG_S[2] - 1.5, BLK_Z1 - BRG_S[2] + 0.1))                     # relief in the pocket floor, wider than the 608ZZ inner race, so only the outer race touches PLA
     for sx in (-1, 1):                                                                                 # M5 through the block into the T-nuts
         blk = blk.cut(cylz(2.75, RAIL_TOP - 1, BLK_Z1 + 1, sx * TNUT_X, 0)).cut(cylz(5.0, BLK_Z1 - CB_DEPTH, BLK_Z1 + 1, sx * TNUT_X, 0))
     add(UNIT, "print_spindle_block", blk, PRINT_C, "fixed", "print")
-    for nm, z0 in ((f"bearing_{BRG_S_NAME}_a", RAIL_TOP), (f"bearing_{BRG_S_NAME}_b", BLK_Z1 - BRG_S[2])):
+    for nm, z0 in ((f"bearing_{BRG_S_NAME}_a", RAIL_TOP + ledge), (f"bearing_{BRG_S_NAME}_b", BLK_Z1 - BRG_S[2])):
         add(UNIT, nm, cylz(BRG_S[1] / 2, z0, z0 + BRG_S[2]).cut(cylz(BRG_S[0] / 2, z0 - 1, z0 + BRG_S[2] + 1)), STEEL, "fixed", "steel")
 
-    add(UNIT, f"spindle_{int(SPIN_D)}mm_steel_rod", cylz(SPIN_D / 2, RAIL_TOP, SPIN_TIP), STEEL, "spin", "steel")
+    add(UNIT, f"spindle_{int(SPIN_D)}mm_steel_rod", cylz(SPIN_D / 2, SPIN_BOT, SPIN_TIP), STEEL, "spin", "steel")
     add(UNIT, f"washers_m{int(SPIN_D)}_{SPACER:g}mm_stack", cylz(SP_R, BLK_Z1, Z_P0).cut(cylz(SP_IR, BLK_Z1 - 1, Z_P0 + 1)), STEEL, "spin", "steel")
     z = Z_P0
     pul = cylz(P_R_FL, z, z + P_FL)

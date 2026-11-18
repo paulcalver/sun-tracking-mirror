@@ -29,4 +29,4 @@ One dial: a deep square frame on a round turning base. A flush 150 mm disc on ea
 python3 cad/src/sun_dial_one.py            # STEP, parts, DXF, BOM, previews (add --az 135 --el 30 to pose)
 python3 cad/src/sun_dial_one.py --check
 ```
-Outputs: `cad/out/sun-dial/archive/sun-dial-one/`, `bom/archive/sun-dials/bom-sun-dial-one.csv`, `cad/media/previews/sun-dial-one/`.
+Outputs: `cad/out/sun-dial/archive/sun-dial-one/`, `bom/sun-dials/bom-sun-dial-one.csv`, `cad/media/previews/sun-dial-one/`.

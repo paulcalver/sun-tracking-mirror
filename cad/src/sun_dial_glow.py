@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """CAD assembly: the smallest sun dial with light (CadQuery). Draft, nothing built or tested.
 
-Builds on cad/src/sun_dial_small.py (same frame, motors, base and turntable) and adds the glow designed in sim/sun-dial-glow.html:
+Builds on cad/src/sun_dial_small.py (same frame, motors, base and turntable) and adds the glow designed in sim/sun-dials/sun-dial-glow.html:
   - opal (milk-white) 3 mm cast acrylic discs, laser cut, with the black strip pressed in (the --discs laser variant)
   - a perimeter LED strip on three inner walls of the frame (left, top, right), LEDs facing in, so the cavity is a diffuse light box
     and both discs glow; the interior is painted matt white and the printed tub and lid stay black so the sides do not glow

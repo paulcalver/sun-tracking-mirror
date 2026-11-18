@@ -166,7 +166,7 @@ static uint32_t jNextAt    = 0;               // millis of next jitter change
 static float  jCurrentRpm  = 0.0f;
 
 // Jitter mode 1 ("ou"): the same random process as the tumble simulator
-// (docs/spinning-mirror-gimbal-concept.html, option D). Speed = base * (1 + ou),
+// (sim/spinning-mirror/spinning-mirror-gimbal-concept.html, option D). Speed = base * (1 + ou),
 // where ou is an Ornstein-Uhlenbeck process: zero mean, standard deviation
 // jSigma (the simulator's "Motor speed jitter" slider, 0..0.8, 0.45 default) and
 // correlation time jTau seconds (the simulator uses 0.2). The base is the

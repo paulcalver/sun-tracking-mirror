@@ -1,6 +1,6 @@
 # GM2804 two-dial wall piece (2026-11-16)
 
-A flat wall piece with two 150 mm white discs. The left disc shows the Sun's elevation and the right disc its azimuth. Each disc is turned directly by an iPower GM2804 gimbal motor with the AS5048A encoder, no gears. Draft CAD, nothing printed, cut or tested. Source of truth: `cad/src/gm2804_dials.py` (CadQuery). The behaviour is modelled in `sim/sun-dials.html`.
+A flat wall piece with two 150 mm white discs. The left disc shows the Sun's elevation and the right disc its azimuth. Each disc is turned directly by an iPower GM2804 gimbal motor with the AS5048A encoder, no gears. Draft CAD, nothing printed, cut or tested. Source of truth: `cad/src/gm2804_dials.py` (CadQuery). The behaviour is modelled in `sim/sun-dials/sun-dials.html`.
 
 ## What it is
 - **Plate:** 550 x 220 mm, 3 mm white acrylic, 62 mm off the wall on four printed posts (M4 screws at the corners). The discs are 150 mm, 3 mm white acrylic, 5 mm in front of the plate, centres 165 and 385 mm from the left edge.

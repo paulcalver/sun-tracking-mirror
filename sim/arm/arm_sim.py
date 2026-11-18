@@ -17,7 +17,7 @@ tilt = elevation) and "branch B" (yaw = azimuth + 180, tilt = 180 - elevation,
 the arm leaning back over its own base). This script tests both.
 
 Usage (from the repo root):
-    python3 sim/arm_sim.py [output_dir]
+    python3 sim/arm/arm_sim.py [output_dir]
 Writes a summary to the terminal, joint-angle CSVs and a PNG of poses.
 Sun position comes from sun-path/scripts/sun_path.py (NOAA low precision).
 All lengths in millimetres, angles in degrees.
@@ -33,7 +33,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "sun-path" / "scripts"))
 from sun_path import sun_position  # noqa: E402
 
@@ -164,7 +164,7 @@ def draw(out):
 
 
 def main():
-    outdir = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "sim" / "output"
+    outdir = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "sim" / "arm" / "output"
     outdir.mkdir(parents=True, exist_ok=True)
     print(f"Arm: L1 {L1}, L2 {L2}, pointer {POINTER}, wrist out {WRIST_R}, shoulder height {SHOULDER_Z} mm\n")
     for branch in ("A", "B"):

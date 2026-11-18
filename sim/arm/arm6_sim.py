@@ -14,7 +14,7 @@ keeps every joint inside a limit, keeps links above the table, avoids links
 touching each other, and avoids the wrist singularity (joint 5 near 0 or 180).
 
 Usage (from the repo root):
-    python3 sim/arm6_sim.py [output_dir] [--five]
+    python3 sim/arm/arm6_sim.py [output_dir] [--five]
 --five locks joint 6 (the roll about the pointer, which does not affect aim).
 Sun position: sun-path/scripts/sun_path.py (NOAA low precision, London).
 Lengths in metres, angles in degrees unless noted. Results are simulation only.
@@ -31,7 +31,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import least_squares
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "sun-path" / "scripts"))
 from sun_path import sun_position  # noqa: E402
 
@@ -276,7 +276,7 @@ def animate(rows, out, frames=96):
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     five = "--five" in sys.argv
-    outdir = Path(args[0]) if args else ROOT / "sim" / ("output6-five" if five else "output6")
+    outdir = Path(args[0]) if args else ROOT / "sim" / "arm" / ("output6-five" if five else "output6")
     outdir.mkdir(parents=True, exist_ok=True)
     print(f"{'5' if five else '6'}-joint run. Scale {SCALE}; reach about {1000*(abs(A2)+abs(A3)):.0f} mm"
           f" (shoulder {1000*D1:.0f} mm high). Posture swings {np.degrees(SWING)} deg, periods {SWING_PERIOD_MIN} min.\n")

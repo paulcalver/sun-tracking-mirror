@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """CAD assembly: spinning mirror gimbal, an 80 mm round mirror on a free hinge inside a ring, the ring on a brushless motor (CadQuery).
-Draft, nothing built or tested. See docs/spinning-mirror-gimbal.md and docs/spinning-mirror-gimbal-concept.html (option D).
+Draft, nothing built or tested. See docs/spinning-mirror-gimbal.md and sim/spinning-mirror/spinning-mirror-gimbal-concept.html (option D).
 
 World frame (mm): origin on the table at the centre of the base, Z up. The ring spins about Z. Its plane is XZ and the mirror hinge axle
 runs along X through the ring centre at Z = ZC. tilt = 0 puts the mirror in the ring plane; the mirror turns about X.

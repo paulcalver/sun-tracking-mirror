@@ -81,7 +81,7 @@ One 100 kHz timer interrupt runs a phase accumulator per motor and raises every 
 
 ## 150 mm single test unit and the tumble simulator
 
-`NUM_MOTORS 1` is the default, so the sketch is already the single-rig build. The `ou` jitter mode reproduces the speed process in `docs/spinning-mirror-gimbal-concept.html` (option D): speed = `rpm` x (1 + ou), ou an Ornstein-Uhlenbeck process with standard deviation `jit` and correlation time `jtau`. The simulator's mechanical sliders (hinge friction, edge weight) are properties of the real hinge, not firmware.
+`NUM_MOTORS 1` is the default, so the sketch is already the single-rig build. The `ou` jitter mode reproduces the speed process in `sim/spinning-mirror/spinning-mirror-gimbal-concept.html` (option D): speed = `rpm` x (1 + ou), ou an Ornstein-Uhlenbeck process with standard deviation `jit` and correlation time `jtau`. The simulator's mechanical sliders (hinge friction, edge weight) are properties of the real hinge, not firmware.
 
 Try on the rig, all changeable while it runs:
 

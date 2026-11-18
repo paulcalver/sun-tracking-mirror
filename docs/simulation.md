@@ -2,7 +2,7 @@
 
 # Simulation results (first pass)
 
-Script: `sim/arm_sim.py` (run from the repo root). Sun position from `sun-path/scripts/sun_path.py` (NOAA low precision, London). Outputs in `sim/output/` (joint-angle CSVs per minute, `arm-poses.png`); terminal summary in `sim/output-summary.txt`. Draft geometry: shoulder 60 mm above table, links 160 + 160 mm, pointer 90 mm, wrist held 200 mm out. All numbers below are simulation results from those draft lengths, not tested hardware.
+Script: `sim/arm/arm_sim.py` (run from the repo root). Sun position from `sun-path/scripts/sun_path.py` (NOAA low precision, London). Outputs in `sim/arm/output/` (joint-angle CSVs per minute, `arm-poses.png`); terminal summary in `sim/arm/output-summary.txt`. Draft geometry: shoulder 60 mm above table, links 160 + 160 mm, pointer 90 mm, wrist held 200 mm out. All numbers below are simulation results from those draft lengths, not tested hardware.
 
 ## Findings
 
@@ -20,7 +20,7 @@ Options, none yet chosen:
 
 # Six-joint, UR-style simulation (second pass)
 
-Script: `sim/arm6_sim.py` (`--five` locks the last joint). Outputs: `sim/output6/` and `sim/output6-five/` (joint-angle CSVs per 2 minutes, `poses.png`, `winter-solstice.gif`); terminal summaries in `sim/output6-summary.txt` and `sim/output6-five-summary.txt`. Geometry is UR-like proportions recalled from public figures (approximate, not manufacturer data) scaled to 0.65, giving about 300 mm reach and a shoulder 99 mm above the table; 70 mm pointer. Simulation only, no hardware tested.
+Script: `sim/arm/arm6_sim.py` (`--five` locks the last joint). Outputs: `sim/arm/output6/` and `sim/arm/output6-five/` (joint-angle CSVs per 2 minutes, `poses.png`, `winter-solstice.gif`); terminal summaries in `sim/arm/output6-summary.txt` and `sim/arm/output6-five-summary.txt`. Geometry is UR-like proportions recalled from public figures (approximate, not manufacturer data) scaled to 0.65, giving about 300 mm reach and a shoulder 99 mm above the table; 70 mm pointer. Simulation only, no hardware tested.
 
 ## Method
 The pointer axis is forced onto the Sun direction. The spare freedom is used for a slow, visible posture: the base yaw swings up to 45° either side of the Sun's compass heading, the shoulder swings 25° and the elbow 30° (periods 72, 40 and 60 minutes), and joint 6 swings back and forth as a decorative roll. The solver also keeps links above the table, apart from each other, and away from the wrist singularity.

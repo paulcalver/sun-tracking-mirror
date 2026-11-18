@@ -2,7 +2,7 @@
 
 > Primary route from 2026-11-15: 150 mm mirrors on NEMA 17 steppers, see `spinning-mirror-150-nema17.md`. This brushless GM2804 version is the alternative.
 
-Draft CAD, nothing printed or tested. Model: `cad/src/spinning_mirror.py` (the unit; `--check` sweeps the mirror tilt for clashes) and, for the rigs with the top support, `cad/src/spinning_mirror_row.py`. Concept and the four drive options: `spinning-mirror-gimbal-concept.html` (this is option D).
+Draft CAD, nothing printed or tested. Model: `cad/src/spinning_mirror.py` (the unit; `--check` sweeps the mirror tilt for clashes) and, for the rigs with the top support, `cad/src/spinning_mirror_row.py`. Concept and the four drive options: `../sim/spinning-mirror/spinning-mirror-gimbal-concept.html` (this is option D).
 
 ## Idea
 An 80 mm round mirror on a free horizontal hinge inside a ring. One brushless gimbal motor spins the ring about the vertical axis with a randomly jittering speed, and nothing drives the hinge. At steady speed the mirror would settle flat; with the speed wobbling it swings and tumbles at random.

@@ -5,8 +5,8 @@ Pole angle = Sun azimuth (cumulative turn). Disc tilt = Sun elevation.
 Because the disc's tilt is the DIFFERENCE between the inner shaft and the pole (1:1 mitre gears and belt),
 the inner shaft must turn by  pole angle + tilt.  Net: both motors turn about 360 degrees a day.
 
-Usage (from the repo root): python3 sim/pole_drive_plan.py
-Writes sim/output/pole-drive-plan.png and prints speeds. Sun: sun-path/scripts/sun_path.py.
+Usage (from the repo root): python3 sim/arm/pole_drive_plan.py
+Writes sim/arm/output/pole-drive-plan.png and prints speeds. Sun: sun-path/scripts/sun_path.py.
 Sign and ratio conventions are my assumptions; they flip or scale with the real gearing.
 """
 import sys
@@ -19,7 +19,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "sun-path" / "scripts"))
 from sun_path import sun_position  # noqa: E402
 
@@ -40,7 +40,7 @@ def day(ymd):
 
 
 def main():
-    out = ROOT / "sim" / "output"
+    out = ROOT / "sim" / "arm" / "output"
     out.mkdir(parents=True, exist_ok=True)
     fig, axes = plt.subplots(1, 3, figsize=(16, 5), sharey=True)
     for ax, (name, ymd) in zip(axes, DAYS.items()):

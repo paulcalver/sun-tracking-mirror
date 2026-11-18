@@ -1,6 +1,6 @@
 # Single sun dial, one motor between two discs (2026-11-16)
 
-One dial: a deep square frame on a round turning base. A flush 150 mm disc on each face shows the Sun's elevation from either side; the frame turns to show the azimuth. Draft CAD, nothing printed, cut or tested. Source of truth: `cad/src/sun_dial_one.py` (CadQuery). The behaviour is modelled in `sim/sun-dial-between.html`.
+One dial: a deep square frame on a round turning base. A flush 150 mm disc on each face shows the Sun's elevation from either side; the frame turns to show the azimuth. Draft CAD, nothing printed, cut or tested. Source of truth: `cad/src/sun_dial_one.py` (CadQuery). The behaviour is modelled in `sim/sun-dials/sun-dial-between.html`.
 
 ## What it is
 - **Frame:** 170 mm square, 44 mm deep, 3 mm black acrylic: two faces with a 152 mm window each, four side strips. Overall height 240 mm, base 200 mm across and 66 mm tall.

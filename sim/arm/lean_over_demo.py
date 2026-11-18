@@ -9,8 +9,8 @@ Right: "lean-over" mount (equatorial). The pole leans at the latitude (it points
 Both discs face the Sun at every moment. Sun position: sun-path/scripts/sun_path.py.
 
 Usage (from the repo root):
-    python3 sim/lean_over_demo.py [YYYY-MM-DD] [output.gif]
-Defaults to 2026-11-01 and sim/output/lean-over-vs-nod.gif. Times are UTC (GMT in winter).
+    python3 sim/arm/lean_over_demo.py [YYYY-MM-DD] [output.gif]
+Defaults to 2026-11-01 and sim/arm/output/lean-over-vs-nod.gif. Times are UTC (GMT in winter).
 Axes: x east, y north, z up. Simulation only; the sizes are schematic.
 """
 import sys
@@ -25,7 +25,7 @@ import numpy as np
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from PIL import Image
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "sun-path" / "scripts"))
 from sun_path import LAT, sun_position  # noqa: E402
 
@@ -84,7 +84,7 @@ def scene(ax, kind, s, title):
 
 def main():
     day = sys.argv[1] if len(sys.argv) > 1 else "2026-11-01"
-    out = Path(sys.argv[2]) if len(sys.argv) > 2 else ROOT / "sim" / "output" / "lean-over-vs-nod.gif"
+    out = Path(sys.argv[2]) if len(sys.argv) > 2 else ROOT / "sim" / "arm" / "output" / "lean-over-vs-nod.gif"
     out.parent.mkdir(parents=True, exist_ok=True)
     y, m, d = (int(v) for v in day.split("-"))
     minutes = np.arange(0, 24 * 60 + 1, STEP_MIN)

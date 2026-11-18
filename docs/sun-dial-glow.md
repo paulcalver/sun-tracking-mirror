@@ -1,6 +1,6 @@
 # Sun dial with light (2026-11-16)
 
-The smallest dial (`docs/sun-dial-small.md`) with the glow from `sim/sun-dial-glow.html`: translucent discs lit from inside, colour and brightness following the sun's elevation, and a lit pinhole marking the day's peak. Draft CAD, nothing printed or tested. Source of truth: `cad/src/sun_dial_glow.py`, which imports `sun_dial_small.py` and adds the light, so frame, motors, base and turntable are unchanged.
+The smallest dial (`docs/sun-dial-small.md`) with the glow from `sim/sun-dials/sun-dial-glow.html`: translucent discs lit from inside, colour and brightness following the sun's elevation, and a lit pinhole marking the day's peak. Draft CAD, nothing printed or tested. Source of truth: `cad/src/sun_dial_glow.py`, which imports `sun_dial_small.py` and adds the light, so frame, motors, base and turntable are unchanged.
 
 ## What was added
 - **Discs:** opal (milk-white) 3 mm cast acrylic, laser cut, black strip pressed in (the `--discs laser` variant of the small dial, hub 2 printed). About half the light passes.

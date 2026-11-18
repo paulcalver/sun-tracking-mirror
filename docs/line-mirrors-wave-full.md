@@ -1,6 +1,6 @@
 # Wave version, full detail (concept CAD, 2026-11-04)
 
-Status: concept model, nothing built or tested. Source: `cad/src/line_wave_full.py` (CadQuery, builds on `line_mirrors.py`). Parts list and BOM: [line-mirrors-wave-bom.md](line-mirrors-wave-bom.md) (`--bom`). STEP: `cad/out/earlier-concepts/line-mirrors/line-mirrors-wave-full.step` (`--step`). Renders: `cad/media/previews/line-mirrors/full-*.png` (`--render`; blue = laser cut, orange = 3D print, grey = bought or metal). Viewer animation: `cad/media/animations/line-wave-viewer.mp4` (`line_mirrors_anim.py`, earlier geometry, motion only).
+Status: concept model, nothing built or tested. Source: `cad/src/line_wave_full.py` (CadQuery, builds on `line_mirrors.py`). Parts list and BOM: [line-mirrors-wave-bom.md](../bom/archive/line-mirrors/line-mirrors-wave-bom.md) (`--bom`). STEP: `cad/out/earlier-concepts/line-mirrors/line-mirrors-wave-full.step` (`--step`). Renders: `cad/media/previews/line-mirrors/full-*.png` (`--render`; blue = laser cut, orange = 3D print, grey = bought or metal). Viewer animation: `cad/media/animations/line-wave-viewer.mp4` (`line_mirrors_anim.py`, earlier geometry, motion only).
 
 ## Layout
 - Strip 824 x 96 x 62 mm, mirror row centred (177 mm from the outer mirror edges to each end).

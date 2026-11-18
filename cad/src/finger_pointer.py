@@ -21,7 +21,7 @@ which does not matter for a distant target such as the Sun.
 Usage (from the repo root):
   python3 cad/src/finger_pointer.py [--az DEG] [--el DEG] [--up y|z] [--check]
 Needs cad/src/assets/finger-outline.json (python3 cad/src/trace_finger.py). Writes cad/out/earlier-concepts/finger-pointer/ (assembly STEP,
-parts/<laser|print|purchase>/ with DXF and engraving PNGs), bom/bom-finger-pointer.csv and previews in
+parts/<laser|print|purchase>/ with DXF and engraving PNGs), bom/archive/finger-pointer/bom-finger-pointer.csv and previews in
 cad/media/previews/finger-pointer/.
 """
 import argparse
@@ -38,7 +38,7 @@ CAD = HERE.parent
 OUTD = CAD / "out" / "earlier-concepts" / "finger-pointer"
 PARTS = OUTD / "parts"
 IMG = CAD / "media" / "previews" / "finger-pointer"
-BOMF = CAD.parent / "bom" / "bom-finger-pointer.csv"
+BOMF = CAD.parent / "bom" / "archive" / "finger-pointer" / "bom-finger-pointer.csv"
 ART = HERE / "assets"
 
 # ------------------------------------------------------------------ parameters (mm)

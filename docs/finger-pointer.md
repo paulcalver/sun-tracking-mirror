@@ -28,7 +28,7 @@ Laser, 6 mm and 3 mm black acrylic (STEP, DXF in `cad/out/earlier-concepts/finge
 
 Printed in PETG-CF on the P1S (13 parts): bearing housing, 2 motor cradles, rod bottom bracket, controller tray, compass post, Hall post, tube collar, tube pulley, rod pulley, head bracket, hub ring. PETG-CF rather than PLA-CF because a sun-facing piece near a window can soften PLA-CF; check the nozzle is hardened.
 
-Bought (reference shapes in `parts/purchase/`; list in `bom/bom-finger-pointer.csv`): 2 NEMA 17 (34 mm), 2 GT2 20T pulleys, 2 GT2 200 mm loops, 12 x 2 tube, 6 mm silver steel (one 333 mm bar covers the 228 mm rod and the 21.7 mm axle), 2 x 6701, 1 x 686ZZ, 1 x 626ZZ, 2 RS PRO POM mitre gears (20T, module 1, 6 mm bore, RS 521-6058), electronics as in the mirror.
+Bought (reference shapes in `parts/purchase/`; list in `bom/archive/finger-pointer/bom-finger-pointer.csv`): 2 NEMA 17 (34 mm), 2 GT2 20T pulleys, 2 GT2 200 mm loops, 12 x 2 tube, 6 mm silver steel (one 333 mm bar covers the 228 mm rod and the 21.7 mm axle), 2 x 6701, 1 x 686ZZ, 1 x 626ZZ, 2 RS PRO POM mitre gears (20T, module 1, 6 mm bore, RS 521-6058), electronics as in the mirror.
 
 ## Things to know or decide
 1. **Exposed gears (2026-11-13).** The drum head is gone. The head is one printed bracket plus the two bought gears: the cap sits on the tube end (rod runs in a bushing in its roof), gear A is on the rod top, and a plate-shaped arm beyond gear B's hub end holds the 686 bearing for the axle. Like the bought L-block it copies, both gear hubs run out to the arms, so the gears sit inside the L (the cap below, the bearing arm beside) and are open on the sides and the back. The axle is short (21.7 mm), supported at the arm and carried into gear B. Much smaller than the 36 mm drum.

@@ -6,7 +6,7 @@ Status (2026-11-03): CAD v4 drawn around real parts, BOM and laser files made, a
 
 Read in this order:
 1. `docs/cad-brief.md`: the current design, sizes, checks, open points.
-2. `docs/bom-v4.md` (and `bom/bom-v4.csv`): parts split into laser cutting, 3D printing and purchase. `docs/bom-for-suppliers.md` is the plain buy list for a UK supplier search.
+2. `bom/archive/arm-v4/bom-v4.md` (and `bom/archive/arm-v4/bom-v4.csv`): parts split into laser cutting, 3D printing and purchase. `bom/archive/arm-v4/bom-for-suppliers.md` is the plain buy list for a UK supplier search.
 3. `docs/parts-sourcing.md`: where each bought part comes from, its status and the decisions.
 4. `cad/README.md`: folder layout (`cad/src` scripts, `cad/out` STEP and DXF, `cad/media` pictures and video).
 5. `HANDOVER.md`: long decision log of the earlier arm and disc concepts, kept for history.

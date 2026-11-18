@@ -1,8 +1,8 @@
-> **Status: stale (2026-11-03).** Draft BOM for the five-joint arm. The current parts list is `bom-v4.md`; this and `bom/bom-uk-draft.csv` are kept for history.
+> **Status: stale (2026-11-03).** Draft BOM for the five-joint arm. The current parts list is `bom-v4.md`; this and `bom/archive/arm-v4/bom-uk-draft.csv` are kept for history.
 
 # Draft UK bill of materials (2026-11-01)
 
-File: `bom/bom-uk-draft.csv`. Five joints, slip ring on the base, 24 V supply, ESP32 on the rotating stage.
+File: `bom/archive/arm-v4/bom-uk-draft.csv`. Five joints, slip ring on the base, 24 V supply, ESP32 on the rotating stage.
 
 **Draft total: about £301**, of which about £230 comes from UK web listings and about £71 is my estimate where I found no UK price. Likely range £250 to £320 (inference). This replaces the earlier £150 to £250 guess for four joints.
 

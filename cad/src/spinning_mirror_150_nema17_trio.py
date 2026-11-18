@@ -12,7 +12,7 @@ World frame (mm): origin on the table at the centre of the box, Z up, X along th
 Usage (from the repo root):
   python3 cad/src/spinning_mirror_150_nema17_trio.py [--check] [--up y|z] [--seed N]
 Writes cad/out/spinning-mirror/spinning-mirror-150-nema17-trio/ (assembly STEP, parts/<laser|print|purchase>/ with DXF for the laser parts),
-bom/bom-spinning-mirror-150-nema17-trio.csv and previews in cad/media/previews/spinning-mirror-150-nema17-trio/.
+bom/spinning-mirrors/archive/bom-spinning-mirror-150-nema17-trio.csv and previews in cad/media/previews/spinning-mirror-150-nema17-trio/.
 """
 import argparse
 import csv
@@ -33,7 +33,7 @@ TAG = "spinning-mirror-150-nema17-trio"
 OUTD = CAD / "out" / "spinning-mirror" / TAG
 PARTS = OUTD / "parts"
 IMG = CAD / "media" / "previews" / TAG
-BOMF = CAD.parent / "bom" / f"bom-{TAG}.csv"
+BOMF = CAD.parent / "bom" / "spinning-mirrors" / "archive" / f"bom-{TAG}.csv"
 
 box, cylz, cylx, cyly = sm.box, sm.cylz, sm.cylx, sm.cyly
 N = 3

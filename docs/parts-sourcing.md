@@ -47,4 +47,4 @@ Bearing King 9 inch (hole pattern, price), Pi Hut slip ring (price, stock), Pi H
 - **Decided 2026-11-03:** plain NEMA 17 on both axes. The geared steppers in `HANDOVER.md` (27:1 NEMA 11, FIT0349, MG17-G10) were for the old worm and chain design; the TR8x2 screw replaces any gearbox.
 - **Decided 2026-11-03:** the controller plate is printed (tray with four legs) so it can carry M3 and M2 heat-set inserts; no laser-cut controller plate.
 - **Decided 2026-11-03:** laser parts in black acrylic (6 mm and 3 mm); engraved pockets and tenons for glue joints; cover base standing on the table with a loose floor; mirror back black.
-- **Supplier search:** `bom-for-suppliers.md` is the plain list to hand to a search (UK suppliers). Still no UK source for the TR8x2 screw and nut or the 200 mm belt; hole patterns of the bearing and slip ring unknown.
+- **Supplier search:** `bom/archive/arm-v4/bom-for-suppliers.md` is the plain list to hand to a search (UK suppliers). Still no UK source for the TR8x2 screw and nut or the 200 mm belt; hole patterns of the bearing and slip ring unknown.

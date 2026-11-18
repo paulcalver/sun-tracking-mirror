@@ -1,6 +1,6 @@
 # Wall piece: 3 rows of eight 50 mm mirrors, one NEMA 17 per row (2026-11-17)
 
-Draft, nothing built or tested. CAD: `cad/src/spinning_mirror_wall_row_50.py`; STEP and part files in `cad/out/spinning-mirror/spinning-mirror-wall-row-50/`; previews in `cad/media/previews/spinning-mirror-wall-row-50/`; BOM `bom/bom-spinning-mirror-wall-row-50.csv` (one line per screw type, quantities for all 24 units); first-test shopping list and prices in `spinning-mirror-belt-row-test-bom.md` (priced for a 10-unit row; scale it to the BOM). Background: `spinning-mirror-150-nema17.md` (the single unit and motor).
+Draft, nothing built or tested. CAD: `cad/src/spinning_mirror_wall_row_50.py`; STEP and part files in `cad/out/spinning-mirror/spinning-mirror-wall-row-50/`; previews in `cad/media/previews/spinning-mirror-wall-row-50/`; BOM `bom/spinning-mirrors/archive/bom-spinning-mirror-wall-row-50.csv` (one line per screw type, quantities for all 24 units); first-test shopping list and prices in `bom/spinning-mirrors/archive/spinning-mirror-belt-row-test-bom.md` (priced for a 10-unit row; scale it to the BOM). Background: `spinning-mirror-150-nema17.md` (the single unit and motor).
 
 ## Layout
 - Three **2020 aluminium extrusion rails** (680 mm each) run along the wall, 200 mm apart vertically, each on three printed standoffs (at X = 40, 360 and 600 mm, in the gaps between units), the spindle line 45 mm out from the wall. The rail is the structure and the slide.

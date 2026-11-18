@@ -34,4 +34,4 @@ Total about £74 plus postage. If the 625ZZ and 683ZZ are both at Technobots, on
 - Fit-test a 5 mm and a 3 mm rod in a bearing before cutting them all.
 - The double-head pulley is about 28 mm long with the grub screw in the centre boss between the two belt channels; put a flat on the 5 mm spindle or use thread-lock.
 
-Note (2026-11-17): the wall piece is now 3 rows of eight; its quantities, with one line per screw type, are in `bom/bom-spinning-mirror-wall-row-50.csv`. The prices above still apply per part.
+Note (2026-11-17): the wall piece is now 3 rows of eight; its quantities, with one line per screw type, are in `bom/spinning-mirrors/archive/bom-spinning-mirror-wall-row-50.csv`. The prices above still apply per part.

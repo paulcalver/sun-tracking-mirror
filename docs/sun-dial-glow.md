@@ -25,4 +25,4 @@ The smallest dial (`docs/sun-dial-small.md`) with the glow from `sim/sun-dials/s
 python3 cad/src/sun_dial_glow.py            # STEP, parts, BOM, previews (add --az 135 --el 30 to pose)
 python3 cad/src/sun_dial_glow.py --check
 ```
-Outputs: `cad/out/sun-dial/sun-dial-glow/`, `bom/bom-sun-dial-glow.csv`, `cad/media/previews/sun-dial-glow/`.
+Outputs: `cad/out/sun-dial/sun-dial-glow/`, `bom/archive/sun-dials/bom-sun-dial-glow.csv`, `cad/media/previews/sun-dial-glow/`.

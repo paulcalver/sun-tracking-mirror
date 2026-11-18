@@ -18,7 +18,7 @@ shaft through the stator that the wires can use. Whether those holes are threade
 
 Usage (from the repo root):
   python3 cad/src/spinning_mirror.py [--az DEG] [--tilt DEG] [--up y|z] [--check]
-Writes cad/out/spinning-mirror/archive/spinning-mirror/ (assembly STEP, parts/<print|purchase>/), bom/bom-spinning-mirror.csv and previews in
+Writes cad/out/spinning-mirror/archive/spinning-mirror/ (assembly STEP, parts/<print|purchase>/), bom/spinning-mirrors/archive/bom-spinning-mirror.csv and previews in
 cad/media/previews/spinning-mirror/.
 """
 import argparse
@@ -35,7 +35,7 @@ ART = HERE / "assets"
 OUTD = CAD / "out" / "spinning-mirror" / "archive" / "spinning-mirror"
 PARTS = OUTD / "parts"
 IMG = CAD / "media" / "previews" / "spinning-mirror"
-BOMF = CAD.parent / "bom" / "bom-spinning-mirror.csv"
+BOMF = CAD.parent / "bom" / "spinning-mirrors" / "archive" / "bom-spinning-mirror.csv"
 
 # ------------------------------------------------------------------ parameters (mm)
 BASE_R = 55.0                                   # puck radius (110 mm across)

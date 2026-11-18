@@ -5,7 +5,7 @@ Part sizes and print volumes come from the CadQuery model (hinge_mirror.py), so 
 prices are listed here by hand (see docs/parts-sourcing.md for the sources and their status).
 
 Usage (from the repo root): python3 cad/src/make_bom.py
-Writes bom/bom-v4.csv and docs/bom-v4.md.
+Writes bom/archive/arm-v4/bom-v4.csv and bom/archive/arm-v4/bom-v4.md.
 """
 import csv
 import math
@@ -104,7 +104,7 @@ buy = [
 ]
 
 # ---------------------------------------------------------------- write CSV
-out_csv = ROOT / "bom" / "bom-v4.csv"
+out_csv = ROOT / "bom" / "archive" / "arm-v4" / "bom-v4.csv"
 with open(out_csv, "w", newline="") as f:
     w = csv.writer(f)
     w.writerow(["process", "item", "qty", "material_or_spec", "size_mm", "unit_gbp", "total_gbp", "confidence", "source_or_note"])
@@ -124,7 +124,7 @@ fit = max(max(bbox(n)) for _, names, _, _ in groups for n in names)
 lines = [
     "# Bill of materials, v4 hinged mirror (2026-11-03)",
     "",
-    "Generated from the CAD by `cad/src/make_bom.py`; also as `bom/bom-v4.csv`. Replaces the stale `bom-uk-draft.csv`. Sizes in mm. Prices in pounds incl. VAT where the shop gave them; see `parts-sourcing.md` for sources.",
+    "Generated from the CAD by `cad/src/make_bom.py`; also as `bom/archive/arm-v4/bom-v4.csv`. Replaces the stale `bom-uk-draft.csv`. Sizes in mm. Prices in pounds incl. VAT where the shop gave them; see `parts-sourcing.md` for sources.",
     "",
     "## Laser cutting (cutter bed 1219 x 914, max 6 mm, ply or acrylic, no metal)",
     "",
@@ -158,6 +158,6 @@ lines += [
     f"Priced lines add up to about {sourced + est:.0f} pounds: {sourced:.0f} from listings or the earlier BOM, {est:.0f} estimated. Not priced yet: {'; '.join(unpriced)}.",
     "Prices of 2026-11-03 or earlier, not rechecked at order time. Nothing is ordered.",
 ]
-(ROOT / "docs" / "bom-v4.md").write_text("\n".join(lines) + "\n")
-print("Wrote", out_csv, "and docs/bom-v4.md")
+(ROOT / "bom" / "archive" / "arm-v4" / "bom-v4.md").write_text("\n".join(lines) + "\n")
+print("Wrote", out_csv, "and bom/archive/arm-v4/bom-v4.md")
 print(f"printed solid mass about {solid_g:.0f} g, largest printed dimension {fit:.0f} mm, priced about {sourced + est:.0f} pounds")

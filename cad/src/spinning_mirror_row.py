@@ -14,7 +14,7 @@ bearings), tilt (carrier, axle, mirrors, weight).
 
 Usage (from the repo root):
   python3 cad/src/spinning_mirror_row.py [--units N] [--up y|z] [--check] [--seed N]    (--units 1 writes out/spinning-mirror/archive/spinning-mirror-test/)
-Writes cad/out/spinning-mirror/archive/spinning-mirror-row/ (assembly STEP, parts/<laser|print|purchase>/ with DXF for the laser parts), bom/bom-spinning-mirror-row.csv
+Writes cad/out/spinning-mirror/archive/spinning-mirror-row/ (assembly STEP, parts/<laser|print|purchase>/ with DXF for the laser parts), bom/spinning-mirrors/archive/bom-spinning-mirror-row.csv
 and previews in cad/media/previews/spinning-mirror-row/.
 """
 import argparse
@@ -35,7 +35,7 @@ TAG = {1: "spinning-mirror-test", 3: "spinning-mirror-trio"}.get(N, "spinning-mi
 OUTD = CAD / "out" / "spinning-mirror" / "archive" / TAG
 PARTS = OUTD / "parts"
 IMG = CAD / "media" / "previews" / TAG
-BOMF = CAD.parent / "bom" / f"bom-{TAG}.csv"
+BOMF = CAD.parent / "bom" / "spinning-mirrors" / "archive" / f"bom-{TAG}.csv"
 
 box, cylz, cylx, cyly = sm.box, sm.cylz, sm.cylx, sm.cyly
 ZC, R_OUT = sm.ZC, sm.R_OUT

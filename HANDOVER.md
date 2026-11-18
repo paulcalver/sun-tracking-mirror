@@ -60,7 +60,7 @@ A simple, low-cost, 3D-printed robotic arm whose end effector continuously point
 | Power | 24V external power brick | No mains wiring inside the build |
 | Structure | PETG (indoors) or ASA (outdoors/window) | PLA softens in direct sun |
 
-Parts budget: about £301 for the five-joint build with slip ring (about £230 from UK listings, £71 estimated). Likely range £250 to £320. See `bom/bom-uk-draft.csv` and `docs/bom-notes.md`. Supersedes the earlier £150 to £250 guess.
+Parts budget: about £301 for the five-joint build with slip ring (about £230 from UK listings, £71 estimated). Likely range £250 to £320. See `bom/archive/arm-v4/bom-uk-draft.csv` and `bom/archive/arm-v4/bom-notes.md`. Supersedes the earlier £150 to £250 guess.
 
 ## Software approach
 

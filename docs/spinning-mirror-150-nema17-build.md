@@ -1,6 +1,6 @@
 # First test unit: 150 mm mirror on a NEMA 17, build guide (2026-11-15)
 
-Draft, nothing built or tested. One unit, no top bar, no hood. CAD: `cad/src/spinning_mirror_150_nema17.py`; STEP and part files in `cad/out/spinning-mirror/spinning-mirror-150-nema17/parts/`; BOM `bom/bom-spinning-mirror-150-nema17.csv`. Background: `spinning-mirror-150-nema17.md`, wiring: `spinning-mirror-150-nema17-wiring-and-order.md`.
+Draft, nothing built or tested. One unit, no top bar, no hood. CAD: `cad/src/spinning_mirror_150_nema17.py`; STEP and part files in `cad/out/spinning-mirror/spinning-mirror-150-nema17/parts/`; BOM `bom/spinning-mirrors/bom-spinning-mirror-150-nema17.csv`. Background: `spinning-mirror-150-nema17.md`, wiring: `spinning-mirror-150-nema17-wiring-and-order.md`.
 
 **Safety first.** A 169 mm ring spins up to about 2.7 m/s at its edge and the mirror tumbles inside it, with no guard. Clamp or weigh down the base, keep hands, hair, cables and faces clear, wear eye protection, put a switch or the supply plug within reach, and start at low speed. Acrylic is the right choice (it does not shatter like glass), but treat the rig as a machine.
 
@@ -29,7 +29,7 @@ Tools: soldering iron with an insert tip, M3 hex key, 4 mm and 9 mm drill bits o
 7. **Carrier and axle.** Glue the brass slug in the carrier's pad (or leave it out for the first run). Place the carrier in the ring, slide the 4 mm rod in through the boss holes, bearings and carrier bore. Centre it so the carrier hubs trap the bearings with about 0.2 mm end float and glue the rod to the carrier with CA or retaining compound. The carrier must turn freely: it should swing like a pendulum and settle flat.
 8. **Mirrors.** Glue the discs to the two faces of the carrier (thin CA spots or double-sided tape), film left on until the end.
 9. **Balance.** The trim screws are in the four M3 holes (2.6 mm, 6 mm deep) in the +Y face of the ring, at 45, 135, 225 and 315 degrees round the ring on its mid-radius (82 mm from the ring centre). Without power, turn the ring by hand and see whether it stops at the same spot every time (that spot is the heavy side). Screw M3 screws, with washers if needed, into the holes on the light side until it stops anywhere. They correct left-right (in-plane) imbalance, not front-back. Weigh each disc on the scale and aim for identical discs.
-10. **Wire up** as in the wiring diagram (`spinning-mirror-150-nema17-wiring.svg`) and the wiring doc: 24 V through the fuse to the TMC2209 + and GND screw terminals (100 uF across, see the wiring doc), ESP32 3.3 V to VIO, STEP and DIR and EN to three ESP32 pins, common ground, USB power for the ESP32.
+10. **Wire up** as in the wiring diagram (`electronics/spinning-mirrors/150mm-test-unit/wiring.svg`) and the wiring doc: 24 V through the fuse to the TMC2209 + and GND screw terminals (100 uF across, see the wiring doc), ESP32 3.3 V to VIO, STEP and DIR and EN to three ESP32 pins, common ground, USB power for the ESP32.
 
 ## Slicer settings, Bambu P1S, matt black PLA (Bambu Studio or Orca)
 Nozzle 0.4 mm, textured or smooth PEI plate, filament "Bambu PLA Matte" (or generic PLA). PLA only, so keep the motor cool (see the heat notes above).

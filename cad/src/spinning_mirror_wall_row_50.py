@@ -13,7 +13,7 @@ World frame (mm): wall plane at Y = 0, the viewer on +Y, X along the row, Z up w
 Usage (from the repo root):
   python3 cad/src/spinning_mirror_wall_row_50.py [--single10] [--mirror100] [--check] [--up y|z] [--seed N]
 Writes cad/out/spinning-mirror/spinning-mirror-wall-row-50/ (assembly STEP, parts/<print|print_ready|purchase>/),
-bom/spinning-mirrors/bom-spinning-mirror-wall-row-50.csv and previews in cad/media/previews/spinning-mirror-wall-row-50/.
+bom/spinning-mirrors/archive/bom-spinning-mirror-wall-row-50.csv and previews in cad/media/previews/spinning-mirror-wall-row-50/.
 """
 import argparse
 import csv
@@ -36,7 +36,7 @@ TAG = f"spinning-mirror-wall-row-{'100' if M100 else '50'}" + ("-single10" if SI
 OUTD = CAD / "out" / "spinning-mirror" / TAG
 PARTS = OUTD / "parts"
 IMG = CAD / "media" / "previews" / TAG
-BOMF = CAD.parent / "bom" / "spinning-mirrors" / f"bom-{TAG}.csv"
+BOMF = CAD.parent / "bom" / "spinning-mirrors" / ("" if M100 else "archive") / f"bom-{TAG}.csv"
 
 box, cylz, cylx, cyly = sm.box, sm.cylz, sm.cylx, sm.cyly
 PRINT_C, STEEL, MIRROR, MOTOR_C = sm.PRINT_C, sm.STEEL, sm.MIRROR, sm.MOTOR_C

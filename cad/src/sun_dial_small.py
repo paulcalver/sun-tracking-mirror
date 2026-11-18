@@ -31,7 +31,7 @@ cap and on a 15.8 mm circle in the back face). The SimpleFOC Mini is 26.1 x 21.0
 
 Usage (from the repo root):
   python3 cad/src/sun_dial_small.py [--az DEG] [--el DEG] [--up y|z] [--discs printed|laser] [--check]
-Writes cad/out/sun-dial/sun-dial-small/ (assembly STEP, parts/<laser|print|purchase>/ with STEP and DXF), bom/bom-sun-dial-small.csv and
+Writes cad/out/sun-dial/sun-dial-small/ (assembly STEP, parts/<laser|print|purchase>/ with STEP and DXF), bom/archive/sun-dials/bom-sun-dial-small.csv and
 previews in cad/media/previews/sun-dial-small/.
 """
 import argparse
@@ -46,7 +46,7 @@ CAD = HERE.parent
 OUTD = CAD / "out" / "sun-dial" / "sun-dial-small"
 PARTS = OUTD / "parts"
 IMG = CAD / "media" / "previews" / "sun-dial-small"
-BOMF = CAD.parent / "bom" / "bom-sun-dial-small.csv"
+BOMF = CAD.parent / "bom" / "archive" / "sun-dials" / "bom-sun-dial-small.csv"
 
 # ------------------------------------------------------------------ parameters (mm)
 DISC_D, DISC_T, SLOT_W = 100.0, 3.0, 3.0

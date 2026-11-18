@@ -14,7 +14,7 @@ Hierarchy: base_fixed (pedestal, lid, ballast, motor), ring_spin (shaft, hub, ri
 
 Usage (from the repo root):
   python3 cad/src/spinning_mirror_150_nema17.py [--az DEG] [--tilt DEG] [--up y|z] [--check]
-Writes cad/out/spinning-mirror/spinning-mirror-150-nema17/ (assembly STEP, parts/<print|purchase>/), bom/bom-spinning-mirror-150-nema17.csv and previews in
+Writes cad/out/spinning-mirror/spinning-mirror-150-nema17/ (assembly STEP, parts/<print|purchase>/), bom/spinning-mirrors/bom-spinning-mirror-150-nema17.csv and previews in
 cad/media/previews/spinning-mirror-150-nema17/.
 """
 import argparse
@@ -37,7 +37,7 @@ TAG = "spinning-mirror-150-nema17"
 OUTD = CAD / "out" / "spinning-mirror" / TAG
 PARTS = OUTD / "parts"
 IMG = CAD / "media" / "previews" / TAG
-BOMF = CAD.parent / "bom" / f"bom-{TAG}.csv"
+BOMF = CAD.parent / "bom" / "spinning-mirrors" / f"bom-{TAG}.csv"
 
 # ------------------------------------------------------------------ parameters (mm)
 # NEMA 17, The Pi Hut 42/60 (datasheet: 1.68 A, 1.65 ohm, 6.2 mH, 6.5 kg cm, 102 g cm2, 0.5 kg); face and hole dimensions are the usual NEMA 17 ones

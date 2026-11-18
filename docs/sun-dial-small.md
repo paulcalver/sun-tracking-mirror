@@ -47,4 +47,4 @@ python3 cad/src/sun_dial_small.py --check
 ```
 The STEP files are written Y up, with the base standing on the Y = 0 plane, so they open upright in Fusion; add `--up z` for Z up. The print-ready files are always Z up.
 
-Outputs: `cad/out/sun-dial/sun-dial-small/`, `bom/bom-sun-dial-small.csv`, `cad/media/previews/sun-dial-small/`.
+Outputs: `cad/out/sun-dial/sun-dial-small/`, `bom/archive/sun-dials/bom-sun-dial-small.csv`, `cad/media/previews/sun-dial-small/`.

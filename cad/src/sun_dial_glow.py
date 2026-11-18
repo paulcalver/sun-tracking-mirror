@@ -14,7 +14,7 @@ Colour and brightness come from the sun's elevation, sent by the base over the s
 
 Usage (from the repo root):
   python3 cad/src/sun_dial_glow.py [--az DEG] [--el DEG] [--up y|z] [--check]
-Writes cad/out/sun-dial/sun-dial-glow/, bom/bom-sun-dial-glow.csv and previews in cad/media/previews/sun-dial-glow/.
+Writes cad/out/sun-dial/sun-dial-glow/, bom/archive/sun-dials/bom-sun-dial-glow.csv and previews in cad/media/previews/sun-dial-glow/.
 """
 import argparse
 import csv
@@ -28,7 +28,7 @@ import sun_dial_small as sd
 CAD = sd.CAD
 OUTD = CAD / "out" / "sun-dial" / "sun-dial-glow"
 IMG = CAD / "media" / "previews" / "sun-dial-glow"
-BOMF = CAD.parent / "bom" / "bom-sun-dial-glow.csv"
+BOMF = CAD.parent / "bom" / "archive" / "sun-dials" / "bom-sun-dial-glow.csv"
 
 # ---- light parameters (mm, frame-local: axis +Z, up +Y, the sun side is +X)
 PEAK_N, PEAK_STEP = 16, 6.0                    # pinholes every 6 degrees, 0 to 90

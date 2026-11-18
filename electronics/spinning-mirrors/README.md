@@ -1,0 +1,11 @@
+# Spinning mirrors: electronics
+
+One subfolder per build. Pin map and firmware: `firmware/README.md`. Parts and order list: `docs/spinning-mirror-150-nema17-wiring-and-order.md`.
+
+| Build | Folder | Status |
+|---|---|---|
+| 150 mm single test unit (1 NEMA 17, ESP32, 1 TMC2209) | `150mm-test-unit/wiring.svg` | drawn, not built or tested |
+| 150 mm trio (3 motors, one ESP32) | `150mm-trio/` | not drawn yet |
+| 100 mm wall piece (2 motors, ESP32 in lock-step) | `wall-row-100/` | not drawn yet |
+
+Add a new build as a new subfolder here and a row above. Open the .svg files in a browser.

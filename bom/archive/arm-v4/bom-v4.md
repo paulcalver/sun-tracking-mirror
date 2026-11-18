@@ -1,6 +1,6 @@
 # Bill of materials, v4 hinged mirror (2026-11-03)
 
-Generated from the CAD by `cad/src/make_bom.py`; also as `bom/bom-v4.csv`. Replaces the stale `bom-uk-draft.csv`. Sizes in mm. Prices in pounds incl. VAT where the shop gave them; see `parts-sourcing.md` for sources.
+Generated from the CAD by `cad/src/make_bom.py`; also as `bom/archive/arm-v4/bom-v4.csv`. Replaces the stale `bom-uk-draft.csv`. Sizes in mm. Prices in pounds incl. VAT where the shop gave them; see `parts-sourcing.md` for sources.
 
 ## Laser cutting (cutter bed 1219 x 914, max 6 mm, ply or acrylic, no metal)
 

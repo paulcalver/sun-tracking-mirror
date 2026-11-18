@@ -773,7 +773,7 @@ def main():
     a = ap.parse_args()
     build_neutral()
     if a.bom:
-        write_bom(lm.CAD.parent / "docs" / "line-mirrors-wave-bom.md")
+        write_bom(lm.CAD.parent / "bom" / "archive" / "line-mirrors" / "line-mirrors-wave-bom.md")
         return
     if a.sun and not a.check:
         sun_view()

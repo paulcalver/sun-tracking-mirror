@@ -47,8 +47,8 @@ text{font-size:13px;fill:#1d232a}
 <text x="210" y="95" class="b">DC jack breakout</text><text x="210" y="113" class="s">screw terminals</text>
 <rect x="370" y="88" width="56" height="24" rx="4" fill="#fff" stroke="#d63031" stroke-width="2"/>
 <text x="398" y="105" text-anchor="middle" class="b">3 A</text><text x="398" y="80" text-anchor="middle" class="s">fuse in +24 V</text>
-<text x="438" y="112" text-anchor="end" class="s">100 uF</text>
-<text x="438" y="124" text-anchor="end" class="s">35 V+</text>
+<text x="468" y="114" class="s">100 uF</text>
+<text x="468" y="126" class="s">35 V+</text>
 
 <!-- driver -->
 <rect x="520" y="80" width="180" height="332" rx="6" class="box"/>

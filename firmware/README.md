@@ -45,6 +45,10 @@ One command per line (or separated by `;`). In Max use `[serial]` at 115200 and 
 | `jitter 0` / `jitter 1` | random speed shifts off / on |
 | `jrange <lo> <hi>` | jitter speed range in rpm (default 60 to 300) |
 | `jtime <min> <max>` | seconds between shifts (default 2 to 8) |
+| `jmode walk` / `jmode ou` | `walk`: random targets in `jrange` at random intervals. `ou`: the tumble simulator's jitter, a random wobble around the `rpm` value |
+| `jit <0..0.8>` | ou mode: jitter size as a fraction of `rpm` (simulator slider 45 = 0.45) |
+| `jtau <0.02..5>` | ou mode: correlation time in seconds (simulator 0.2); bigger = slower, longer swells |
+| `jrev 0` / `jrev 1` | ou mode: 1 lets the speed dip below zero (brief reversals, as in the simulator); 0 holds it at zero or above |
 | `status` | one line with all state, easy to parse in Max |
 | `help` | list |
 
@@ -74,3 +78,37 @@ One 100 kHz timer interrupt runs a phase accumulator per motor and raises every 
 - Direction on each wall motor, and whether the TMC2209's MS pins give 1/8 on your board, need checking.
 - No watchdog: if Max stops sending, the motors keep their last command. Use `stop` / `estop`.
 - OSC over WiFi was not requested; serial only.
+
+## 150 mm single test unit and the tumble simulator
+
+`NUM_MOTORS 1` is the default, so the sketch is already the single-rig build. The `ou` jitter mode reproduces the speed process in `docs/spinning-mirror-gimbal-concept.html` (option D): speed = `rpm` x (1 + ou), ou an Ornstein-Uhlenbeck process with standard deviation `jit` and correlation time `jtau`. The simulator's mechanical sliders (hinge friction, edge weight) are properties of the real hinge, not firmware.
+
+Try on the rig, all changeable while it runs:
+
+```
+rpm 180
+jmode ou
+jit 0.45
+jtau 0.2
+accel 200
+enable 1
+jitter 1
+```
+
+Notes:
+- At `rpm 180`, `jit 0.45` the peaks exceed 300 rpm; those are clamped by `MAX_SPINDLE_RPM`, which flattens the tops. Lower `rpm` or `jit`, or raise the cap only after the bench test.
+- That wobble asks for roughly 60 rad/s2 rms with peaks over 150, so the default 100 rad/s2 limit will round it off. A 150 mm mirror and ring are about 3.4e-4 to 4.8e-4 kg m2 (docs), so 200 rad/s2 is about 0.1 N m, within the motor's budget but start at 100 and raise `accel` live.
+- The simulator runs slowed (time scale 0.08). The firmware runs in real time, so `jtau 0.2` is 0.2 real seconds.
+- With `jrev 1` the ring reverses through zero speed at the acceleration limit; stepper torque there is fine, but watch the mirror mount.
+
+## Laptop control panel (`ui/spinning_mirror_control.html`)
+
+A single HTML page that talks to the ESP32 over USB serial using the browser's Web Serial API, so there is nothing to install.
+
+1. Flash the sketch, close the Arduino Serial Monitor and Max (only one program can hold the port).
+2. Open `firmware/ui/spinning_mirror_control.html` in **Chrome or Edge** (Safari and Firefox have no Web Serial). If it will not connect from a `file://` address, run `python3 -m http.server 8000` in `firmware/ui` and open `http://localhost:8000/spinning_mirror_control.html`.
+3. Click Connect and pick the ESP32's port. Opening the port resets the ESP32; the drivers stay off until you press Start.
+
+It has Start, Stop (ramp down) and Emergency stop buttons, sliders for speed, acceleration, jitter size, correlation time, range and interval, direction and reversal switches, a 20 s live speed plot from the firmware's `status` line, and a raw command box. Sliders send their commands as you drag them, and the controls take the firmware's current values on connect. The speed sliders' maximum follows the firmware cap, which is read from the boot line. The page cannot raise the cap; the firmware always clamps.
+
+Unverified: only the page's status parsing and layout were checked in a browser pane with fake status lines; the serial connection itself has not been tried.

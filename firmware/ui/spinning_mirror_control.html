@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spinning mirror control</title>
+<style>
+  :root { --bg:#f6f5f1; --card:#fff; --ink:#1d1d1b; --mute:#6b6a65; --line:#dcdad2; --acc:#b5651d; --ok:#2f7d4f; --bad:#b3261e; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#161614; --card:#201f1c; --ink:#ecebe6; --mute:#9a988f; --line:#37352f; --acc:#e3963f; --ok:#5cc08a; --bad:#ef7d74; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.4 system-ui,sans-serif; padding:16px; max-width:900px; margin-inline:auto; }
+  h1 { font-size:20px; margin:0 0 4px; }
+  .sub { color:var(--mute); margin:0 0 14px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px; margin-bottom:12px; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  button { font:inherit; padding:7px 14px; border-radius:7px; border:1px solid var(--line); background:var(--card); color:var(--ink); cursor:pointer; }
+  button:hover { border-color:var(--acc); }
+  button.primary { background:var(--acc); color:#fff; border-color:var(--acc); }
+  button.stop { background:var(--bad); color:#fff; border-color:var(--bad); }
+  button.on { outline:2px solid var(--acc); }
+  button:disabled { opacity:.45; cursor:default; }
+  .ctl { display:grid; grid-template-columns:150px 1fr 70px; gap:10px; align-items:center; margin:8px 0; }
+  .ctl output { text-align:right; font-variant-numeric:tabular-nums; }
+  input[type=range] { width:100%; accent-color:var(--acc); }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; }
+  .stat { border:1px solid var(--line); border-radius:8px; padding:8px 10px; }
+  .stat small { color:var(--mute); display:block; }
+  .stat b { font-size:20px; font-variant-numeric:tabular-nums; }
+  canvas { width:100%; height:140px; display:block; border:1px solid var(--line); border-radius:8px; }
+  #log { height:130px; overflow:auto; font:12px/1.4 ui-monospace,monospace; color:var(--mute); white-space:pre-wrap; }
+  #conn { font-weight:600; } .ok { color:var(--ok); } .bad { color:var(--bad); }
+  .note { color:var(--mute); font-size:13px; }
+  @media (max-width:560px) { .ctl { grid-template-columns:1fr 60px; } .ctl label { grid-column:1/-1; } .ctl output{ grid-column:2; grid-row:2;} }
+</style>
+</head>
+<body>
+<h1>Spinning mirror control</h1>
+<p class="sub">Talks to the ESP32 over USB serial (Chrome or Edge, Web Serial). Close the Arduino Serial Monitor and Max first; only one program can hold the port.</p>
+
+<div class="card">
+  <div class="row">
+    <button id="bConnect" class="primary">Connect</button>
+    <span id="conn" class="bad">not connected</span>
+    <span class="note" id="capNote"></span>
+  </div>
+  <p class="note" id="unsupported" hidden>This browser has no Web Serial. Use Chrome or Edge.</p>
+</div>
+
+<div class="card">
+  <div class="row">
+    <button id="bStart" class="primary" disabled>Start (enable)</button>
+    <button id="bStop" disabled>Stop (ramp down)</button>
+    <button id="bEstop" class="stop" disabled>Emergency stop</button>
+    <span class="note">Emergency stop releases the motor at once; the ring then freewheels.</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="grid">
+    <div class="stat"><small>speed now (rpm)</small><b id="sNow">-</b></div>
+    <div class="stat"><small>target (rpm)</small><b id="sTgt">-</b></div>
+    <div class="stat"><small>drivers</small><b id="sEn">-</b></div>
+    <div class="stat"><small>jitter</small><b id="sJit">-</b></div>
+  </div>
+  <canvas id="plot" width="860" height="140"></canvas>
+  <div class="note">Last 20 s of speed (grey = target, orange = actual).</div>
+</div>
+
+<div class="card">
+  <div class="ctl"><label for="rpm">Speed (base rpm)</label><input id="rpm" type="range" min="0" max="300" step="1" value="0"><output id="rpmV">0</output></div>
+  <div class="row" style="margin:6px 0">
+    <span>Direction</span>
+    <button id="dCw" class="on">Clockwise</button><button id="dCcw">Counter-clockwise</button>
+  </div>
+  <div class="ctl"><label for="accel">Acceleration limit (rad/s²)</label><input id="accel" type="range" min="5" max="300" step="5" value="100"><output id="accelV">100</output></div>
+  <p class="note">About 100 is comfortable, 300 is the hard ceiling. Both are clamped again in the firmware.</p>
+</div>
+
+<div class="card">
+  <div class="row">
+    <button id="jOff" class="on">Jitter off</button><button id="jOn">Jitter on</button>
+    <span style="margin-left:12px">Mode</span>
+    <button id="mOu" class="on">Wobble (simulator)</button><button id="mWalk">Random targets</button>
+  </div>
+  <div id="ouBox">
+    <div class="ctl"><label for="jit">Jitter size</label><input id="jit" type="range" min="0" max="0.8" step="0.01" value="0.45"><output id="jitV">0.45</output></div>
+    <div class="ctl"><label for="jtau">Correlation time (s)</label><input id="jtau" type="range" min="0.02" max="3" step="0.02" value="0.2"><output id="jtauV">0.20</output></div>
+    <label><input type="checkbox" id="jrev" checked> allow brief reversals</label>
+    <p class="note">Speed = base × (1 + wobble). The same process as the tumble simulator: jitter size is its slider divided by 100.</p>
+  </div>
+  <div id="walkBox" hidden>
+    <div class="ctl"><label for="jlo">Range low (rpm)</label><input id="jlo" type="range" min="0" max="300" step="1" value="60"><output id="jloV">60</output></div>
+    <div class="ctl"><label for="jhi">Range high (rpm)</label><input id="jhi" type="range" min="0" max="300" step="1" value="300"><output id="jhiV">300</output></div>
+    <div class="ctl"><label for="jtmin">Interval min (s)</label><input id="jtmin" type="range" min="0.2" max="30" step="0.1" value="2"><output id="jtminV">2.0</output></div>
+    <div class="ctl"><label for="jtmax">Interval max (s)</label><input id="jtmax" type="range" min="0.2" max="30" step="0.1" value="8"><output id="jtmaxV">8.0</output></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="row"><input id="raw" placeholder="raw command, e.g. status" style="flex:1;min-width:200px;padding:7px;border-radius:7px;border:1px solid var(--line);background:var(--bg);color:var(--ink)"><button id="bSend" disabled>Send</button></div>
+  <div id="log"></div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let port = null, writer = null, reader = null, connected = false, cap = 300, pollTimer = null;
+const hist = [];   // {t, now, tgt}
+
+function log(s, cls) { const l = $('log'); l.textContent += s + '\n'; l.scrollTop = l.scrollHeight; if (l.textContent.length > 20000) l.textContent = l.textContent.slice(-10000); }
+async function send(cmd) {
+  if (!connected) return;
+  try { await writer.write(cmd + '\n'); } catch (e) { log('write error: ' + e); }
+}
+
+// ---- connection ----
+if (!('serial' in navigator)) $('unsupported').hidden = false;
+$('bConnect').onclick = async () => {
+  if (connected) { await disconnect(); return; }
+  try {
+    port = await navigator.serial.requestPort();
+    await port.open({ baudRate: 115200 });
+  } catch (e) { log('connect failed: ' + e); return; }
+  const enc = new TextEncoderStream(); enc.readable.pipeTo(port.writable); writer = enc.writable.getWriter();
+  connected = true; setConn(true);
+  readLoop();
+  // The ESP32 resets when the port opens; wait for its boot text, then sync.
+  setTimeout(() => send('status'), 1800);
+  pollTimer = setInterval(() => send('status'), 250);
+};
+async function disconnect() {
+  connected = false; clearInterval(pollTimer);
+  try { await reader.cancel(); } catch (e) {}
+  try { await writer.close(); } catch (e) {}
+  try { await port.close(); } catch (e) {}
+  setConn(false);
+}
+function setConn(on) {
+  $('conn').textContent = on ? 'connected' : 'not connected';
+  $('conn').className = on ? 'ok' : 'bad';
+  $('bConnect').textContent = on ? 'Disconnect' : 'Connect';
+  ['bStart','bStop','bEstop','bSend'].forEach(i => $(i).disabled = !on);
+}
+async function readLoop() {
+  const dec = new TextDecoderStream(); port.readable.pipeTo(dec.writable).catch(() => {});
+  reader = dec.readable.getReader();
+  let buf = '';
+  try {
+    while (true) {
+      const { value, done } = await reader.read(); if (done) break;
+      buf += value; let i;
+      while ((i = buf.indexOf('\n')) >= 0) { handleLine(buf.slice(0, i).trim()); buf = buf.slice(i + 1); }
+    }
+  } catch (e) {}
+  if (connected) { connected = false; clearInterval(pollTimer); setConn(false); log('port closed'); }
+}
+
+// ---- incoming ----
+let synced = false;
+function handleLine(line) {
+  if (!line) return;
+  if (line.startsWith('status ')) { onStatus(line); return; }   // not logged: polled 4x a second
+  log(line);
+  const m = line.match(/MAX_SPINDLE_RPM=(\d+)/);
+  if (m) { cap = +m[1]; setCap(); }
+}
+function setCap() {
+  ['rpm','jlo','jhi'].forEach(i => $(i).max = cap);
+  $('capNote').textContent = 'speed cap ' + cap + ' rpm (set in firmware)';
+}
+function onStatus(line) {
+  const kv = {}; line.slice(7).split(/\s+/).forEach(p => { const [k, v] = p.split('='); kv[k] = v; });
+  const now = parseFloat(kv.rpm_now), tgt = parseFloat(kv.rpm_target);
+  $('sNow').textContent = now.toFixed(0); $('sTgt').textContent = tgt.toFixed(0);
+  $('sEn').textContent = kv.en === '1' ? (kv.stopping === '1' ? 'stopping' : 'on') : 'off';
+  $('sJit').textContent = kv.jitter === '1' ? kv.jmode : 'off';
+  hist.push({ t: performance.now(), now, tgt });
+  while (hist.length && performance.now() - hist[0].t > 20000) hist.shift();
+  drawPlot();
+  if (!synced) {   // first status after connect: put the controls where the firmware is
+    synced = true;
+    setSlider('rpm', kv.rpm_set); setSlider('accel', kv.accel); setSlider('jit', kv.jit); setSlider('jtau', kv.jtau);
+    const [lo, hi] = kv.jrpm.split('..'); setSlider('jlo', lo); setSlider('jhi', hi);
+    const [a, b] = kv.jtime.split('..'); setSlider('jtmin', a); setSlider('jtmax', b);
+    $('jrev').checked = kv.jrev === '1';
+    setDir(+kv.dir); setJit(kv.jitter === '1'); setMode(kv.jmode);
+  }
+}
+function setSlider(id, v) { $(id).value = v; $(id + 'V').textContent = fmt(id, +v); }
+const fmt = (id, v) => ({ jit: v.toFixed(2), jtau: v.toFixed(2), jtmin: v.toFixed(1), jtmax: v.toFixed(1) }[id] ?? String(Math.round(v)));
+
+// ---- plot ----
+function drawPlot() {
+  const c = $('plot'), g = c.getContext('2d'), W = c.width, H = c.height;
+  const css = getComputedStyle(document.body);
+  g.clearRect(0, 0, W, H);
+  const lim = Math.max(60, cap) * 1.1;
+  const y = v => H / 2 - (v / lim) * (H / 2 - 6);
+  g.strokeStyle = css.getPropertyValue('--line'); g.beginPath(); g.moveTo(0, y(0)); g.lineTo(W, y(0)); g.stroke();
+  const now = performance.now();
+  const line = (key, col) => { g.strokeStyle = col; g.lineWidth = 2; g.beginPath(); hist.forEach((p, i) => { const x = W - (now - p.t) / 20000 * W; i ? g.lineTo(x, y(p[key])) : g.moveTo(x, y(p[key])); }); g.stroke(); };
+  line('tgt', css.getPropertyValue('--mute').trim()); line('now', css.getPropertyValue('--acc').trim());
+}
+
+// ---- controls ----
+function bindSlider(id, cmd, debounceMs = 80) {
+  let t = null;
+  $(id).addEventListener('input', () => {
+    $(id + 'V').textContent = fmt(id, +$(id).value);
+    clearTimeout(t); t = setTimeout(() => send(cmd()), debounceMs);
+  });
+}
+bindSlider('rpm',   () => 'rpm ' + $('rpm').value);
+bindSlider('accel', () => 'accel ' + $('accel').value);
+bindSlider('jit',   () => 'jit ' + $('jit').value);
+bindSlider('jtau',  () => 'jtau ' + $('jtau').value);
+bindSlider('jlo', () => 'jrange ' + $('jlo').value + ' ' + $('jhi').value);
+bindSlider('jhi', () => 'jrange ' + $('jlo').value + ' ' + $('jhi').value);
+bindSlider('jtmin', () => 'jtime ' + $('jtmin').value + ' ' + $('jtmax').value);
+bindSlider('jtmax', () => 'jtime ' + $('jtmin').value + ' ' + $('jtmax').value);
+$('jrev').onchange = () => send('jrev ' + ($('jrev').checked ? 1 : 0));
+
+function setDir(d) { $('dCw').classList.toggle('on', d > 0); $('dCcw').classList.toggle('on', d < 0); }
+$('dCw').onclick  = () => { setDir(1);  send('dir 1'); };
+$('dCcw').onclick = () => { setDir(-1); send('dir -1'); };
+function setJit(on) { $('jOn').classList.toggle('on', on); $('jOff').classList.toggle('on', !on); }
+$('jOn').onclick  = () => { setJit(true);  send('jitter 1'); };
+$('jOff').onclick = () => { setJit(false); send('jitter 0'); };
+function setMode(m) { const ou = m === 'ou'; $('mOu').classList.toggle('on', ou); $('mWalk').classList.toggle('on', !ou); $('ouBox').hidden = !ou; $('walkBox').hidden = ou; }
+$('mOu').onclick   = () => { setMode('ou');   send('jmode ou'); };
+$('mWalk').onclick = () => { setMode('walk'); send('jmode walk'); };
+
+$('bStart').onclick = () => send('start');
+$('bStop').onclick  = () => send('stop');
+$('bEstop').onclick = () => { send('estop'); setSlider('rpm', 0); setJit(false); };
+$('bSend').onclick  = () => { const v = $('raw').value.trim(); if (v) { log('> ' + v); send(v); $('raw').value = ''; } };
+$('raw').addEventListener('keydown', e => { if (e.key === 'Enter') $('bSend').click(); });
+setCap();
+</script>
+</body>
+</html>

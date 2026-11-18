@@ -165,6 +165,21 @@ static float  jTMax        = JITTER_T_MAX_DEFAULT;
 static uint32_t jNextAt    = 0;               // millis of next jitter change
 static float  jCurrentRpm  = 0.0f;
 
+// Jitter mode 1 ("ou"): the same random process as the tumble simulator
+// (docs/spinning-mirror-gimbal-concept.html, option D). Speed = base * (1 + ou),
+// where ou is an Ornstein-Uhlenbeck process: zero mean, standard deviation
+// jSigma (the simulator's "Motor speed jitter" slider, 0..0.8, 0.45 default) and
+// correlation time jTau seconds (the simulator uses 0.2). The base is the
+// "rpm" command. With jRev on, 1 + ou may go negative so the ring reverses
+// briefly, as in the simulator; with jRev off it is held at zero or above.
+// Mode 0 ("walk") is the earlier scheme: a uniform random target in jrange at
+// random intervals.
+static int    jMode        = 0;       // 0 walk, 1 ou
+static float  jSigma       = 0.45f;
+static float  jTau         = 0.2f;
+static bool   jRev         = true;
+static float  ouState      = 0.0f;
+
 static uint32_t lastRampUs = 0;
 
 constexpr float RPM_TO_RAD = 2.0f * PI / 60.0f;
@@ -215,6 +230,12 @@ static void applySpeed() {
   portEXIT_CRITICAL(&stepMux);
 }
 
+static float gaussian() {   // Box-Muller
+  float u1 = ((float)(esp_random() >> 8) + 1.0f) / 16777217.0f;   // (0,1]
+  float u2 = (float)(esp_random() >> 8) / 16777216.0f;
+  return sqrtf(-2.0f * logf(u1)) * cosf(2.0f * PI * u2);
+}
+
 static void scheduleJitter(uint32_t now) {
   jNextAt = now + (uint32_t)(randomFloat(jTMin, jTMax) * 1000.0f);
 }
@@ -257,7 +278,17 @@ static void rampStep() {
       pickJitterTarget();
       scheduleJitter(nowMs);
     }
-    targetRad = dirSign * jCurrentRpm * RPM_TO_RAD;
+    if (jMode == 1) {
+      // exact OU update: ou += -ou/tau*dt + sigma*sqrt(2*dt/tau)*N(0,1)
+      float k = dt / jTau;
+      if (k > 1.0f) k = 1.0f;
+      ouState += -ouState * k + jSigma * sqrtf(2.0f * k) * gaussian();
+      float f = 1.0f + ouState;
+      if (!jRev && f < 0.0f) f = 0.0f;
+      targetRad = dirSign * manualRpm * f * RPM_TO_RAD;   // capped below
+    } else {
+      targetRad = dirSign * jCurrentRpm * RPM_TO_RAD;
+    }
   } else {
     targetRad = dirSign * manualRpm * RPM_TO_RAD;
   }
@@ -322,10 +353,10 @@ static void cmdEstop() {
 
 static void printStatus() {
   Serial.printf("status en=%d stopping=%d motors=%d dir=%d rpm_set=%.1f rpm_now=%.1f rpm_target=%.1f "
-                "accel=%.0f jitter=%d jrpm=%.0f..%.0f jtime=%.1f..%.1f\n",
+                "accel=%.0f jitter=%d jmode=%s jit=%.2f jtau=%.2f jrev=%d jrpm=%.0f..%.0f jtime=%.1f..%.1f\n",
                 enabled, stopping, NUM_MOTORS, dirSign, manualRpm,
                 velRad / RPM_TO_RAD, targetRad / RPM_TO_RAD, accelLimit,
-                jitterOn, jRpmLo, jRpmHi, jTMin, jTMax);
+                jitterOn, jMode ? "ou" : "walk", jSigma, jTau, jRev, jRpmLo, jRpmHi, jTMin, jTMax);
 }
 
 static void printHelp() {
@@ -340,7 +371,11 @@ static void printHelp() {
     "  accel <rad/s2>    acceleration limit (5..300, default 100)\n"
     "  jitter 0|1        random speed shifts on/off\n"
     "  jrange <lo> <hi>  jitter speed range in rpm\n"
-    "  jtime <min> <max> jitter interval range in seconds\n"
+    "  jtime <min> <max> jitter interval range in seconds (walk mode)\n"
+    "  jmode walk|ou     walk = random targets in jrange; ou = simulator-style wobble around rpm\n"
+    "  jit <0..0.8>      ou mode: speed jitter, fraction of rpm (simulator slider /100)\n"
+    "  jtau <0.02..5>    ou mode: correlation time, seconds (simulator uses 0.2)\n"
+    "  jrev 0|1          ou mode: allow brief reversals (1) or hold speed at 0 or above (0)\n"
     "  status            one-line state\n"
     "  help");
 }
@@ -388,6 +423,7 @@ static void handleLine(char *line) {
   } else if (!strcmp(cmd, "jitter")) {
     if (!a1) { Serial.println("err jitter needs 0 or 1"); return; }
     jitterOn = atoi(a1) != 0;
+    if (jitterOn) ouState = 0.0f;
     if (jitterOn) { pickJitterTarget(); scheduleJitter(millis()); }
     Serial.printf("ok jitter %d\n", jitterOn);
   } else if (!strcmp(cmd, "jrange")) {
@@ -405,6 +441,23 @@ static void handleLine(char *line) {
     if (hi < lo) { float t = lo; lo = hi; hi = t; }
     jTMin = lo; jTMax = hi;
     Serial.printf("ok jtime %.1f %.1f\n", jTMin, jTMax);
+  } else if (!strcmp(cmd, "jmode")) {
+    if (!a1) { Serial.println("err jmode needs walk or ou"); return; }
+    jMode = (!strcasecmp(a1, "ou") || !strcmp(a1, "1")) ? 1 : 0;
+    ouState = 0.0f;
+    Serial.printf("ok jmode %s\n", jMode ? "ou" : "walk");
+  } else if (!strcmp(cmd, "jit")) {
+    if (!a1) { Serial.println("err jit needs 0..0.8"); return; }
+    jSigma = constrain(atof(a1), 0.0f, 0.8f);
+    Serial.printf("ok jit %.2f\n", jSigma);
+  } else if (!strcmp(cmd, "jtau")) {
+    if (!a1) { Serial.println("err jtau needs seconds"); return; }
+    jTau = constrain(atof(a1), 0.02f, 5.0f);
+    Serial.printf("ok jtau %.2f\n", jTau);
+  } else if (!strcmp(cmd, "jrev")) {
+    if (!a1) { Serial.println("err jrev needs 0 or 1"); return; }
+    jRev = atoi(a1) != 0;
+    Serial.printf("ok jrev %d\n", jRev);
   } else if (!strcmp(cmd, "status")) {
     printStatus();
   } else if (!strcmp(cmd, "help") || !strcmp(cmd, "?")) {

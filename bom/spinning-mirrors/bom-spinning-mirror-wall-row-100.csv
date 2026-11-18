@@ -33,6 +33,7 @@ buy,"M5 slide-in T-nut for a 6 mm slot (20 series, zinc plated)",29,0.653,32,20.
 buy,"M5 x 35 button head screw, stainless",26,0.505,33,16.67,"extrusion shop, BHB-M5-35","2 per unit (block into the T-nuts) plus 2 per motor bracket, spares"
 buy,"M5 x 50 button head screw, stainless",4,,,,,"1 per standoff, from the wall side into the back-slot T-nut (head 15 mm deep in the standoff); 1 spare"
 buy,"M5 x 8 button head screw, stainless",6,,,,,"2 hold the electronics box to the rail; 4 spare; 8 mm, not 12: the head seats 2.5 mm below the rail and a longer screw bottoms on the slot floor before it clamps"
+buy,"Slot cover strip, black PVC, 20 series, 1000 mm (Ooznest SCO-20-B-1000)",1,1.370,1,1.37,"Ooznest SCO-20-B-1000 (1000 mm, black; check whether the 1.37 is ex VAT)","press into the rail's bottom slot over the two motor cables: about 0.51 m each side from the box to the rail ends, 1.03 m in all, so one 1000 mm length cut in two leaves a small gap in the middle under the box; check the cover's depth against the cable"
 buy,"M8 shim washer 8 x 12 x 1 mm, stainless (DIN 988 or similar)",10,,,,,"1 per spindle as a spacer on the inner race of the upper bearing; spares; 12 mm OD sits on the inner race only, clear of the 608ZZ shield and outer race; price TBC"
 buy,"M3 x 6 socket cap head screw, stainless",10,0.154,10,1.54,"extrusion shop, CHB-M3-6",4 per motor into the front face; check the thread depth first
 buy,"M4 x 10 cup-point grub screw, stainless",10,,,,,"1 per ring foot, clamps the ring to the spindle on a flat; thread-lock; 10 mm so it passes the 6 mm insert and the open hole to reach the rod (a 6 mm grub would not reach)"
@@ -49,4 +50,4 @@ buy,"Clear 2-part epoxy (5 minute, syringe)",1,,,,,"a few spots to make the disc
 buy,"Filament PLA, grams used",550,0.009,550,5.13,"11.19 per kg inc VAT, divided by 1.2; cost of the weight used, not the spool","estimate from the STEP volumes (rings, carriers, standoffs, box, lid) with a 0.6 wall and infill factor; not a slicer figure"
 buy,"Filament PLA-CF, grams used",370,0.025,370,9.25,"29.99 per kg inc VAT, divided by 1.2; cost of the weight used, not the spool",estimate: spindle blocks and motor brackets; if only the brackets are PLA-CF it is about 120 g and the blocks move to PLA (about 800 g)
 shipping,"Technobots UK shipping, zone 1 (ex VAT, from the 3 x 8 cart; assumed the same)",,,,5.95,Technobots,other shops' delivery not included
-total,"Priced lines above, ex VAT, with Technobots shipping",,,,212.04,,lines with no price are not in this total; owned items counted at 0
+total,"Priced lines above, ex VAT, with Technobots shipping",,,,213.41,,lines with no price are not in this total; owned items counted at 0

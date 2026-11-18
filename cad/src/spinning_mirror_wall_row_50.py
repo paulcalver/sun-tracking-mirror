@@ -506,6 +506,7 @@ def write_bom():
         ("buy", f"M5 x {BLK_L} button head screw, stainless", 2 * U + 2 * R + 6 + (SO + 1 if BLK_L == 35 and not M100 else 0), "2 per unit (block into the T-nuts) plus 2 per motor bracket, spares" + ("; also 1 per standoff and 1 spare" if BLK_L == 35 and not M100 else "")),
         *([] if BLK_L == 35 and not M100 else [("buy", "M5 x 50 button head screw, stainless" if M100 else "M5 x 35 screw, stainless", SO + 1, "1 per standoff, from the wall side into the back-slot T-nut (head 15 mm deep in the standoff); 1 spare")]),
         ("buy", f"M5 x {8 if M100 else 12} button head screw, stainless", 2 + 4, "2 hold the electronics box to the rail; 4 spare" + ("; 8 mm, not 12: the head seats 2.5 mm below the rail and a longer screw bottoms on the slot floor before it clamps" if M100 else "")),
+        *([("buy", "Slot cover strip, black PVC, 20 series, 1000 mm (Ooznest SCO-20-B-1000)", 1, "press into the rail's bottom slot over the two motor cables: about 0.51 m each side from the box to the rail ends, 1.03 m in all, so one 1000 mm length cut in two leaves a small gap in the middle under the box; check the cover's depth against the cable")] if M100 else []),
         *([("buy", "M8 shim washer 8 x 12 x 1 mm, stainless (DIN 988 or similar)", U + 2, "1 per spindle as a spacer on the inner race of the upper bearing; spares; 12 mm OD sits on the inner race only, clear of the 608ZZ shield and outer race; price TBC")] if M100 else
           [("buy", "M5 panel/slot washer 12.5 x 5.3 x 1 mm, stainless", 2 * U + 2, "2 per spindle as a 2 mm spacer on the inner race of the upper bearing; spares; 12.5 mm just clears the bearing's outer-race shoulder (about 13 mm), so check it does not rub")]),
         ("buy", "M3 x 6 socket cap head screw, stainless", 4 * R + 2, "4 per motor into the front face; check the thread depth first"),
@@ -559,6 +560,7 @@ def write_bom():
             ("M5 slide-in T-nut", 20.90 / 32, 32, 1, "extrusion shop, SIN-20-M5 (the 32-off price)"),
             ("M5 x 35", 16.67 / 33, 33, 1, "extrusion shop, BHB-M5-35"),
             ("M3 x 6 socket cap", 1.54 / 10, 10, 1, "extrusion shop, CHB-M3-6"),
+            ("Slot cover strip", 1.37, 1, 1, "Ooznest SCO-20-B-1000 (1000 mm, black; check whether the 1.37 is ex VAT)"),
             ("Acrylic mirror 100 mm", 10.00 / 20, 20, 1, "owner's quote, 20 discs for 10.00 (VAT treatment not stated, counted as ex VAT)"),
             ("Filament PLA, grams", 11.19 / VAT / 1000, 550, 1, "11.19 per kg inc VAT, divided by 1.2; cost of the weight used, not the spool"),
             ("Filament PLA-CF, grams", 29.99 / VAT / 1000, 370, 1, "29.99 per kg inc VAT, divided by 1.2; cost of the weight used, not the spool"),

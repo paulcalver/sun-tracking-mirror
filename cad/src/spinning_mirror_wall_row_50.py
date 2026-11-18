@@ -13,7 +13,7 @@ World frame (mm): wall plane at Y = 0, the viewer on +Y, X along the row, Z up w
 Usage (from the repo root):
   python3 cad/src/spinning_mirror_wall_row_50.py [--single10] [--mirror100] [--check] [--up y|z] [--seed N]
 Writes cad/out/spinning-mirror/spinning-mirror-wall-row-50/ (assembly STEP, parts/<print|print_ready|purchase>/),
-bom/bom-spinning-mirror-wall-row-50.csv and previews in cad/media/previews/spinning-mirror-wall-row-50/.
+bom/spinning-mirrors/bom-spinning-mirror-wall-row-50.csv and previews in cad/media/previews/spinning-mirror-wall-row-50/.
 """
 import argparse
 import csv
@@ -36,7 +36,7 @@ TAG = f"spinning-mirror-wall-row-{'100' if M100 else '50'}" + ("-single10" if SI
 OUTD = CAD / "out" / "spinning-mirror" / TAG
 PARTS = OUTD / "parts"
 IMG = CAD / "media" / "previews" / TAG
-BOMF = CAD.parent / "bom" / f"bom-{TAG}.csv"
+BOMF = CAD.parent / "bom" / "spinning-mirrors" / f"bom-{TAG}.csv"
 
 box, cylz, cylx, cyly = sm.box, sm.cylz, sm.cylx, sm.cyly
 PRINT_C, STEEL, MIRROR, MOTOR_C = sm.PRINT_C, sm.STEEL, sm.MIRROR, sm.MOTOR_C
@@ -67,6 +67,8 @@ BRG_S = (8.0, 22.0, 7.0) if M100 else (5.0, 16.0, 5.0)
 BRG_S_NAME, BRG_H_NAME = ("608zz", "684zz") if M100 else ("625zz", "683zz")
 BLK_X, BLK_Y, BLK_H = (27.0, 15.0, 32.0) if M100 else (20.0, 15.0, 22.0)   # half length along the rail, half width, height
 BLK_Z1 = RAIL_TOP + BLK_H                      # 42 (52)
+SO_SEAT = 15.0 if M100 else 10.0                # standoff screw head seat, mm from the wall: 100 mm 15, so an M5 x 50 reaches the back-slot T-nut (arm 60 mm long) and stops about 1 mm short of the slot floor
+CB_DEPTH = 2.0 if M100 else 3.0                # screw-head counterbore depth from the block / bracket top: 100 mm 2 mm, so an M5 x 35 tip stops about 1 mm short of the rail slot floor (20 series: lip 1.8, 6.1 deep)
 TNUT_X = 20.0 if M100 else 15.5                # M5 T-nut holes
 SPIN_D = 8.0 if M100 else 5.0                  # spindle rod
 ROD_CLR = SPIN_D / 2 + 0.5                     # clearance hole radius for the rod through the block
@@ -93,14 +95,10 @@ BOSS_D, BOSS_X0 = (14.0, MIR_R + 1.5) if M100 else (11.0, MIR_R + 1.5)
 HUB_D, AXLE_D = (5.4, 4.0) if M100 else (4.0, 3.0)      # 100 mm hub 5.4 mm: fits inside the 684ZZ inner-race face and leaves wall round the bore
 MIR_T, MIR_MAT = (1.5, "acrylic") if M100 else (1.0, "glass")      # 100 mm: 1.5 mm acrylic (lighter than glass); 50 mm: 1 mm glass
 CAR_T, RIM_W, BAR_W = (6.0, 3.5, 6.0) if M100 else (4.0, 2.5, 5.0)  # carrier thick enough that the axle and hubs stay inside it
-# mirror retention (100 mm only): a printed bezel on each face clamps the disc under a 2 mm lip and twist-locks (bayonet) onto four pegs on the carrier edge, no screws
-BEZEL = M100
-R_C = MIR_R + 1.0 if BEZEL else MIR_R          # carrier radius (1 mm bigger than the mirror so the bezel skirt has an edge to grip)
-GASKET, LIP_T, LIP_OVER = 0.3, 1.0, 2.0        # room for tape under the lip, lip thickness, lip overlap onto the mirror edge
-BZ_R, BZ_WALL_IN = R_C + 2.2, R_C + 0.2        # bezel outer radius (0.8 mm inside the ring bore at the corner) and skirt bore around the carrier edge
-BZ_Z0 = 0.15                                   # skirt bottom above the carrier mid-plane (the two bezels leave a 0.3 mm gap at the equator)
-PEG_Z, PEG_ANG, PEG_R, PEG_OUT = 1.5, (50.0, 120.0, 250.0, 300.0), 0.8, 1.0   # carrier pegs: height above the mid-plane, entry angles, radius, length beyond the carrier edge
-GROOVE_R, TWIST = R_C + 1.2, 16.0              # L-groove floor radius in the bezel skirt (1 mm of wall left outside) and twist angle to lock
+# mirror retention (100 mm): no bezel; the two discs are glued flat to the carrier faces, with the carrier edge 0.5 mm inside the disc so no printed edge shows
+R_C = MIR_R - 0.5 if M100 else MIR_R             # carrier radius
+POCKET_BACK = 0.4 if M100 else 0.1               # pocket depth beyond the bearing width (100 mm: 0.4, so the bearing never bottoms on the first layers)
+RELIEF_D, RELIEF_DEPTH = 6.4, 1.5              # 100 mm: counterbore in the pocket floor, wider than the 684ZZ inner race (about 6 mm), so only the outer race touches the floor
 BORE_D = AXLE_D + 0.15 if M100 else AXLE_D     # carrier axle bore: 100 mm gets 0.15 mm of slip (printed holes shrink; glue the rod in)
 ZC = FOOT_Z0 + FOOT_H + R_OUT                  # ring and mirror centre height
 SPIN_TIP = FOOT_Z0 + FOOT_H + 2.5 - 0.5        # rod tip, 0.5 mm short of the end of the bore
@@ -154,7 +152,7 @@ def build_unit():
     blk = blk.cut(cylz(ROD_CLR, RAIL_TOP - 1, BLK_Z1 + 1))                                             # rod clearance
     blk = blk.cut(cylz(rp, BLK_Z1 - BRG_S[2], BLK_Z1 + 1))                                             # upper bearing pocket, opens upward
     for sx in (-1, 1):                                                                                 # M5 through the block into the T-nuts
-        blk = blk.cut(cylz(2.75, RAIL_TOP - 1, BLK_Z1 + 1, sx * TNUT_X, 0)).cut(cylz(5.0, BLK_Z1 - 3.0, BLK_Z1 + 1, sx * TNUT_X, 0))
+        blk = blk.cut(cylz(2.75, RAIL_TOP - 1, BLK_Z1 + 1, sx * TNUT_X, 0)).cut(cylz(5.0, BLK_Z1 - CB_DEPTH, BLK_Z1 + 1, sx * TNUT_X, 0))
     add(UNIT, "print_spindle_block", blk, PRINT_C, "fixed", "print")
     for nm, z0 in ((f"bearing_{BRG_S_NAME}_a", RAIL_TOP), (f"bearing_{BRG_S_NAME}_b", BLK_Z1 - BRG_S[2])):
         add(UNIT, nm, cylz(BRG_S[1] / 2, z0, z0 + BRG_S[2]).cut(cylz(BRG_S[0] / 2, z0 - 1, z0 + BRG_S[2] + 1)), STEEL, "fixed", "steel")
@@ -177,9 +175,12 @@ def build_unit():
     for sx in (-1, 1):
         x0, x1 = (BOSS_X0, R_OUT) if sx > 0 else (-R_OUT, -BOSS_X0)
         ring = ring.union(cylx(BOSS_D / 2, x0, x1, 0, ZC))
-        pk0, pk1 = (BOSS_X0 - 1, BOSS_X0 + BRG[2] + 0.1) if sx > 0 else (-BOSS_X0 - BRG[2] - 0.1, -BOSS_X0 + 1)
+        fl = POCKET_BACK                                                           # gap between the bearing and the pocket floor
+        pk0, pk1 = (BOSS_X0 - 1, BOSS_X0 + BRG[2] + fl) if sx > 0 else (-BOSS_X0 - BRG[2] - fl, -BOSS_X0 + 1)
         ring = ring.cut(cylx(BRG[1] / 2 + 0.05, pk0, pk1, 0, ZC))                  # bearing pocket opens to the inside
         ring = ring.cut(cylx(AXLE_D / 2 + 0.2, 0, R_OUT + 1, 0, ZC) if sx > 0 else cylx(AXLE_D / 2 + 0.2, -R_OUT - 1, 0, 0, ZC))   # axle clearance
+        if M100:                                                                   # relief behind the bearing so the turning inner race cannot rub on the printed floor
+            ring = ring.cut(cylx(RELIEF_D / 2, pk1 - 0.1, pk1 + RELIEF_DEPTH, 0, ZC) if sx > 0 else cylx(RELIEF_D / 2, pk0 - RELIEF_DEPTH, pk0 + 0.1, 0, ZC))
     foot_top = ZC - R_OUT + 2
     ring = ring.union(box(-FOOT_X, FOOT_X, -RING_W / 2, RING_W / 2, FOOT_Z0, foot_top))
     ring = ring.cut(cylz(SPIN_BORE_R, FOOT_Z0 - 1, FOOT_Z0 + FOOT_H + 2.5))         # spindle bore, ends 2.5 mm into the ring wall
@@ -193,8 +194,8 @@ def build_unit():
     rim = cylz(R_C, ZC - CAR_T / 2, ZC + CAR_T / 2).cut(cylz(MIR_R - RIM_W, ZC - CAR_T, ZC + CAR_T))
     bar = box(-MIR_R + 1, MIR_R - 1, -BAR_W / 2, BAR_W / 2, ZC - CAR_T / 2, ZC + CAR_T / 2)
     car = rim.union(bar)
-    if not BEZEL:
-        car = car.union(box(-BAR_W / 2, BAR_W / 2, -MIR_R + 1, MIR_R - 1, ZC - CAR_T / 2, ZC + CAR_T / 2))   # second bar; the 100 mm carrier needs only the rim and one bar (both bezels clamp the disc)
+    if not M100:
+        car = car.union(box(-BAR_W / 2, BAR_W / 2, -MIR_R + 1, MIR_R - 1, ZC - CAR_T / 2, ZC + CAR_T / 2))   # second bar; the 100 mm carrier needs only the rim and one bar (a 1.5 mm disc glued on a 3 mm rim sags about 0.06 mm at 10 g)
     hub_len = BOSS_X0 - 0.1
     car = car.union(cylx(HUB_D / 2, MIR_R - 1, hub_len, 0, ZC)).union(cylx(HUB_D / 2, -hub_len, -MIR_R + 1, 0, ZC))
     car = car.cut(cylx(BORE_D / 2, -hub_len - 1, hub_len + 1, 0, ZC))
@@ -202,35 +203,7 @@ def build_unit():
         r_b = BORE_D / 2
         pts = [(-r_b * 0.7071, ZC + r_b * 0.7071), (-0.48, ZC + 2.45), (0.48, ZC + 2.45), (r_b * 0.7071, ZC + r_b * 0.7071)]
         car = car.cut(cq.Workplane("YZ").workplane(offset=-R_C - 1).polyline(pts).close().extrude(2 * R_C + 2))
-    if BEZEL:
-        for a in PEG_ANG:                                                            # bayonet pegs: front ones at z +PEG_Z, back ones (the front turned over about X) at z -PEG_Z and mirrored angles
-            peg = cylx(PEG_R, R_C - 0.5, R_C + PEG_OUT, 0, ZC + PEG_Z)
-            car = car.union(peg.rotate((0, 0, 0), (0, 0, 1), a))
-            car = car.union(peg.rotate((0, 0, ZC), (1, 0, ZC), 180).rotate((0, 0, 0), (0, 0, 1), -a))
     add(UNIT, "print_mirror_carrier", car, PRINT_C, "tilt", "print")
-    if BEZEL:
-        zf = ZC + CAR_T / 2                                                          # carrier face
-        zm = zf + MIR_T + GASKET                                                     # underside of the lip
-        zt = zm + LIP_T                                                              # front face of the bezel
-        bz = cylz(BZ_R, ZC + BZ_Z0, zt - 1.0).union(cone(BZ_R, BZ_R - 1.0, zt - 1.0, zt))   # outer, 1 mm chamfer on the front edge
-        bz = bz.cut(cylz(BZ_WALL_IN, ZC, zf)).cut(cylz(MIR_R + 0.3, zf - 0.5, zm)).cut(cylz(MIR_R - LIP_OVER, zm - 0.1, zt + 1))
-        for sx in (-1, 1):                                                           # clear the hinge hub, boss and bearing over the whole twist: sweep a 7.5 mm radius cut around the axle through the twist angle (the bezel turns, the boss does not)
-            base = cylx(BOSS_D / 2 + 0.5, 51.0 if sx > 0 else -BZ_R - 1, BZ_R + 1 if sx > 0 else -51.0, 0, ZC)
-            sweep = base
-            for k in range(-2, int(TWIST) + 3):
-                sweep = sweep.union(base.rotate((0, 0, 0), (0, 0, 1), k))
-            bz = bz.cut(sweep)
-        gr = PEG_R + 0.15                                                            # groove half-height (0.15 mm play)
-        for a in PEG_ANG:                                                            # L-groove in the skirt wall: axial entry from the open end, then a TWIST-degree leg with a small bump near its end (the click)
-            cut = box(BZ_WALL_IN - 0.1, GROOVE_R, -gr, gr, ZC - 1.0, ZC + PEG_Z)
-            n = int(TWIST)
-            for k in range(n + 1):
-                rr = PEG_R - 0.04 if (n - 5 <= k <= n - 3) else gr
-                cut = cut.union(cylx(rr, BZ_WALL_IN - 0.1, GROOVE_R, 0, ZC + PEG_Z).rotate((0, 0, 0), (0, 0, 1), k * TWIST / n))
-            bz = bz.cut(cut.rotate((0, 0, 0), (0, 0, 1), a))
-        bz = bz.rotate((0, 0, 0), (0, 0, 1), -TWIST)                                 # modelled in the locked position
-        add(UNIT, "print_mirror_bezel", bz, PRINT_C, "tilt", "print")
-        add(UNIT, "print_mirror_bezel_b", bz.rotate((0, 0, ZC), (1, 0, ZC), 180), PRINT_C, "tilt", "print")
     add(UNIT, f"axle_{int(AXLE_D)}mm_steel_rod", cylx(AXLE_D / 2, -R_OUT, R_OUT, 0, ZC), STEEL, "tilt", "steel")
     add(UNIT, f"mirror_front_{MIR_MAT}_{int(2 * MIR_R)}", cylz(MIR_R, ZC + CAR_T / 2, ZC + CAR_T / 2 + MIR_T), MIRROR, "tilt", MIR_MAT)
     add(UNIT, f"mirror_back_{MIR_MAT}_{int(2 * MIR_R)}", cylz(MIR_R, ZC - CAR_T / 2 - MIR_T, ZC - CAR_T / 2), MIRROR, "tilt", MIR_MAT)
@@ -254,7 +227,7 @@ def rail():
 def standoff():
     """Arm from the wall to the rail's back face with a wall flange; M5 into a back-slot T-nut, head recessed on the wall side."""
     st = box(-10, 10, 5, Y_R - 10, 0, RAIL_TOP).union(box(-15, 15, 0, 5, 10 - 25, 10 + 25))
-    st = st.cut(cyly(2.75, -1, Y_R - 10 + 1, 0, 10)).cut(cyly(5.0, -1, 10, 0, 10))
+    st = st.cut(cyly(2.75, -1, Y_R - 10 + 1, 0, 10)).cut(cyly(5.0, -1, SO_SEAT, 0, 10))
     for sz in (-1, 1):
         st = st.cut(cyly(2.25, -1, 6, 0, 10 + sz * 18))
     return st
@@ -270,7 +243,7 @@ def motor_bracket():
             x, y = X_MOTOR + sx * u.N_HOLE_PITCH / 2, Y_R + sy * u.N_HOLE_PITCH / 2
             b = b.cut(cylz(1.7, WEB_Z0 - 1, WEB_Z1 + 1, x, y)).cut(cylz(3.2, WEB_Z1 - 3.0, WEB_Z1 + 1, x, y))
     for x in BR_TNUT:
-        b = b.cut(cylz(2.75, RAIL_TOP - 1, BLK_Z1 + 1, x, Y_R)).cut(cylz(5.0, BLK_Z1 - 3.0, BLK_Z1 + 1, x, Y_R))
+        b = b.cut(cylz(2.75, RAIL_TOP - 1, BLK_Z1 + 1, x, Y_R)).cut(cylz(5.0, BLK_Z1 - CB_DEPTH, BLK_Z1 + 1, x, Y_R))
     return b
 
 
@@ -416,7 +389,7 @@ def frame_mass_g():
 def print_oriented(nm, s):
     if nm == "print_ring_with_foot":
         s = s.rotate((0, 0, 0), (1, 0, 0), 90)                      # flat, +Y face up
-    elif nm in ("print_motor_bracket", "print_electronics_box", "print_mirror_bezel"):
+    elif nm in ("print_motor_bracket", "print_electronics_box"):
         s = s.rotate((0, 0, 0), (1, 0, 0), 180)                     # upside down, the flat top on the bed
     elif nm.startswith("print_wall_standoff"):
         s = s.rotate((0, 0, 0), (1, 0, 0), 90)                      # flange on the bed
@@ -437,8 +410,6 @@ def export_all(yup):
         if nm.startswith("print_"):
             u.write_step(nm, print_oriented(nm, s), PARTS / "print_ready" / f"{nm}.step")
     for nm, s, *_ in UNIT:
-        if nm == "print_mirror_bezel_b":
-            continue                                                  # the back bezel is the front one turned over
         put(nm, s)
     for nm, s, *_ in ROW + ELEC:
         if nm.startswith("print_wall_standoff_") and not nm.endswith("_1"):
@@ -472,8 +443,7 @@ def write_bom():
     amp = 5 if multi else 3
     rows = [
         ("print", ("Ring with foot: matt PLA, print flat with the +Y face up, 4 walls" if M100 else "Ring with foot: PETG or ASA, matt black, print flat with the +Y face up, 4 walls"), U, (f"ream the two {BRG[1] + 0.05:.2f} mm bearing pockets and the {SPIN_D + 0.1:.1f} mm spindle bore")),
-        ("print", "Mirror carrier: print flat, 4 walls", U, "four small bayonet pegs on the rim edge on each face; handle gently; axle bore is 4.15 mm with a teardrop roof, glue the 4 mm rod in, ream with a 4.0 mm drill if it is tight" if BEZEL else ""),
-        *([("print", "Mirror bezel: print lip face down (cup opening up), 4 walls", 2 * U, "one per face; holds the disc under a 2 mm lip and twist-locks (about 16 degrees) onto the four carrier pegs; the back one is the same part; test-fit one first, the click is a 0.04 mm interference")] if BEZEL else []),
+        ("print", "Mirror carrier: print flat, 4 walls", U, ("rimless: the rim edge is 0.5 mm inside the disc; discs are glued on, see the doc; axle bore is 4.15 mm with a teardrop roof, glue the 4 mm rod in, ream with a 4.0 mm drill if it is tight") if M100 else ""),
         ("print", "Spindle bearing block: print upright, 4 walls" + (" (matt PLA, or PLA-CF for less creep under belt tension)" if M100 else ""), U, f"ream the two {BRG_S[1]:g} mm pockets so a {BRG_S_NAME.upper()} presses in"),
         ("print", "Motor bracket: print upside down on its flat top face" + (" in PLA-CF (stiffer, creeps less; it carries the motor and belt pull and sits against the warm motor face)" if M100 else ""), R, ("one per motor; the right-hand one (print_motor_bracket_2) is the mirror image" if DUAL else "one per row") if multi else "one motor"),
     ]
@@ -510,11 +480,11 @@ def write_bom():
         ("buy", f"Bearing {BRG_H_NAME.upper()} ({BRG[0]:g} x {BRG[1]:g} x {BRG[2]:g}), mirror hinges", 2 * U + 4, "2 per unit plus 4 spare"),
         ("buy", (f"Stainless rod 8 mm x 300 mm (OFFCUP, pack of 2), each cut into 3 spindles of {round(SPIN_LEN)} mm" if M100 else "Stainless rod 5 mm x 300 mm (AOOSU, pack of 4), each cut into 4 spindles of 67 mm"), (-(-U // 3) if M100 else -(-U // 4)), "flat ground for the grub screws; drawn rod can run oversize, test-fit a bearing"),
         ("buy", f"Stainless rod {int(AXLE_D)} mm, cut into {U} hinge axles of {round(2 * R_OUT)} mm", (-(-U // (1000 // (round(2 * R_OUT) + 2))) if M100 else (2 if multi else 1)), "glue into the carrier" + ("; already owned, about 950 mm needed" if M100 else "")),
-        ("buy", ("Acrylic mirror 100 mm round, 1.5 mm thick (cut from sheet or bought as discs)" if M100 else "Glass mirror 50 mm round, 1 mm thick, seamed edges, rear silvered"), 2 * U + 4, "2 per unit plus 4 spare; " + ("held under the bezel lips, with an optional 0.3 mm double-sided tape" if M100 else "mount with mirror-safe tape or neutral silicone")),
+        ("buy", ("Acrylic mirror 100 mm round, 1.5 mm thick (cut from sheet or bought as discs)" if M100 else "Glass mirror 50 mm round, 1 mm thick, seamed edges, rear silvered"), 2 * U + 4, "2 per unit plus 4 spare; " + ("glued flat to the carrier faces, protective film left on until the end" if M100 else "mount with mirror-safe tape or neutral silicone")),
         ("buy", "M5 slide-in T-nut for a 6 mm slot (20 series, zinc plated)", 2 * U + 2 * R + SO + 2 + 4,
          "2 per unit, 2 per motor bracket, 1 per standoff (rail back slot), 2 for the box, spares; load them into the slot from the rail end before building"),
-        ("buy", f"M5 x {BLK_L} button head screw, stainless", 2 * U + 2 * R + 6 + (SO + 1 if BLK_L == 35 else 0), "2 per unit (block into the T-nuts) plus 2 per motor bracket, spares" + ("; also 1 per standoff and 1 spare" if BLK_L == 35 else "")),
-        *([] if BLK_L == 35 else [("buy", "M5 x 35 screw, stainless", SO + 1, "1 per standoff, into the back-slot T-nut; 1 spare")]),
+        ("buy", f"M5 x {BLK_L} button head screw, stainless", 2 * U + 2 * R + 6 + (SO + 1 if BLK_L == 35 and not M100 else 0), "2 per unit (block into the T-nuts) plus 2 per motor bracket, spares" + ("; also 1 per standoff and 1 spare" if BLK_L == 35 and not M100 else "")),
+        *([] if BLK_L == 35 and not M100 else [("buy", "M5 x 50 button head screw, stainless" if M100 else "M5 x 35 screw, stainless", SO + 1, "1 per standoff, from the wall side into the back-slot T-nut (head 15 mm deep in the standoff); 1 spare")]),
         ("buy", "M5 x 12 button head screw, stainless", 2 + 4, "2 hold the electronics box to the rail; 4 spare"),
         *([("buy", "M8 flat washer 16 x 8.4 x 1.6 mm, stainless", U + 2, "1 per spindle as a spacer on the inner race of the upper bearing; spares; check the 16 mm OD does not rub the 608ZZ outer race")] if M100 else
           [("buy", "M5 panel/slot washer 12.5 x 5.3 x 1 mm, stainless", 2 * U + 2, "2 per spindle as a 2 mm spacer on the inner race of the upper bearing; spares; 12.5 mm just clears the bearing's outer-race shoulder (about 13 mm), so check it does not rub")]),
@@ -527,7 +497,9 @@ def write_bom():
           [("buy", "Heat-set insert M3 x 5.7", U + 8 + 4, "1 per ring foot, 4 box corners, 4 perfboard posts, spares")]),
         ("buy", "Thread-locking compound (medium)", 1, "grub screws and pulley set screws"),
         ("buy", "Cyanoacrylate glue or retaining compound", 1, "glue the hinge axles into the carriers"),
-        *([] if BEZEL else [("buy", "Double-sided foam mounting tape 1 mm and neutral-cure silicone", 1, "mirrors onto the carriers")]),
+        *([("buy", "Double-sided foam mounting tape 1 mm and neutral-cure silicone", 1, "mirrors onto the carriers")] if not M100 else [("buy", "Double-sided acrylic foam tape (VHB type) 1 mm x 6 mm, 3 m roll, for bonding the acrylic discs to the carriers", 1, "a ring on the rim and a strip on the bar per face; add a few spots of clear 2-part epoxy or CA for the permanent bond (test on a scrap disc first: CA can craze acrylic)")]),
+        *([("buy", "Filament PLA, grams used", 550, "estimate from the STEP volumes (rings, carriers, standoffs, box, lid) with a 0.6 wall and infill factor; not a slicer figure"),
+           ("buy", "Filament PLA-CF, grams used", 370, "estimate: spindle blocks and motor brackets; if only the brackets are PLA-CF it is about 120 g and the blocks move to PLA (about 800 g)")] if M100 else []),
     ]
     VAT = 1.2
     # (substring of the item, unit price per piece ex VAT, quantity in the 3x8 baskets, pack size, supplier). Technobots and the extrusion shop show ex VAT; Amazon UK
@@ -567,6 +539,16 @@ def write_bom():
             ("M4 x 6 cup-point grub", 1.56 / 10, 10, 1, "extrusion shop, GS-M4-6"),
             ("M3 x 6 socket cap", 1.54 / 10, 10, 1, "extrusion shop, CHB-M3-6"),
             ("M8 flat washer", 0.22, 10, 1, "M8 form A washer 16 x 8.4 x 1.6 (ex VAT)"),
+            ("Acrylic mirror 100 mm", 10.00 / 20, 20, 1, "owner's quote, 20 discs for 10.00 (VAT treatment not stated, counted as ex VAT)"),
+            ("Filament PLA, grams", 11.19 / VAT / 1000, 550, 1, "11.19 per kg inc VAT, divided by 1.2; cost of the weight used, not the spool"),
+            ("Filament PLA-CF, grams", 29.99 / VAT / 1000, 370, 1, "29.99 per kg inc VAT, divided by 1.2; cost of the weight used, not the spool"),
+            ("ESP32 dev board", 0.0, 1, 1, "owned"),
+            ("DC supply", 0.0, 1, 1, "owned (bench supply)"),
+            ("Inline fuse holder", 0.0, 1, 1, "owned"),
+            ("Electrolytic capacitor", 0.0, 3, 1, "owned"),
+            ("Lever connectors", 0.0, 2, 1, "owned"),
+            ("Thread-locking compound", 0.0, 1, 1, "owned"),
+            ("Cyanoacrylate glue", 0.0, 1, 1, "owned"),
         ]
     out, total = [], 0.0
     for pr, item, qty, note in rows:
@@ -580,10 +562,12 @@ def write_bom():
                 note += f"; basket covers {bought} of {qty}, order {qty - bought} more"
             out.append((pr, item, qty, f"{unit:.3f}", bought, f"{cost:.2f}", sup, note))
         else:
+            if M100 and item.startswith(("4-pin 2.54 mm motor extension", "Wire 22 AWG", "Perfboard", "USB-C panel", "Rubber grommet")):
+                note += "; price TBC (£0 in the total for now)"
             out.append((pr, item, qty, "", "", "", "", note))
     out.append(("shipping", "Technobots UK shipping, zone 1 (ex VAT, from the 3 x 8 cart; assumed the same)", "", "", "", "5.95", "Technobots", "other shops' delivery not included"))
     total += 5.95
-    out.append(("total", "Priced lines above, ex VAT, with Technobots shipping", "", "", "", f"{total:.2f}", "", "lines with no price are not in this total"))
+    out.append(("total", "Priced lines above, ex VAT, with Technobots shipping", "", "", "", f"{total:.2f}", "", "lines with no price are not in this total; owned items counted at 0"))
     BOMF.parent.mkdir(exist_ok=True)
     with open(BOMF, "w", newline="") as f:
         w = csv.writer(f)
@@ -659,9 +643,6 @@ def main():
     sm.render(P, IMG / "front.png", [(0, 90, "View from the room (X runs right to left)")], box_=bx, zoom=1.7)
     sm.render(P, IMG / "motor-end.png", [(18, 40, "Motor end of the bottom row: bracket, NEMA 17, first units")], box_=me, zoom=1.2, only=("r1", "electronics"))
     sm.render(P, IMG / "unit-section.png", [(4, 90, f"Section through the bottom row (y > {Y_R:g} cut away)")], box_=me, zoom=1.2, cut_y=Y_R, only=("r1",))
-    if BEZEL:
-        P2 = all_parts([(0.0, 30.0)] + [(0.0, 0.0)] * (N * ROWS - 1))
-        sm.render(P2, IMG / "mirror-bezel.png", [(24, 35, "Carrier with a bezel on each face, tilted 30 deg")], box_=(-70, 70, Y_R - 70, Y_R + 70, ZC - 70, ZC + 70), zoom=1.7, only=("r1u1_print_mirror", "r1u1_mirror", "r1u1_print_ring", "r1u1_axle"))
     only = ("r1_rail", "electronics", "placeholder", "r1_motor_", "r1_print_motor", "r1_print_wall")
     sm.render(P, IMG / "electronics-box.png", [(-28, 35, "Electronics box under the bottom rail (from below)")], box_=eb, zoom=1.15, only=only)
     sm.render(P, IMG / "electronics-box-open.png", [(-38, 28, "Lid removed: perfboard on the lid posts")], box_=eb, zoom=1.15,

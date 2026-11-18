@@ -466,7 +466,7 @@ def assemble(poses, yup):
 
 def write_bom():
     U, R = N * ROWS, MOTORS                                    # units, motors (= rows, or 2 for the dual layout)
-    SO = len(STANDOFF_X) * R                                   # wall standoffs, three per rail
+    SO = len(STANDOFF_X) * ROWS                                # wall standoffs, three per rail
     BLK_L = 5 * -(-int(BLK_Z1 - 18) // 5)                      # M5 screw length for the blocks and brackets (25, or 35 for 100 mm)
     multi = MOTORS > 1
     amp = 5 if multi else 3
@@ -573,7 +573,7 @@ def write_bom():
         hit = next((x for x in prices if x[0] in item), None)
         if hit:
             _, unit, bought3, pack, sup = hit
-            bought = bought3 if (multi and not M100) else -(-qty // pack) * pack
+            bought = bought3 if ((ROWS > 1 and not M100) or (M100 and item.startswith(("M5 slide-in T-nut", "M5 x 35")))) else -(-qty // pack) * pack   # 100 mm: T-nuts and M5 x 35 are bought at the basket quantity (32 and 33)
             cost = round(unit * bought, 2)
             total += cost
             if bought < qty:

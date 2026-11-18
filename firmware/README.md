@@ -112,3 +112,67 @@ A single HTML page that talks to the ESP32 over USB serial using the browser's W
 It has Start, Stop (ramp down) and Emergency stop buttons, sliders for speed, acceleration, jitter size, correlation time, range and interval, direction and reversal switches, a 20 s live speed plot from the firmware's `status` line, and a raw command box. Sliders send their commands as you drag them, and the controls take the firmware's current values on connect. The speed sliders' maximum follows the firmware cap, which is read from the boot line. The page cannot raise the cap; the firmware always clamps.
 
 Unverified: only the page's status parsing and layout were checked in a browser pane with fake status lines; the serial connection itself has not been tried.
+
+## Wiring diagram for the 150 mm test unit
+
+`electronics/spinning-mirrors/150mm-test-unit/wiring.svg` (open it in a browser). It matches this firmware's default pins. As a checklist:
+
+| From | To |
+|---|---|
+| 24 V supply + | DC jack breakout + , through a 3 A fuse, to the driver's + terminal (100 uF 35 V+ capacitor across + and GND at the terminal) |
+| 24 V supply - | driver GND terminal |
+| ESP32 GND | driver GND (logic pin) and the supply ground: all grounds joined |
+| ESP32 3V3 | driver VDD |
+| ESP32 GPIO 25 | driver STEP |
+| ESP32 GPIO 16 | driver DIR |
+| ESP32 GPIO 19 | driver EN, with a 10k pull-up from EN to 3V3 |
+| Motor coil A (one wire pair, about 1.65 ohm) | driver 1A / 1B |
+| Motor coil B (the other pair) | driver 2A / 2B |
+| ESP32 USB | the laptop (5 V power and programming) |
+| (later) dial wiper | GPIO 34, dial ends to 3V3 and GND |
+
+Leave MS1, MS2, DIAG, INDEX, UART and SPRD open. Set the driver current pot to about half way (1.2 to 1.5 A). Never unplug the motor with 24 V on.
+
+## Wiring the 100 mm wall piece (two motors)
+
+Diagram: `electronics/spinning-mirrors/wall-row-100/wiring.svg`. Set `NUM_MOTORS 2` in the sketch. **No pin changes** were needed: motor 1 uses STEP 25, DIR 16; motor 2 uses STEP 26, DIR 17; EN 19 is shared.
+
+Layout in the box: both TMC2209s and the ESP32 on one 70 x 90 mm perfboard. Left end wall: DC jack with its lead, and motor 1's lead (motor 1 is at the left end of the rail, mirrors 1 to 4). Right end wall: USB-C panel cable, and motor 2's lead (right end, mirrors 5 to 8). Power chain: 24 V bench supply, DC jack, 5 A fuse in the +24 V lead, Wago +24 V and GND blocks, then each driver's + and GND terminals with a 100 uF 35 V+ capacitor across them.
+
+**Lock-step, and what is shared**
+- STEP and DIR are on separate ESP32 pins, one pair per driver, not one shared wire. The firmware writes both STEP pins in one register write from one timer, so the edges are identical (set `TIE_STEP_PINS 1` and join both STEP inputs to GPIO 25 if you would rather have one physical wire). DIR is kept separate so a motor mounted at the opposite end can be reversed in firmware (`DIR_INVERT`) instead of re-soldering; check on the bench that both rings turn the same way in the room.
+- EN is shared on GPIO 19 with one 10k pull-up to 3V3: both drivers must start, stop and fail off together, and a single pull-up keeps both off while the ESP32 boots.
+- MS1 and MS2 are left open on both drivers, so both run 1/8 step. They are not wired to the ESP32. If you ever change one, change both, or the motors will run at different speeds.
+- All grounds join: ESP32 GND to each driver's logic GND, supply GND to each driver's power GND.
+
+**Open points, answered**
+- **Wire gauge:** 22 AWG for 24 V and GND (the 5 A fuse protects it, and the real draw is about 2 A with both motors at 1.2 to 1.5 A). 26 AWG for STEP, DIR, EN and 3V3. Keep the 3V3 and GND logic runs short and twisted with the signal where you can.
+- **Motor lead connector:** the Pi Hut's motor has a short cable with a small plug (listed as 4-pin, 2.54 mm pitch; check the listing photo and your cable before ordering). Plug the 0.5 m extension onto the motor, strip the other end and clamp it in the driver's screw terminal with ferrules (Adafruit's TMC2209 motor terminals are screws). That way no connector has to pass through the 14 mm grommet holes. Extension wire order may not match the driver, so find the two coil pairs with a multimeter (about 1.65 ohm within a pair, open between pairs) before connecting.
+- **Hall sensor:** left out of the build. GPIO 35 (half 1) and GPIO 34 (half 2) are reserved, both input only, so each needs its own 10k pull-up to 3V3 if a Hall sensor is added. The firmware has only an empty `phaseCheck()` hook.
+- **Power-up order:** (1) with everything off, check coil pairs, wiring and that no wire touches another; (2) set the bench supply to 24 V with the current limit at 3 A, output off; (3) plug in USB so the ESP32 boots with drivers disabled; (4) switch the 24 V output on; (5) `enable 1`, then bring `rpm` up. Power down with `stop`, wait for the ring to stop, switch the 24 V off, then unplug USB.
+- **Bench supply cautions:** do not cut the 24 V while the rings are spinning, and do not rely on a supply with no current sink to absorb regenerated energy; use `stop` first. A current limit set too low makes the rail sag on acceleration peaks and the motors skip steps silently. Never hot-plug a motor with 24 V on. Power the ESP32 from USB only (no buck, and never both). If the laptop and bench supply both have earth, the USB ground and 24 V negative are joined by the driver boards; if you hear mains hum or the USB drops out, power the laptop from its battery or add a USB isolator.
+
+Nothing here is built or tested; check every pin label on the actual boards before wiring.
+
+## Remote dial (two pots, wireless)
+
+A second ESP32 with two 10k linear pots sends their positions to the main unit over ESP-NOW (the built-in radio; no router, no pairing). Sketch: `remote_dial/remote_dial.ino`. Diagram: `electronics/spinning-mirrors/remote-dial/wiring.svg`. Planned range: under 3 m with USB power at the dial.
+
+| Remote ESP32 | Goes to |
+|---|---|
+| 3V3 / GND | both pots' outer ends |
+| GPIO 34 | SPEED pot wiper |
+| GPIO 35 | JITTER pot wiper |
+| USB | power bank or wall adapter |
+
+Parts: one ESP32 dev board (a spare of the main one is fine), two 10k linear (B) pots with knobs, an enclosure, optionally 2 x 100 nF capacitors, a USB cable and power source.
+
+- **Flash:** open `remote_dial/remote_dial.ino` the same way as the main sketch (esp32 core 3.x). The main sketch has `ENABLE_REMOTE_DIAL 1` by default and needs no wiring; both units use WiFi channel 1 and the same `REMOTE_KEY`.
+- **Mapping:** the speed pot gives 0 to `REMOTE_RPM_MAX` (200 rpm, bottom 4 % = zero, always under the speed cap); the jitter pot gives wobble size 0 to `REMOTE_JIT_MAX` (0.8). Moving the jitter pot switches the main unit to `ou` jitter mode and turns jitter on.
+- **Takes over only when moved:** each pot is ignored until it has moved about 4 % from its reading when the main unit first heard it. Switching the remote on never changes a running setting, and serial or the laptop panel can still set values; a dial change then overrides them. `remote 0` makes the main unit ignore the dial, `remote 1` re-baselines it. `status` shows `remote`, `remote_seen` and `remote_age_ms` (milliseconds since the last packet).
+- **Does not start the motors:** drivers are still enabled from serial or the panel. Set `REMOTE_CAN_ENABLE 1` in the main sketch for a standalone installation: the speed dial above zero then enables the drivers and turning it to zero does a `stop`.
+- **Link loss:** the main unit keeps the last setting. Safe limits (speed cap, acceleration cap) apply to everything the dial can ask for.
+- **Pin note:** the wall piece's Hall hook reserved GPIO 34 and 35 on the main unit; the dial does not use those pins on the main unit (they are on the remote), so there is no conflict.
+- **Not secure:** broadcast ESP-NOW is not encrypted and the key is a constant, so anyone nearby who knew it could send values. The caps still bound what they could do. Unicast with encryption would need the main unit's MAC address.
+
+Unverified: neither sketch has been compiled (no ESP32 toolchain here), so the ESP-NOW callback signature and `analogSetPinAttenuation` calls need checking against core 3.x on first build; range and pot noise untested.

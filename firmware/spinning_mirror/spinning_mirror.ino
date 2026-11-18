@@ -33,6 +33,18 @@
 #include "soc/gpio_reg.h"
 
 // ----------------------------------------------------------------------------
+// Remote dial (ESP-NOW). Set to 0 to leave the radio out entirely.
+// The remote unit is firmware/remote_dial/remote_dial.ino: two pots (speed and
+// jitter) on a second ESP32. The packet layout and key must match it.
+// ----------------------------------------------------------------------------
+#define ENABLE_REMOTE_DIAL 1
+#if ENABLE_REMOTE_DIAL
+#include <WiFi.h>
+#include <esp_now.h>
+#include <esp_wifi.h>
+#endif
+
+// ----------------------------------------------------------------------------
 // CONFIGURATION  (everything you are likely to edit is in this block)
 // ----------------------------------------------------------------------------
 
@@ -95,6 +107,17 @@ constexpr float JITTER_RPM_LO_DEFAULT = 60.0f;
 constexpr float JITTER_RPM_HI_DEFAULT = 300.0f;
 constexpr float JITTER_T_MIN_DEFAULT  = 2.0f;   // seconds between speed changes, min
 constexpr float JITTER_T_MAX_DEFAULT  = 8.0f;   // seconds between speed changes, max
+
+// Remote dial mapping (used only if ENABLE_REMOTE_DIAL).
+constexpr float REMOTE_RPM_MAX     = 200.0f;  // speed dial full scale (rpm), kept below MAX_SPINDLE_RPM
+constexpr float REMOTE_JIT_MAX     = 0.8f;    // jitter dial full scale (jit fraction)
+constexpr int   REMOTE_DEADBAND    = 12;      // permille a pot must move before it counts
+constexpr int   REMOTE_ENGAGE      = 40;      // permille a pot must move from its first reading to take over
+// 1 lets the speed dial start and stop the drivers by itself (for a standalone
+// installation with no laptop). 0 (default) = the dial only changes settings;
+// start the drivers from serial or the laptop panel.
+#define REMOTE_CAN_ENABLE 0
+constexpr uint16_t REMOTE_KEY = 0x5A3C;       // must equal the remote's key; not real security
 
 // After "stop" the drivers are released this long after the motors reach zero.
 constexpr uint32_t DISABLE_DELAY_MS = 300;
@@ -179,6 +202,25 @@ static float  jSigma       = 0.45f;
 static float  jTau         = 0.2f;
 static bool   jRev         = true;
 static float  ouState      = 0.0f;
+
+#if ENABLE_REMOTE_DIAL
+// Remote dial state (see the receiver section below).
+struct __attribute__((packed)) DialPacket {   // identical in remote_dial.ino
+  uint16_t key;
+  uint8_t  ver;     // 1
+  uint8_t  seq;
+  uint16_t speed;   // 0..1000
+  uint16_t jitter;  // 0..1000
+};
+static volatile DialPacket rxPkt;
+static volatile bool rxNew = false;
+static volatile uint32_t rxAtMs = 0;
+static bool remoteEnabled = true;
+static bool remoteSeen = false;
+static int  baseSpeed = 0, baseJit = 0;       // first readings after boot
+static bool speedEngaged = false, jitEngaged = false;
+static int  lastSpeed = -1000, lastJit = -1000;
+#endif
 
 static uint32_t lastRampUs = 0;
 
@@ -353,10 +395,19 @@ static void cmdEstop() {
 
 static void printStatus() {
   Serial.printf("status en=%d stopping=%d motors=%d dir=%d rpm_set=%.1f rpm_now=%.1f rpm_target=%.1f "
-                "accel=%.0f jitter=%d jmode=%s jit=%.2f jtau=%.2f jrev=%d jrpm=%.0f..%.0f jtime=%.1f..%.1f\n",
+                "accel=%.0f jitter=%d jmode=%s jit=%.2f jtau=%.2f jrev=%d jrpm=%.0f..%.0f jtime=%.1f..%.1f"
+#if ENABLE_REMOTE_DIAL
+                " remote=%d remote_seen=%d remote_age_ms=%ld\n",
+#else
+                "\n",
+#endif
                 enabled, stopping, NUM_MOTORS, dirSign, manualRpm,
                 velRad / RPM_TO_RAD, targetRad / RPM_TO_RAD, accelLimit,
-                jitterOn, jMode ? "ou" : "walk", jSigma, jTau, jRev, jRpmLo, jRpmHi, jTMin, jTMax);
+                jitterOn, jMode ? "ou" : "walk", jSigma, jTau, jRev, jRpmLo, jRpmHi, jTMin, jTMax
+#if ENABLE_REMOTE_DIAL
+                , remoteEnabled, remoteSeen, remoteSeen ? (long)(millis() - rxAtMs) : -1L
+#endif
+                );
 }
 
 static void printHelp() {
@@ -376,6 +427,7 @@ static void printHelp() {
     "  jit <0..0.8>      ou mode: speed jitter, fraction of rpm (simulator slider /100)\n"
     "  jtau <0.02..5>    ou mode: correlation time, seconds (simulator uses 0.2)\n"
     "  jrev 0|1          ou mode: allow brief reversals (1) or hold speed at 0 or above (0)\n"
+    "  remote 0|1        ignore / listen to the remote dial (1 re-baselines it)\n"
     "  status            one-line state\n"
     "  help");
 }
@@ -458,6 +510,13 @@ static void handleLine(char *line) {
     if (!a1) { Serial.println("err jrev needs 0 or 1"); return; }
     jRev = atoi(a1) != 0;
     Serial.printf("ok jrev %d\n", jRev);
+#if ENABLE_REMOTE_DIAL
+  } else if (!strcmp(cmd, "remote")) {
+    if (!a1) { Serial.println("err remote needs 0 or 1"); return; }
+    remoteEnabled = atoi(a1) != 0;
+    if (remoteEnabled) { speedEngaged = jitEngaged = false; remoteSeen = false; }   // re-baseline
+    Serial.printf("ok remote %d\n", remoteEnabled);
+#endif
   } else if (!strcmp(cmd, "status")) {
     printStatus();
   } else if (!strcmp(cmd, "help") || !strcmp(cmd, "?")) {
@@ -479,6 +538,59 @@ static void pollSerial() {
     }
   }
 }
+
+// ----------------------------------------------------------------------------
+// Remote dial receiver
+// ----------------------------------------------------------------------------
+#if ENABLE_REMOTE_DIAL
+
+static void onDialRx(const esp_now_recv_info_t *info, const uint8_t *data, int len) {
+  if (len != (int)sizeof(DialPacket)) return;
+  DialPacket p; memcpy(&p, data, sizeof(p));
+  if (p.key != REMOTE_KEY || p.ver != 1 || p.speed > 1000 || p.jitter > 1000) return;
+  memcpy((void *)&rxPkt, &p, sizeof(p));
+  rxAtMs = millis();
+  rxNew = true;
+}
+
+static void remoteBegin() {
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
+  esp_wifi_set_channel(1, WIFI_SECOND_CHAN_NONE);   // both units use channel 1
+  if (esp_now_init() != ESP_OK) { Serial.println("remote: esp_now_init failed"); return; }
+  esp_now_register_recv_cb(onDialRx);
+  Serial.println("remote dial receiver on (ESP-NOW, channel 1)");
+}
+
+static void remotePoll() {
+  if (!rxNew) return;
+  DialPacket p; memcpy(&p, (const void *)&rxPkt, sizeof(p));
+  rxNew = false;
+  if (!remoteEnabled) return;
+  int sp = p.speed, ji = p.jitter;
+  if (!remoteSeen) { remoteSeen = true; baseSpeed = sp; baseJit = ji; return; }   // first reading: baseline only
+
+  if (!speedEngaged && abs(sp - baseSpeed) > REMOTE_ENGAGE) speedEngaged = true;
+  if (!jitEngaged   && abs(ji - baseJit)   > REMOTE_ENGAGE) jitEngaged = true;
+
+  if (speedEngaged && abs(sp - lastSpeed) > REMOTE_DEADBAND) {
+    lastSpeed = sp;
+    float rpm = (sp < 40) ? 0.0f : REMOTE_RPM_MAX * sp / 1000.0f;   // bottom 4 % = zero
+    manualRpm = capRpm(rpm, nullptr);
+#if REMOTE_CAN_ENABLE
+    if (manualRpm > 0.0f) cmdEnable(true); else cmdStop();
+#endif
+  }
+  if (jitEngaged && abs(ji - lastJit) > REMOTE_DEADBAND) {
+    lastJit = ji;
+    jSigma = REMOTE_JIT_MAX * ji / 1000.0f;
+    if (!jitterOn || jMode != 1) { jMode = 1; jitterOn = true; ouState = 0.0f; }
+  }
+}
+#else
+static inline void remoteBegin() {}
+static inline void remotePoll() {}
+#endif
 
 // ----------------------------------------------------------------------------
 // Arduino entry points
@@ -514,6 +626,8 @@ void setup() {
   timerAttachInterrupt(stepTimer, &onStepTick);
   timerAlarm(stepTimer, 1000000UL / TICK_HZ, true, 0);
 
+  remoteBegin();
+
   lastRampUs = micros();
   jCurrentRpm = JITTER_RPM_LO_DEFAULT;
 
@@ -525,6 +639,7 @@ void setup() {
 
 void loop() {
   pollSerial();
+  remotePoll();
   rampStep();
   phaseCheck();
 }

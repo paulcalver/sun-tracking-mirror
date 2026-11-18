@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1020 975" width="1020" height="975" font-family="system-ui, -apple-system, Segoe UI, sans-serif">
+<style>
+text{font-size:13px;fill:#1d232a}
+.s{font-size:11px;fill:#55606b}
+.b{font-weight:600}
+.box{fill:#f3f5f7;stroke:#44505c;stroke-width:1.5}
+.w{fill:none;stroke-width:2.5;stroke-linecap:round}
+.red{stroke:#d63031}.blk{stroke:#111}.org{stroke:#e08a1e}.blu{stroke:#2a6fd6}.pur{stroke:#8a4fc7}.grn{stroke:#2a9d4a}
+</style>
+<rect width="1020" height="975" fill="#ffffff"/>
+<text x="30" y="32" class="b" style="font-size:16px">100 mm wall piece: two NEMA 17s in lock-step, power and signal wiring</text>
+<g class="s">
+<line x1="620" y1="26" x2="650" y2="26" class="w red"/><text x="656" y="30">+24 V</text>
+<line x1="710" y1="26" x2="740" y2="26" class="w blk"/><text x="746" y="30">GND</text>
+<line x1="785" y1="26" x2="815" y2="26" class="w org"/><text x="821" y="30">3.3 V</text>
+<line x1="870" y1="26" x2="900" y2="26" class="w blu"/><text x="906" y="30">signal</text>
+</g>
+
+<!-- wires first -->
+<path d="M170 100 H610" class="w red"/>
+<path d="M170 130 H560" class="w blk"/>
+<path d="M610 100 V500" class="w red"/>
+<path d="M560 130 V514" class="w blk"/>
+<path d="M610 224 H640" class="w red"/>
+<path d="M560 254 H640" class="w blk"/>
+<path d="M610 240 H588" class="w red"/><path d="M582 240 H560" class="w blk"/>
+<path d="M820 224 H860 M820 249 H860" class="w pur"/>
+<path d="M820 304 H860 M820 329 H860" class="w grn"/>
+<path d="M610 484 H640" class="w red"/>
+<path d="M560 514 H640" class="w blk"/>
+<path d="M610 500 H588" class="w red"/><path d="M582 500 H560" class="w blk"/>
+<path d="M820 484 H860 M820 509 H860" class="w pur"/>
+<path d="M820 564 H860 M820 589 H860" class="w grn"/>
+<!-- ESP32 to driver 1 and 2 -->
+<path d="M260 284 H640" class="w blk"/>
+<path d="M280 284 V544 H640" class="w blk"/>
+<path d="M260 309 H640" class="w org"/>
+<path d="M320 309 V569 H640" class="w org"/>
+<path d="M260 334 H640" class="w blu"/>
+<path d="M260 359 H640" class="w blu"/>
+<path d="M260 384 H640" class="w blu"/>
+<path d="M380 384 V644 H640" class="w blu"/>
+<path d="M260 594 H640" class="w blu"/>
+<path d="M260 619 H640" class="w blu"/>
+<path d="M320 450 H336 M366 450 H380" class="w org"/>
+<path d="M150 700 V730" class="w blk" stroke-dasharray="5 4"/>
+<circle cx="280" cy="284" r="3.4" fill="#111"/><circle cx="320" cy="309" r="3.4" fill="#e08a1e"/><circle cx="380" cy="384" r="3.4" fill="#2a6fd6"/>
+<circle cx="320" cy="450" r="3.4" fill="#e08a1e"/><circle cx="380" cy="450" r="3.4" fill="#2a6fd6"/>
+
+<!-- power chain -->
+<text x="30" y="62" class="s">mains in</text>
+<rect x="30" y="70" width="140" height="90" rx="6" class="box"/>
+<text x="42" y="95" class="b">24 V bench supply</text><text x="42" y="113" class="s">set current limit 3 A</text>
+<text x="156" y="104" text-anchor="end" class="s">+</text><text x="156" y="134" text-anchor="end" class="s">-</text>
+<rect x="200" y="70" width="150" height="90" rx="6" class="box"/>
+<text x="210" y="95" class="b">DC jack + lead</text><text x="210" y="113" class="s">LEFT end wall</text><text x="210" y="127" class="s">22 AWG to the box</text>
+<rect x="370" y="88" width="56" height="24" rx="4" fill="#fff" stroke="#d63031" stroke-width="2"/>
+<text x="398" y="105" text-anchor="middle" class="b">5 A</text><text x="398" y="80" text-anchor="middle" class="s">fuse in +24 V</text>
+<rect x="440" y="88" width="80" height="24" rx="4" class="box"/><text x="480" y="104" text-anchor="middle" class="s">Wago +24 V</text>
+<rect x="440" y="118" width="80" height="24" rx="4" class="box"/><text x="480" y="134" text-anchor="middle" class="s">Wago GND</text>
+<circle cx="610" cy="100" r="3.4" fill="#d63031"/><circle cx="560" cy="130" r="3.4" fill="#111"/>
+
+<line x1="588" y1="230" x2="588" y2="250" stroke="#111" stroke-width="2.5"/><line x1="582" y1="230" x2="582" y2="250" stroke="#111" stroke-width="2.5"/><text x="553" y="244" text-anchor="end" class="s">100 uF 35 V+</text><circle cx="610" cy="240" r="3.4" fill="#d63031"/><circle cx="560" cy="240" r="3.4" fill="#111"/>
+<line x1="588" y1="490" x2="588" y2="510" stroke="#111" stroke-width="2.5"/><line x1="582" y1="490" x2="582" y2="510" stroke="#111" stroke-width="2.5"/><text x="553" y="504" text-anchor="end" class="s">100 uF 35 V+</text><circle cx="610" cy="500" r="3.4" fill="#d63031"/><circle cx="560" cy="500" r="3.4" fill="#111"/>
+<rect x="640" y="200" width="180" height="236" rx="6" class="box"/>
+<text x="650" y="228" class="s">+ (motor supply)</text>
+<text x="650" y="258" class="s">GND</text>
+<text x="650" y="288" class="s">GND (logic)</text>
+<text x="650" y="313" class="s">VDD (3.3 V logic)</text>
+<text x="650" y="338" class="s">STEP</text>
+<text x="650" y="363" class="s">DIR</text>
+<text x="650" y="388" class="s">EN (low = on)</text>
+<text x="650" y="404" class="s">MS1, MS2 open = 1/8 step</text>
+<text x="650" y="422" class="b">Adafruit TMC2209 #1</text>
+<text x="812" y="228" text-anchor="end" class="s">1A</text>
+<text x="812" y="253" text-anchor="end" class="s">1B</text>
+<text x="812" y="308" text-anchor="end" class="s">2A</text>
+<text x="812" y="333" text-anchor="end" class="s">2B</text>
+<rect x="860" y="205" width="140" height="140" rx="6" class="box"/>
+<text x="870" y="228" class="s">coil A +</text>
+<text x="870" y="253" class="s">coil A -</text>
+<text x="870" y="308" class="s">coil B +</text>
+<text x="870" y="333" class="s">coil B -</text>
+<text x="930" y="279" text-anchor="middle" class="b">NEMA 17 #1</text>
+<text x="930" y="295" text-anchor="middle" class="s">left end of rail,</text><text x="930" y="308" text-anchor="middle" class="s">mirrors 1-4</text>
+<text x="930" y="310" text-anchor="middle" class="s" style="display:none"> </text>
+<text x="860" y="362" class="s">0.5 m 4-pin lead,</text><text x="860" y="375" class="s">out the LEFT end wall</text>
+<rect x="640" y="460" width="180" height="236" rx="6" class="box"/>
+<text x="650" y="488" class="s">+ (motor supply)</text>
+<text x="650" y="518" class="s">GND</text>
+<text x="650" y="548" class="s">GND (logic)</text>
+<text x="650" y="573" class="s">VDD (3.3 V logic)</text>
+<text x="650" y="598" class="s">STEP</text>
+<text x="650" y="623" class="s">DIR</text>
+<text x="650" y="648" class="s">EN (low = on)</text>
+<text x="650" y="664" class="s">MS1, MS2 open = 1/8 step</text>
+<text x="650" y="682" class="b">Adafruit TMC2209 #2</text>
+<text x="812" y="488" text-anchor="end" class="s">1A</text>
+<text x="812" y="513" text-anchor="end" class="s">1B</text>
+<text x="812" y="568" text-anchor="end" class="s">2A</text>
+<text x="812" y="593" text-anchor="end" class="s">2B</text>
+<rect x="860" y="465" width="140" height="140" rx="6" class="box"/>
+<text x="870" y="488" class="s">coil A +</text>
+<text x="870" y="513" class="s">coil A -</text>
+<text x="870" y="568" class="s">coil B +</text>
+<text x="870" y="593" class="s">coil B -</text>
+<text x="930" y="539" text-anchor="middle" class="b">NEMA 17 #2</text>
+<text x="930" y="555" text-anchor="middle" class="s">right end of rail,</text><text x="930" y="568" text-anchor="middle" class="s">mirrors 5-8</text>
+<text x="930" y="570" text-anchor="middle" class="s" style="display:none"> </text>
+<text x="860" y="622" class="s">0.5 m 4-pin lead,</text><text x="860" y="635" class="s">out the RIGHT end wall</text>
+
+<!-- ESP32 -->
+<rect x="40" y="200" width="220" height="500" rx="6" class="box"/>
+<text x="52" y="226" class="b">ESP32 dev board</text>
+<text x="52" y="242" class="s">38-pin, 3.3 V logic</text>
+<text x="52" y="270" class="s">powered from USB 5 V</text>
+<text x="252" y="288" text-anchor="end" class="s">GND</text>
+<text x="252" y="313" text-anchor="end" class="s">3V3</text>
+<text x="252" y="338" text-anchor="end" class="s">GPIO25 STEP 1</text>
+<text x="252" y="363" text-anchor="end" class="s">GPIO16 DIR 1</text>
+<text x="252" y="388" text-anchor="end" class="s">GPIO19 EN (both)</text>
+<text x="252" y="598" text-anchor="end" class="s">GPIO26 STEP 2</text>
+<text x="252" y="623" text-anchor="end" class="s">GPIO17 DIR 2</text>
+<text x="52" y="670" class="s">STEP 1 and 2 carry identical</text><text x="52" y="684" class="s">pulses (one register write)</text>
+<text x="351" y="441" text-anchor="middle" class="s">10k</text>
+<rect x="336" y="444" width="30" height="12" fill="#fff" stroke="#e08a1e" stroke-width="2"/>
+<text x="351" y="472" text-anchor="middle" class="s">pull-up</text>
+
+<rect x="50" y="730" width="200" height="52" rx="6" class="box"/>
+<text x="62" y="752" class="b">USB-C panel cable</text><text x="62" y="768" class="s">RIGHT end wall, to laptop</text>
+<rect x="300" y="730" width="300" height="82" rx="6" class="box" stroke-dasharray="5 4"/>
+<text x="310" y="750" class="b">Hall sensors: not fitted</text>
+<text x="310" y="768" class="s">GPIO35 = half 1, GPIO34 = half 2 (input only),</text>
+<text x="310" y="782" class="s">each with its own 10k pull-up to 3V3, plus 3V3 + GND.</text>
+<text x="310" y="796" class="s">Pins reserved; firmware hook only.</text>
+
+<!-- notes -->
+<rect x="30" y="830" width="960" height="122" rx="6" fill="#fafbfc" stroke="#c8d0d8"/>
+<text x="42" y="850" class="b">Notes</text>
+<text x="42" y="868" class="s">24 V: bench supply, DC jack, 5 A fuse, Wago, then each driver's + terminal with a 100 uF across + and GND. Power wires 22 AWG, logic 26 AWG.</text>
+<text x="42" y="884" class="s">The ESP32 runs from USB only (no buck converter; never USB and a buck together). Everything shares one ground.</text>
+<text x="42" y="900" class="s">Lock-step: STEP and DIR use separate pins, but the firmware writes both STEP pins in one register, so the edges are identical.</text>
+<text x="42" y="916" class="s">DIR is separate so one motor can be inverted in firmware (DIR_INVERT). EN is shared: one pull-up keeps both drivers off at boot and they start and stop together.</text>
+<text x="42" y="932" class="s">MS1/MS2 stay open on both drivers (1/8 step). Motor leads: plug on the motor end, other end stripped and ferruled into the driver's 1A/1B/2A/2B screws.</text>
+<text x="42" y="948" class="s">Check each coil pair with a multimeter (about 1.65 ohm) before wiring. Never unplug a motor with 24 V on. Nothing here has been built or tested.</text>
+</svg>
+

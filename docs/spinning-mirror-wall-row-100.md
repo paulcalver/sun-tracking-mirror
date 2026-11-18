@@ -7,10 +7,10 @@ One 1150 mm 2020 rail (X = -85 to 1065; the motor hangs about 55 mm past each ra
 
 ## What changes from the 50 mm piece
 - **Mirrors:** 100 mm x 1.5 mm **acrylic** by default (glass at 2 mm would add about 40 g a unit and make the torque problem worse; the thickness and material are in the 100 mm block at the top of the script).
-- **Spindle:** an **8 mm rod** in two **608ZZ** (8 x 22 x 7) bearings, spaced 25 mm apart in a taller block (32 mm), with an 8 mm bore double-head pulley and an **M8 washer** as the spacer. The ring is held by an **M4** grub screw into an M4 heat-set insert, on a flat filed on the rod.
+- **Spindle:** an **8 mm rod** in two **608ZZ** (8 x 22 x 7) bearings, spaced 25 mm apart in a taller block (32 mm), with an 8 mm bore double-head pulley and an **M8 x 12 x 1 shim washer** as the spacer (12 mm OD, so it sits on the inner race only). The ring is held by an **M4** grub screw into an M4 heat-set insert, on a flat filed on the rod.
 - **Hinge:** a **4 mm axle** on two **684ZZ** (4 x 9 x 4) bearings in a 12 mm wide ring with 14 mm bosses; 6 mm carrier with 5.4 mm hubs; the axle bore through the carrier is 4.15 mm with a flat-topped teardrop roof (printed holes shrink and a sideways bore sags), so the 4 mm rod slides in and is glued; ream with a 4.0 mm drill only if it is tight.
 - **Pitch and belts:** **140 mm** pitch (22 mm between the 118 mm swept rings) on **320 mm** closed GT2 loops with 20-tooth pulleys. Check 160-tooth 320 mm loops are sold; if not, the pitch follows the nearest loop (a 300 mm loop gives 130 mm, a 340 mm loop on 30-tooth pulleys 140 mm).
-- **Block screws** are M5 x 35 (the same as the standoff screws). The electronics box is the same, now centred under the rail.
+- **Block screws** are M5 x 35; the wall standoffs take M5 x 50, the electronics box M5 x 8 and the ring-foot grub screws are M4 x 10 (see the review notes below). The electronics box is the same, now centred under the rail.
 - Ring centre 157 mm and ring top 216 mm above its rail bottom; the piece is about 0.45 m tall and 1.38 m wide.
 - **Mirror retention:** see below.
 
@@ -20,10 +20,13 @@ The first bezel version (a printed push-and-twist cup on each face) printed clun
 Glue: a ring of 1 mm acrylic foam tape (VHB type) on the rim and a strip on the bar per face, plus a few spots of clear 2-part epoxy for the permanent bond. Test on a scrap disc first (CA glue can craze acrylic) and leave the protective film on until the end. Press each disc flat while it sets. Keep the printed carrier flat, because a warped carrier shows through the mirror.
 
 ## Hinge bearing pockets (2026-11-18)
-The turning inner race of each 684ZZ used to sit 0.1 mm from a flat printed floor, so it could rub on the PLA behind it. The pocket is now 0.4 mm deeper than the bearing, and there is a 6.4 mm counterbore 1.5 mm deep in the floor, wider than the inner race, so only the outer race touches the floor. Pocket diameter is still 9.05 mm; if the bearing feels tight in the PLA, ream it gently.
+The turning inner race of each 684ZZ used to sit 0.1 mm from a flat printed floor, so it could rub on the PLA behind it. The pocket is now 0.4 mm deeper than the bearing, and there is a 6.4 mm counterbore 1.5 mm deep in the floor, wider than the inner race, so only the outer race touches the floor. Update after the first print: the pockets were too tight, which squeezes the thin 684ZZ outer race and adds drag. The pocket is now **9.25 mm across** (a slip fit) with a 0.4 mm lead-in chamfer at the mouth and a flat-topped teardrop roof so it prints round (the ring prints flat, +Y up). The floor relief is **7.2 mm** across with a 0.2 mm chamfer, so the ledge under the outer race is only about 1 mm wide and the inner race has about 0.6 mm of clearance even after shrinkage. Hold each bearing in place with a small drop of retaining compound or CA on the **outer race only**, never on the inner race or the shields.
 
 ## Rail screws (2026-11-18)
 The 20-series rail has a 6.13 mm slot opening, 1.8 mm lips and a slot 6.1 mm deep; the M5 slide-in nut is 9 x 10 x 4.4 mm (6 mm neck 1.4 high, wings 1.4, chamfer 1.6). The screw-head counterbore in the spindle blocks and motor brackets is 2 mm deep (was 3), so an M5 x 35 stops about 1 mm short of the slot floor with the full nut thread engaged. A 3 mm counterbore left only 0.1 mm to the floor. The wall standoffs are 60 mm long, so their head seat is now 15 mm in from the wall and they take **M5 x 50** (tip about 1 mm short of the slot floor); an M5 x 35 there would end about 15 mm short of the nut.
+
+## Pre-order review (2026-11-18)
+A second review of everything you buy changed these lines. **Box screws M5 x 8** (an M5 x 12 bottoms on the rail's slot floor before the head seats). **Ring-foot grub screws M4 x 10** (the foot face is 10 mm from the rod, a 6 mm grub would not reach). **VHB tape 3 mm wide for the rim (about 5 m) plus 6 mm for the bars (about 2 m)**, and a line for clear 2-part epoxy. The lower 608ZZ now goes into the block from below and is pressed up against the cone ceiling, which leaves it 0.5 mm off the rail. Fit the standoffs to the rail before the rail goes on the wall (the screw heads are on the wall side), and fit the electronics box last, because it hides the middle standoff's lower wall screw; use pan-head M4 wall screws, as the flange holes have no countersink. Still to check with real parts: pulley length (28 mm), motor shaft length (24 mm; 22 mm is marginal, 20 mm too short), nothing else on the washer (now an 8 x 12 x 1 shim) and the motor lead connector.
 
 ## Printing material (2026-11-18)
 Matt PLA throughout is fine for this prototype: indoors, out of daylight, short runs. PETG or ASA would add nothing here, so there is no need to buy PETG. Two cautions with plain PLA, which softens at about 55 to 60 C and creeps under steady load:
@@ -39,7 +42,7 @@ One unit turns about 138 g (mirror group 49 g, discs and carrier) with spin iner
 ## Open points
 - 320 mm GT2 loops and 8 mm bore double-head pulleys are not in the baskets; check they exist before committing to the pitch.
 - Print the new carrier (rim edge 0.5 mm inside the disc) and a ring with the relief behind the bearing pockets, and check that the tumble joint swings freely before the rest.
-- 1.5 mm acrylic discs at 100 mm: dish and finish are unknown, so order one first. The M8 washer (16 mm) and the 608ZZ outer race (about 18 mm inside) leave little room: check it does not rub.
+- 1.5 mm acrylic discs at 100 mm: dish and finish are unknown, so order one first. The spacer is now an 8 x 12 x 1 shim, so it should clear the 608ZZ shield and outer race; check it on the bench.
 - The 4 mm ring walls and the 0.95 to 1.5 mm walls around the hinge bearing pockets are thin: press the bearings in gently (PLA is stiff but brittle, so ream the pockets rather than forcing them).
 - Everything else (pulley length, motor shaft length, thread depth) is as in the 50 mm doc.
 

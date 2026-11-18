@@ -72,8 +72,8 @@ CB_DEPTH = 2.0 if M100 else 3.0                # screw-head counterbore depth fr
 TNUT_X = 20.0 if M100 else 15.5                # M5 T-nut holes
 SPIN_D = 8.0 if M100 else 5.0                  # spindle rod
 ROD_CLR = SPIN_D / 2 + 0.5                     # clearance hole radius for the rod through the block
-SPACER = 1.6 if M100 else 2.0                  # one M8 washer / two M5 panel washers between the upper bearing and the pulley
-SP_R, SP_IR = (8.0, 4.2) if M100 else (6.25, 2.65)    # spacer outside and inside radius
+SPACER = 1.0 if M100 else 2.0                  # one M8 x 12 x 1 shim washer / two M5 panel washers between the upper bearing and the pulley
+SP_R, SP_IR = (6.0, 4.2) if M100 else (6.25, 2.65)    # spacer outside and inside radius
 Z_P0 = BLK_Z1 + SPACER                         # pulley bottom
 
 # double-head GT2 20T pulley (assumed from the photo and listings: 28 mm long, grub screw in the centre boss)
@@ -98,7 +98,9 @@ CAR_T, RIM_W, BAR_W = (6.0, 3.5, 6.0) if M100 else (4.0, 2.5, 5.0)  # carrier th
 # mirror retention (100 mm): no bezel; the two discs are glued flat to the carrier faces, with the carrier edge 0.5 mm inside the disc so no printed edge shows
 R_C = MIR_R - 0.5 if M100 else MIR_R             # carrier radius
 POCKET_BACK = 0.4 if M100 else 0.1               # pocket depth beyond the bearing width (100 mm: 0.4, so the bearing never bottoms on the first layers)
-RELIEF_D, RELIEF_DEPTH = 6.4, 1.5              # 100 mm: counterbore in the pocket floor, wider than the 684ZZ inner race (about 6 mm), so only the outer race touches the floor
+PK_R = BRG[1] / 2 + (0.125 if M100 else 0.05)  # bearing pocket radius: 100 mm 9.25 mm across (a slip fit: a printed hole shrinks 0.1 mm or more and a 684ZZ outer race is only 0.85 mm thick, so a pressed fit squeezes it and adds drag; hold it with a drop of retaining compound)
+PK_CH, PK_TOP = 0.4, 4.9                       # 100 mm: lead-in chamfer at the pocket mouth, and the height of the flat top of the teardrop roof above the pocket axis (the ring prints with +Y up)
+RELIEF_D, RELIEF_DEPTH = (7.2 if M100 else 6.4), 1.5              # 100 mm: counterbore in the pocket floor, wider than the 684ZZ inner race (about 6 mm), so only the outer race touches the floor
 BORE_D = AXLE_D + 0.15 if M100 else AXLE_D     # carrier axle bore: 100 mm gets 0.15 mm of slip (printed holes shrink; glue the rod in)
 ZC = FOOT_Z0 + FOOT_H + R_OUT                  # ring and mirror centre height
 SPIN_TIP = FOOT_Z0 + FOOT_H + 2.5 - 0.5        # rod tip, 0.5 mm short of the end of the bore
@@ -148,10 +150,8 @@ def build_unit():
     UNIT.clear()
     rp = BRG_S[1] / 2 + 0.05
     blk = box(-BLK_X, BLK_X, -BLK_Y, BLK_Y, RAIL_TOP, BLK_Z1).edges("|Z").chamfer(4.0)
-    ledge = 0.5 if M100 else 0.0                                                                       # 100 mm: the lower bearing sits on a 0.5 mm ledge, so its turning inner race clears the rail
-    blk = blk.cut(cylz(rp, RAIL_TOP + ledge - (0.0 if ledge else 1.0), RAIL_TOP + ledge + BRG_S[2]))   # lower bearing pocket, opens onto the rail
-    if M100:
-        blk = blk.cut(cylz(9.0, RAIL_TOP - 1, RAIL_TOP + ledge + 0.1))                                 # opening in the ledge, wider than the 608ZZ inner race, so only the outer race rests on it
+    ledge = 0.5 if M100 else 0.0                                                                       # 100 mm: the lower bearing is pressed up against the cone, 0.5 mm clear of the rail, so its turning inner race cannot touch it
+    blk = blk.cut(cylz(rp, RAIL_TOP - 1, RAIL_TOP + ledge + BRG_S[2]))                                 # lower bearing pocket, opens onto the rail (the bearing goes in from below)
     blk = blk.cut(cone(rp, ROD_CLR, RAIL_TOP + ledge + BRG_S[2], RAIL_TOP + ledge + BRG_S[2] + (rp - ROD_CLR)))        # 45 degree ceiling, so it prints without a bridge
     blk = blk.cut(cylz(ROD_CLR, RAIL_TOP - 1, BLK_Z1 + 1))                                             # rod clearance
     blk = blk.cut(cylz(rp, BLK_Z1 - BRG_S[2], BLK_Z1 + 1))                                             # upper bearing pocket, opens upward
@@ -180,13 +180,24 @@ def build_unit():
     ring = cyly(R_OUT, -RING_W / 2, RING_W / 2, 0, ZC).cut(cyly(R_IN, -RING_W, RING_W, 0, ZC))
     for sx in (-1, 1):
         x0, x1 = (BOSS_X0, R_OUT) if sx > 0 else (-R_OUT, -BOSS_X0)
-        ring = ring.union(cylx(BOSS_D / 2, x0, x1, 0, ZC))
+        boss = cylx(BOSS_D / 2, x0, x1, 0, ZC)
+        if M100:
+            boss = boss.intersect(cyly(R_OUT, -RING_W, RING_W, 0, ZC))             # trim the boss to the ring's outer circle, so the outside is smooth (no flat pad at the axle)
+        ring = ring.union(boss)
         fl = POCKET_BACK                                                           # gap between the bearing and the pocket floor
         pk0, pk1 = (BOSS_X0 - 1, BOSS_X0 + BRG[2] + fl) if sx > 0 else (-BOSS_X0 - BRG[2] - fl, -BOSS_X0 + 1)
-        ring = ring.cut(cylx(BRG[1] / 2 + 0.05, pk0, pk1, 0, ZC))                  # bearing pocket opens to the inside
+        ring = ring.cut(cylx(PK_R, pk0, pk1, 0, ZC))                                # bearing pocket opens to the inside
+        if M100:
+            xm = BOSS_X0 if sx > 0 else -BOSS_X0                                    # the mouth of the pocket, on the boss face
+            ring = ring.cut(cq.Workplane(obj=cq.Solid.makeCone(PK_R + PK_CH, PK_R, PK_CH, cq.Vector(xm, 0, ZC), cq.Vector(1 if sx > 0 else -1, 0, 0))))   # lead-in chamfer
+            hw = 2 ** 0.5 * PK_R - PK_TOP                                           # flat-topped teardrop roof so the pocket prints round, not sagged
+            td = [(PK_R * 0.7071, ZC - PK_R * 0.7071), (PK_TOP, ZC - hw), (PK_TOP, ZC + hw), (PK_R * 0.7071, ZC + PK_R * 0.7071)]
+            ring = ring.cut(cq.Workplane("YZ").workplane(offset=pk0).polyline(td).close().extrude(pk1 - pk0))
         ring = ring.cut(cylx(AXLE_D / 2 + 0.2, 0, R_OUT + 1, 0, ZC) if sx > 0 else cylx(AXLE_D / 2 + 0.2, -R_OUT - 1, 0, 0, ZC))   # axle clearance
         if M100:                                                                   # relief behind the bearing so the turning inner race cannot rub on the printed floor
             ring = ring.cut(cylx(RELIEF_D / 2, pk1 - 0.1, pk1 + RELIEF_DEPTH, 0, ZC) if sx > 0 else cylx(RELIEF_D / 2, pk0 - RELIEF_DEPTH, pk0 + 0.1, 0, ZC))
+            xf = pk1 if sx > 0 else pk0                                             # floor plane: 0.2 mm chamfer on the relief edge
+            ring = ring.cut(cq.Workplane(obj=cq.Solid.makeCone(RELIEF_D / 2 + 0.2, RELIEF_D / 2, 0.2, cq.Vector(xf, 0, ZC), cq.Vector(1 if sx > 0 else -1, 0, 0))))
     foot_top = ZC - R_OUT + 2
     ring = ring.union(box(-FOOT_X, FOOT_X, -RING_W / 2, RING_W / 2, FOOT_Z0, foot_top))
     ring = ring.cut(cylz(SPIN_BORE_R, FOOT_Z0 - 1, FOOT_Z0 + FOOT_H + 2.5))         # spindle bore, ends 2.5 mm into the ring wall
@@ -448,7 +459,7 @@ def write_bom():
     multi = MOTORS > 1
     amp = 5 if multi else 3
     rows = [
-        ("print", ("Ring with foot: matt PLA, print flat with the +Y face up, 4 walls" if M100 else "Ring with foot: PETG or ASA, matt black, print flat with the +Y face up, 4 walls"), U, (f"ream the two {BRG[1] + 0.05:.2f} mm bearing pockets and the {SPIN_D + 0.1:.1f} mm spindle bore")),
+        ("print", ("Ring with foot: matt PLA, print flat with the +Y face up, 4 walls" if M100 else "Ring with foot: PETG or ASA, matt black, print flat with the +Y face up, 4 walls"), U, (f"ream the two {2 * PK_R:.2f} mm bearing pockets (slip fit; a drop of retaining compound on the outer race holds each bearing) and the {SPIN_D + 0.1:.1f} mm spindle bore")),
         ("print", "Mirror carrier: print flat, 4 walls", U, ("rimless: the rim edge is 0.5 mm inside the disc; discs are glued on, see the doc; axle bore is 4.15 mm with a teardrop roof, glue the 4 mm rod in, ream with a 4.0 mm drill if it is tight") if M100 else ""),
         ("print", "Spindle bearing block: print upright, 4 walls" + (" (matt PLA, or PLA-CF for less creep under belt tension)" if M100 else ""), U, f"ream the two {BRG_S[1]:g} mm pockets so a {BRG_S_NAME.upper()} presses in"),
         ("print", "Motor bracket: print upside down on its flat top face" + (" in PLA-CF (stiffer, creeps less; it carries the motor and belt pull and sits against the warm motor face)" if M100 else ""), R, ("one per motor; the right-hand one (print_motor_bracket_2) is the mirror image" if DUAL else "one per row") if multi else "one motor"),
@@ -491,11 +502,11 @@ def write_bom():
          "2 per unit, 2 per motor bracket, 1 per standoff (rail back slot), 2 for the box, spares; load them into the slot from the rail end before building"),
         ("buy", f"M5 x {BLK_L} button head screw, stainless", 2 * U + 2 * R + 6 + (SO + 1 if BLK_L == 35 and not M100 else 0), "2 per unit (block into the T-nuts) plus 2 per motor bracket, spares" + ("; also 1 per standoff and 1 spare" if BLK_L == 35 and not M100 else "")),
         *([] if BLK_L == 35 and not M100 else [("buy", "M5 x 50 button head screw, stainless" if M100 else "M5 x 35 screw, stainless", SO + 1, "1 per standoff, from the wall side into the back-slot T-nut (head 15 mm deep in the standoff); 1 spare")]),
-        ("buy", "M5 x 12 button head screw, stainless", 2 + 4, "2 hold the electronics box to the rail; 4 spare"),
-        *([("buy", "M8 flat washer 16 x 8.4 x 1.6 mm, stainless", U + 2, "1 per spindle as a spacer on the inner race of the upper bearing; spares; check the 16 mm OD does not rub the 608ZZ outer race")] if M100 else
+        ("buy", f"M5 x {8 if M100 else 12} button head screw, stainless", 2 + 4, "2 hold the electronics box to the rail; 4 spare" + ("; 8 mm, not 12: the head seats 2.5 mm below the rail and a longer screw bottoms on the slot floor before it clamps" if M100 else "")),
+        *([("buy", "M8 shim washer 8 x 12 x 1 mm, stainless (DIN 988 or similar)", U + 2, "1 per spindle as a spacer on the inner race of the upper bearing; spares; 12 mm OD sits on the inner race only, clear of the 608ZZ shield and outer race; price TBC")] if M100 else
           [("buy", "M5 panel/slot washer 12.5 x 5.3 x 1 mm, stainless", 2 * U + 2, "2 per spindle as a 2 mm spacer on the inner race of the upper bearing; spares; 12.5 mm just clears the bearing's outer-race shoulder (about 13 mm), so check it does not rub")]),
         ("buy", "M3 x 6 socket cap head screw, stainless", 4 * R + 2, "4 per motor into the front face; check the thread depth first"),
-        ("buy", f"M{4 if M100 else 3} x {6 if M100 else 5} cup-point grub screw, stainless", U + 2, "1 per ring foot, clamps the ring to the spindle on a flat; thread-lock"),
+        ("buy", f"M{4 if M100 else 3} x {10 if M100 else 5} cup-point grub screw, stainless", U + 2, "1 per ring foot, clamps the ring to the spindle on a flat; thread-lock" + ("; 10 mm so it passes the 6 mm insert and the open hole to reach the rod (a 6 mm grub would not reach)" if M100 else "")),
         ("buy", "M3 x 8 pan head screw, stainless", 6, "4 hold the electronics box lid; 2 spare"),
         ("buy", "M3 x 6 pan head screw, stainless", 6, "4 hold the perfboard to the lid posts; 2 spare"),
         ("buy", "M4 x 40 wall screw with plug to suit your wall", 2 * SO + 2, "2 per standoff flange; choose the plug for the wall type"),
@@ -503,7 +514,9 @@ def write_bom():
           [("buy", "Heat-set insert M3 x 5.7", U + 8 + 4, "1 per ring foot, 4 box corners, 4 perfboard posts, spares")]),
         ("buy", "Thread-locking compound (medium)", 1, "grub screws and pulley set screws"),
         ("buy", "Cyanoacrylate glue or retaining compound", 1, "glue the hinge axles into the carriers"),
-        *([("buy", "Double-sided foam mounting tape 1 mm and neutral-cure silicone", 1, "mirrors onto the carriers")] if not M100 else [("buy", "Double-sided acrylic foam tape (VHB type) 1 mm x 6 mm, 3 m roll, for bonding the acrylic discs to the carriers", 1, "a ring on the rim and a strip on the bar per face; add a few spots of clear 2-part epoxy or CA for the permanent bond (test on a scrap disc first: CA can craze acrylic)")]),
+        *([("buy", "Double-sided foam mounting tape 1 mm and neutral-cure silicone", 1, "mirrors onto the carriers")] if not M100 else [("buy", "Double-sided acrylic foam tape (VHB type) 1 mm thick x 3 mm wide, 5 m", 1, "for the 3 mm carrier rims: about 4.8 m for 16 faces; a 6 mm tape would hang over the rim"),
+           ("buy", "Double-sided acrylic foam tape (VHB type) 1 mm thick x 6 mm wide, 2 m", 1, "for the cross bars: about 1.5 m for 16 faces"),
+           ("buy", "Clear 2-part epoxy (5 minute, syringe)", 1, "a few spots to make the disc bond permanent; test on a scrap disc first, CA glue can craze acrylic")]),
         *([("buy", "Filament PLA, grams used", 550, "estimate from the STEP volumes (rings, carriers, standoffs, box, lid) with a 0.6 wall and infill factor; not a slicer figure"),
            ("buy", "Filament PLA-CF, grams used", 370, "estimate: spindle blocks and motor brackets; if only the brackets are PLA-CF it is about 120 g and the blocks move to PLA (about 800 g)")] if M100 else []),
     ]
@@ -542,9 +555,7 @@ def write_bom():
             ("cut to 1150 mm", 12.89, 1, 1, "extrusion shop, AEP-TV-2020-B-CTS (12.89 is the basket price for 1180 mm, so 1150 should be slightly less)"),
             ("M5 slide-in T-nut", 20.90 / 32, 32, 1, "extrusion shop, SIN-20-M5 (the 32-off price)"),
             ("M5 x 35", 16.67 / 33, 33, 1, "extrusion shop, BHB-M5-35"),
-            ("M4 x 6 cup-point grub", 1.56 / 10, 10, 1, "extrusion shop, GS-M4-6"),
             ("M3 x 6 socket cap", 1.54 / 10, 10, 1, "extrusion shop, CHB-M3-6"),
-            ("M8 flat washer", 0.22, 10, 1, "M8 form A washer 16 x 8.4 x 1.6 (ex VAT)"),
             ("Acrylic mirror 100 mm", 10.00 / 20, 20, 1, "owner's quote, 20 discs for 10.00 (VAT treatment not stated, counted as ex VAT)"),
             ("Filament PLA, grams", 11.19 / VAT / 1000, 550, 1, "11.19 per kg inc VAT, divided by 1.2; cost of the weight used, not the spool"),
             ("Filament PLA-CF, grams", 29.99 / VAT / 1000, 370, 1, "29.99 per kg inc VAT, divided by 1.2; cost of the weight used, not the spool"),

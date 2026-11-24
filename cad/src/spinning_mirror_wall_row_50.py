@@ -338,8 +338,9 @@ def eb_tray():
     b = box(EB_X0, EB_X1, EB_Y0, EB_Y1, EB_Z_LID, EB_ZTOP)
     b = b.cut(box(EB_X0 + EB_WX, EB_X1 - EB_WX, EB_Y0 + w, EB_Y1 - w, EB_ZIN0, EB_ZTOP + 1))
     gy1 = EB_Y1 - 2.0                                                            # groove stops 2 mm in from the FRONT face (closed end = the stop) and is open at the back, the wall side, so the front shows no joint
-    for xr0, xr1 in ((EB_X0 + EB_WX, EB_X0 + EB_WX + EB_RIB_W), (EB_X1 - EB_WX - EB_RIB_W, EB_X1 - EB_WX)):      # inner ribs under the grooves
-        b = b.union(box(xr0, xr1, EB_Y0 + w - 0.01, EB_Y1 - w + 0.01, EB_ZTOP - EB_RIB_H, EB_ZTOP))
+    for xi, sg in ((EB_X0 + EB_WX, 1), (EB_X1 - EB_WX, -1)):                      # inner ribs under the grooves, with a 45 degree underside so they print without support
+        pts = [(xi, EB_ZTOP), (xi + sg * EB_RIB_W, EB_ZTOP), (xi + sg * EB_RIB_W, EB_ZTOP - (EB_RIB_H - EB_RIB_W)), (xi, EB_ZTOP - EB_RIB_H)]
+        b = b.union(cq.Workplane("XZ", origin=(0, EB_Y1 - w + 0.01, 0)).polyline(pts).close().extrude(EB_IN_Y + 0.02))
     for xc in (EB_X0 + (EB_WX + EB_RIB_W) / 2, EB_X1 - (EB_WX + EB_RIB_W) / 2):                           # dovetail groove in the top of each end wall, centred in the thickened wall
         pts = [(xc + x, z) for x, z in _dovetail(DT_MOUTH / 2 + (-EB_TOP_T - EB_ZTOP) * _tan30() + DT_CL, DT_D + 0.3, EB_ZTOP + 0.01, DT_ANG)]
         b = b.cut(cq.Workplane("XZ", origin=(0, gy1, 0)).polyline(pts).close().extrude(gy1 - EB_Y0 + 1.0))

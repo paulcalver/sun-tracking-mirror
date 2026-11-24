@@ -8,10 +8,11 @@
  * NOT COMPILED, NOT RUN. ESP32 Arduino core 3.x API.
  *
  * Wiring (10k linear pots, each: one end to 3V3, other end to GND, wiper to pin):
- *   SPEED  wiper -> GPIO 34
- *   JITTER wiper -> GPIO 35
+ *   SPEED  wiper -> XIAO A0 (GPIO 1)
+ *   JITTER wiper -> XIAO A1 (GPIO 2)
  * Optional: 100 nF from each wiper to GND to calm the reading.
- * GPIO 34 and 35 are ADC1 pins, which keep working while the radio is on.
+ * These are ADC1 pins, which keep working while the radio is on.
+ * Board: XIAO ESP32-S3 (set USB CDC On Boot to Enabled to see the serial prints).
  * Power: USB (power bank or wall adapter).
  *
  * The main unit ignores each pot until it has moved a little from its reading
@@ -22,8 +23,10 @@
 #include <esp_now.h>
 #include <esp_wifi.h>
 
-const uint8_t SPEED_PIN  = 34;
-const uint8_t JITTER_PIN = 35;
+// Seeed XIAO ESP32-S3: A0 = GPIO1, A1 = GPIO2 (both ADC1). On a classic 38-pin
+// ESP32 use 34 and 35 instead.
+const uint8_t SPEED_PIN  = 1;     // XIAO A0 / D0
+const uint8_t JITTER_PIN = 2;     // XIAO A1 / D1
 constexpr uint16_t REMOTE_KEY = 0x5A3C;      // must equal REMOTE_KEY in spinning_mirror.ino
 constexpr uint32_t SEND_EVERY_MS = 50;       // 20 packets a second (also the heartbeat)
 const bool INVERT_SPEED = false;             // flip if a pot is wired backwards

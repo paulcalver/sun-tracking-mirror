@@ -80,20 +80,47 @@
   <div class="row">
     <button id="jOff" class="on">Jitter off</button><button id="jOn">Jitter on</button>
     <span style="margin-left:12px">Mode</span>
-    <button id="mOu" class="on">Wobble (simulator)</button><button id="mWalk">Random targets</button>
+    <button id="mOu" class="on">Wobble (simulator)</button><button id="mWalk">Random targets</button><button id="mKick">Sharp kicks</button>
   </div>
+  <div id="revRow" style="margin:8px 0"><label><input type="checkbox" id="jrev" checked> allow direction reversals (wobble: brief dips below zero; kicks: random flips)</label></div>
   <div id="ouBox">
     <div class="ctl"><label for="jit">Jitter size</label><input id="jit" type="range" min="0" max="0.8" step="0.01" value="0.45"><output id="jitV">0.45</output></div>
     <div class="ctl"><label for="jtau">Correlation time (s)</label><input id="jtau" type="range" min="0.02" max="3" step="0.02" value="0.2"><output id="jtauV">0.20</output></div>
-    <label><input type="checkbox" id="jrev" checked> allow brief reversals</label>
     <p class="note">Speed = base × (1 + wobble). The same process as the tumble simulator: jitter size is its slider divided by 100.</p>
   </div>
   <div id="walkBox" hidden>
     <div class="ctl"><label for="jlo">Range low (rpm)</label><input id="jlo" type="range" min="0" max="300" step="1" value="60"><output id="jloV">60</output></div>
     <div class="ctl"><label for="jhi">Range high (rpm)</label><input id="jhi" type="range" min="0" max="300" step="1" value="300"><output id="jhiV">300</output></div>
-    <div class="ctl"><label for="jtmin">Interval min (s)</label><input id="jtmin" type="range" min="0.2" max="30" step="0.1" value="2"><output id="jtminV">2.0</output></div>
-    <div class="ctl"><label for="jtmax">Interval max (s)</label><input id="jtmax" type="range" min="0.2" max="30" step="0.1" value="8"><output id="jtmaxV">8.0</output></div>
+    <div class="ctl"><label for="jtmin">Interval min (s)</label><input id="jtmin" type="range" min="0.1" max="30" step="0.05" value="2"><output id="jtminV">2.0</output></div>
+    <div class="ctl"><label for="jtmax">Interval max (s)</label><input id="jtmax" type="range" min="0.1" max="30" step="0.05" value="8"><output id="jtmaxV">8.0</output></div>
   </div>
+</div>
+
+<div class="card">
+  <div class="row"><b>Presets</b><span class="note">click to apply (sends all settings, drivers stay as they are)</span></div>
+  <div class="row" id="builtin" style="margin:8px 0"></div>
+  <div class="row">
+    <button id="bRand">Randomise</button>
+    <button id="bCopy">Copy as one line</button>
+  </div>
+  <p class="note">Randomise keeps acceleration as it is and picks a mode, speeds and timings inside sensible ranges. "Copy as one line" gives text you can paste into the Arduino Serial Monitor.</p>
+</div>
+
+<div class="card" id="keepers">
+  <div class="row"><b>Settings that work</b><span class="note">save what you like, with a note</span></div>
+  <div class="row" style="margin:8px 0">
+    <input id="pname" placeholder="name, e.g. rolling tumble" style="padding:7px;border-radius:7px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:200px">
+    <input id="pnote" placeholder="note, e.g. tumbles for 10 s, quiet" style="padding:7px;border-radius:7px;border:1px solid var(--line);background:var(--bg);color:var(--ink);flex:1;min-width:200px">
+    <button id="bSave" class="primary">Save current settings</button>
+  </div>
+  <div id="mine"></div>
+  <div class="row" style="margin-top:10px">
+    <button id="bCopyAll">Copy all as text</button>
+    <button id="bExport">Download file</button>
+    <button id="bImport">Load file</button>
+    <input type="file" id="fImport" accept=".json,application/json" hidden>
+  </div>
+  <p class="note">Kept in this browser (so use the same browser and address next time). Download a file to back them up or move them to another computer.</p>
 </div>
 
 <div class="card">
@@ -186,7 +213,7 @@ function onStatus(line) {
   }
 }
 function setSlider(id, v) { $(id).value = v; $(id + 'V').textContent = fmt(id, +v); }
-const fmt = (id, v) => ({ jit: v.toFixed(2), jtau: v.toFixed(2), jtmin: v.toFixed(1), jtmax: v.toFixed(1) }[id] ?? String(Math.round(v)));
+const fmt = (id, v) => ({ jit: v.toFixed(2), jtau: v.toFixed(2), jtmin: v.toFixed(2), jtmax: v.toFixed(2) }[id] ?? String(Math.round(v)));
 
 // ---- plot ----
 function drawPlot() {
@@ -225,9 +252,10 @@ $('dCcw').onclick = () => { setDir(-1); send('dir -1'); };
 function setJit(on) { $('jOn').classList.toggle('on', on); $('jOff').classList.toggle('on', !on); }
 $('jOn').onclick  = () => { setJit(true);  send('jitter 1'); };
 $('jOff').onclick = () => { setJit(false); send('jitter 0'); };
-function setMode(m) { const ou = m === 'ou'; $('mOu').classList.toggle('on', ou); $('mWalk').classList.toggle('on', !ou); $('ouBox').hidden = !ou; $('walkBox').hidden = ou; }
+function setMode(m) { const ou = m === 'ou'; $('mOu').classList.toggle('on', ou); $('mWalk').classList.toggle('on', m === 'walk'); $('mKick').classList.toggle('on', m === 'kick'); $('ouBox').hidden = !ou; $('walkBox').hidden = ou; $('revRow').hidden = (m === 'walk'); }
 $('mOu').onclick   = () => { setMode('ou');   send('jmode ou'); };
 $('mWalk').onclick = () => { setMode('walk'); send('jmode walk'); };
+$('mKick').onclick = () => { setMode('kick'); send('jmode kick'); };
 
 $('bStart').onclick = () => send('start');
 $('bStop').onclick  = () => send('stop');
@@ -235,6 +263,99 @@ $('bEstop').onclick = () => { send('estop'); setSlider('rpm', 0); setJit(false);
 $('bSend').onclick  = () => { const v = $('raw').value.trim(); if (v) { log('> ' + v); send(v); $('raw').value = ''; } };
 $('raw').addEventListener('keydown', e => { if (e.key === 'Enter') $('bSend').click(); });
 setCap();
+
+// ---- presets, randomise, copy ----
+const BUILTIN = {
+  'Swing':           { mode:'ou',   rpm:100, jit:0.25, jtau:0.2,  accel:150, rev:1 },
+  'Tumble':          { mode:'ou',   rpm:120, jit:0.5,  jtau:0.2,  accel:200, rev:1 },
+  'Wild wobble':     { mode:'ou',   rpm:150, jit:0.7,  jtau:0.15, accel:250, rev:1 },
+  'Fast wobble':     { mode:'ou',   rpm:90,  jit:0.6,  jtau:0.05, accel:300, rev:1 },
+  'Slow wobble, crosses zero': { mode:'ou', rpm:40, jit:0.8, jtau:0.3, accel:150, rev:1 },
+  'Slow kicks, reversing':     { mode:'kick', lo:20, hi:90,  tmin:0.5, tmax:1.5, accel:150, rev:1 },
+  'Fast slow-kicks':           { mode:'kick', lo:30, hi:120, tmin:0.3, tmax:0.9, accel:250, rev:1 },
+  'Big kicks':       { mode:'kick', lo:40, hi:220, tmin:0.3, tmax:0.8, accel:300, rev:1 },
+  'Random targets':  { mode:'walk', lo:30, hi:250, tmin:0.5, tmax:1.5, accel:300, rev:0 },
+};
+const clampCap = v => Math.min(cap, Math.max(0, v));
+function readState() {
+  const mode = $('mKick').classList.contains('on') ? 'kick' : $('mWalk').classList.contains('on') ? 'walk' : 'ou';
+  return { mode, rpm:+$('rpm').value, accel:+$('accel').value, jit:+$('jit').value, jtau:+$('jtau').value,
+           lo:+$('jlo').value, hi:+$('jhi').value, tmin:+$('jtmin').value, tmax:+$('jtmax').value, rev:$('jrev').checked ? 1 : 0 };
+}
+function lineFor(s) {
+  const parts = ['jmode ' + s.mode];
+  if (s.mode === 'ou') parts.push('rpm ' + s.rpm, 'jit ' + s.jit, 'jtau ' + s.jtau);
+  else parts.push('jrange ' + s.lo + ' ' + s.hi, 'jtime ' + s.tmin + ' ' + s.tmax);
+  parts.push('jrev ' + s.rev, 'accel ' + s.accel, 'jitter 1');
+  return parts.join(';');
+}
+function applyState(p) {
+  const s = Object.assign(readState(), p);
+  s.rpm = clampCap(s.rpm); s.lo = clampCap(s.lo); s.hi = clampCap(s.hi);
+  setSlider('rpm', s.rpm); setSlider('accel', s.accel); setSlider('jit', s.jit); setSlider('jtau', s.jtau);
+  setSlider('jlo', s.lo); setSlider('jhi', s.hi); setSlider('jtmin', s.tmin); setSlider('jtmax', s.tmax);
+  $('jrev').checked = !!s.rev; setMode(s.mode); setJit(true);
+  send(lineFor(s));
+}
+function mkBtn(label, fn, cls) { const b = document.createElement('button'); b.textContent = label; if (cls) b.className = cls; b.onclick = fn; return b; }
+Object.keys(BUILTIN).forEach(n => $('builtin').appendChild(mkBtn(n, () => applyState(BUILTIN[n]))));
+
+const rnd = (a, b) => a + Math.random() * (b - a);
+$('bRand').onclick = () => {
+  const mode = ['ou', 'ou', 'kick', 'walk'][Math.floor(Math.random() * 4)];
+  const lo = Math.round(rnd(10, 90)), hi = Math.round(Math.min(cap, lo + rnd(40, 220)));
+  const tmin = +rnd(0.15, 1).toFixed(2);
+  applyState({ mode, rpm: Math.round(rnd(40, 160)), jit: +rnd(0.25, 0.8).toFixed(2), jtau: +rnd(0.05, 0.6).toFixed(2),
+               lo, hi, tmin, tmax: +(tmin + rnd(0.2, 1.5)).toFixed(2), rev: Math.random() < 0.6 ? 1 : 0 });
+};
+$('bCopy').onclick = async () => {
+  const line = lineFor(readState());
+  try { await navigator.clipboard.writeText(line); log('copied: ' + line); } catch (e) { log(line); }
+};
+function loadSaved() { try { return JSON.parse(localStorage.getItem('mirrorPresets') || '{}'); } catch (e) { return {}; } }
+function storeSaved(o) { try { localStorage.setItem('mirrorPresets', JSON.stringify(o)); return true; } catch (e) { log('could not save in this browser; use Download file'); return false; } }
+let memSaved = null;   // fallback if browser storage is blocked
+const getAll = () => memSaved || loadSaved();
+const putAll = o => { memSaved = o; storeSaved(o); };
+function summary(s) {
+  const core = s.mode === 'ou' ? `wobble, base ${s.rpm} rpm, jit ${s.jit}, tau ${s.jtau}s`
+                               : `${s.mode}, ${s.lo}-${s.hi} rpm every ${s.tmin}-${s.tmax}s`;
+  return `${core}, accel ${s.accel}, reversals ${s.rev ? 'on' : 'off'}`;
+}
+function renderSaved() {
+  const m = $('mine'); m.innerHTML = ''; const all = getAll(); const names = Object.keys(all);
+  if (!names.length) { m.innerHTML = '<p class="note">Nothing saved yet.</p>'; return; }
+  names.forEach(n => {
+    const s = all[n], row = document.createElement('div');
+    row.style.cssText = 'border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:6px 0';
+    row.innerHTML = '<div class="b"></div><div class="note" data-sum></div><div class="note" data-note></div><div class="row" style="margin-top:6px"></div>';
+    row.children[0].textContent = n; row.children[1].textContent = summary(s); row.children[2].textContent = s.note || '';
+    const r = row.children[3];
+    r.appendChild(mkBtn('Apply', () => applyState(s), 'primary'));
+    r.appendChild(mkBtn('Copy line', async () => { const l = lineFor(s); try { await navigator.clipboard.writeText(l); log('copied: ' + l); } catch (e) { log(l); } }));
+    r.appendChild(mkBtn('Delete', () => { const a = getAll(); delete a[n]; putAll(a); renderSaved(); }));
+    m.appendChild(row);
+  });
+}
+$('bSave').onclick = () => {
+  const n = $('pname').value.trim(); if (!n) { $('pname').focus(); return; }
+  const a = getAll(); a[n] = Object.assign(readState(), { note: $('pnote').value.trim(), saved: new Date().toISOString().slice(0, 16).replace('T', ' ') });
+  putAll(a); $('pname').value = ''; $('pnote').value = ''; renderSaved();
+};
+const allAsText = () => Object.entries(getAll()).map(([n, s]) => `${n}${s.note ? ' (' + s.note + ')' : ''}\n  ${summary(s)}\n  ${lineFor(s)}`).join('\n\n');
+$('bCopyAll').onclick = async () => { const t = allAsText(); try { await navigator.clipboard.writeText(t); log('copied ' + Object.keys(getAll()).length + ' settings'); } catch (e) { log(t); } };
+$('bExport').onclick = () => {
+  const blob = new Blob([JSON.stringify(getAll(), null, 2)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'mirror-settings.json'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+$('bImport').onclick = () => $('fImport').click();
+$('fImport').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try { const o = JSON.parse(await f.text()); putAll(Object.assign(getAll(), o)); renderSaved(); log('loaded ' + Object.keys(o).length + ' settings'); }
+  catch (err) { log('could not read that file'); }
+  e.target.value = '';
+};
+renderSaved();
 </script>
 </body>
 </html>

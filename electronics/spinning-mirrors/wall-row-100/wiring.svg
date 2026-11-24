@@ -111,16 +111,16 @@ text{font-size:13px;fill:#1d232a}
 
 <!-- ESP32 -->
 <rect x="40" y="200" width="220" height="500" rx="6" class="box"/>
-<text x="52" y="226" class="b">ESP32 dev board</text>
-<text x="52" y="242" class="s">38-pin, 3.3 V logic</text>
+<text x="52" y="226" class="b">XIAO ESP32-S3</text>
+<text x="52" y="242" class="s">3.3 V logic</text>
 <text x="52" y="270" class="s">powered from USB 5 V</text>
 <text x="252" y="288" text-anchor="end" class="s">GND</text>
 <text x="252" y="313" text-anchor="end" class="s">3V3</text>
-<text x="252" y="338" text-anchor="end" class="s">GPIO25 STEP 1</text>
-<text x="252" y="363" text-anchor="end" class="s">GPIO16 DIR 1</text>
-<text x="252" y="388" text-anchor="end" class="s">GPIO19 EN (both)</text>
-<text x="252" y="598" text-anchor="end" class="s">GPIO26 STEP 2</text>
-<text x="252" y="623" text-anchor="end" class="s">GPIO17 DIR 2</text>
+<text x="252" y="338" text-anchor="end" class="s">D0 (GPIO1) STEP 1</text>
+<text x="252" y="363" text-anchor="end" class="s">D1 (GPIO2) DIR 1</text>
+<text x="252" y="388" text-anchor="end" class="s">D5 (GPIO6) EN (both)</text>
+<text x="252" y="598" text-anchor="end" class="s">D3 (GPIO4) STEP 2</text>
+<text x="252" y="623" text-anchor="end" class="s">D4 (GPIO5) DIR 2</text>
 <text x="52" y="670" class="s">STEP 1 and 2 carry identical</text><text x="52" y="684" class="s">pulses (one register write)</text>
 <text x="351" y="441" text-anchor="middle" class="s">10k</text>
 <rect x="336" y="444" width="30" height="12" fill="#fff" stroke="#e08a1e" stroke-width="2"/>
@@ -130,8 +130,8 @@ text{font-size:13px;fill:#1d232a}
 <text x="62" y="752" class="b">USB-C panel cable</text><text x="62" y="768" class="s">RIGHT end wall, to laptop</text>
 <rect x="300" y="730" width="300" height="82" rx="6" class="box" stroke-dasharray="5 4"/>
 <text x="310" y="750" class="b">Hall sensors: not fitted</text>
-<text x="310" y="768" class="s">GPIO35 = half 1, GPIO34 = half 2 (input only),</text>
-<text x="310" y="782" class="s">each with its own 10k pull-up to 3V3, plus 3V3 + GND.</text>
+<text x="310" y="768" class="s">D10 (GPIO9) = half 1, D7 (GPIO44) = half 2,</text>
+<text x="310" y="782" class="s">10k pull-up to 3V3 if open-collector, plus 3V3 + GND.</text>
 <text x="310" y="796" class="s">Pins reserved; firmware hook only.</text>
 
 <!-- notes -->

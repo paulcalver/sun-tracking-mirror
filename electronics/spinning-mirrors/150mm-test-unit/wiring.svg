@@ -76,15 +76,15 @@ text{font-size:13px;fill:#1d232a}
 
 <!-- ESP32 -->
 <rect x="40" y="230" width="220" height="190" rx="6" class="box"/>
-<text x="52" y="256" class="b">ESP32 dev board</text>
+<text x="52" y="256" class="b">XIAO ESP32-S3</text>
 <text x="52" y="272" class="s">3.3 V logic</text>
 <text x="52" y="300" class="s">USB 5 V in,</text><text x="52" y="314" class="s">3.3 V on board</text>
 <text x="252" y="254" text-anchor="end" class="s">GND</text>
 <text x="252" y="279" text-anchor="end" class="s">3V3</text>
-<text x="252" y="304" text-anchor="end" class="s">GPIO25 STEP</text>
-<text x="252" y="329" text-anchor="end" class="s">GPIO16 DIR</text>
-<text x="252" y="354" text-anchor="end" class="s">GPIO19 EN</text>
-<text x="252" y="383" text-anchor="end" class="s">GPIO34 ADC</text>
+<text x="252" y="304" text-anchor="end" class="s">D0 (GPIO1) STEP</text>
+<text x="252" y="329" text-anchor="end" class="s">D1 (GPIO2) DIR</text>
+<text x="252" y="354" text-anchor="end" class="s">D5 (GPIO6) EN</text>
+<text x="252" y="383" text-anchor="end" class="s">D10 (GPIO9) ADC</text>
 <rect x="60" y="470" width="180" height="50" rx="6" class="box"/>
 <text x="72" y="492" class="b">Computer USB</text><text x="72" y="508" class="s">5 V power + programming</text>
 

@@ -22,22 +22,22 @@ text{font-size:13px;fill:#1d232a}
 <!-- ESP32 -->
 <rect x="40" y="90" width="220" height="230" rx="6" class="box"/>
 <text x="52" y="116" class="b">Remote ESP32</text>
-<text x="52" y="132" class="s">any ESP32 dev board</text>
+<text x="52" y="132" class="s">XIAO ESP32-S3</text>
 <text x="52" y="270" class="s">radio: ESP-NOW,</text><text x="52" y="284" class="s">WiFi channel 1</text>
 <text x="252" y="124" text-anchor="end" class="s">3V3</text>
 <text x="252" y="154" text-anchor="end" class="s">GND</text>
-<text x="252" y="184" text-anchor="end" class="s">GPIO34 (ADC1)</text>
+<text x="252" y="184" text-anchor="end" class="s">A0 (GPIO1)</text>
 <text x="252" y="239" text-anchor="end" class="s">3V3</text>
 <text x="252" y="269" text-anchor="end" class="s">GND</text>
-<text x="252" y="299" text-anchor="end" class="s">GPIO35 (ADC1)</text>
+<text x="252" y="299" text-anchor="end" class="s">A1 (GPIO2)</text>
 
 <!-- pots -->
 <rect x="330" y="95" width="170" height="100" rx="6" class="box"/>
 <text x="340" y="116" class="b">SPEED pot, 10k linear</text>
-<text x="340" y="132" class="s">end 1: 3V3</text><text x="340" y="154" class="s">end 2: GND</text><text x="340" y="184" class="s">wiper: GPIO34</text>
+<text x="340" y="132" class="s">end 1: 3V3</text><text x="340" y="154" class="s">end 2: GND</text><text x="340" y="184" class="s">wiper: A0 (GPIO1)</text>
 <rect x="330" y="210" width="170" height="100" rx="6" class="box"/>
 <text x="340" y="231" class="b">JITTER pot, 10k linear</text>
-<text x="340" y="247" class="s">end 1: 3V3</text><text x="340" y="269" class="s">end 2: GND</text><text x="340" y="299" class="s">wiper: GPIO35</text>
+<text x="340" y="247" class="s">end 1: 3V3</text><text x="340" y="269" class="s">end 2: GND</text><text x="340" y="299" class="s">wiper: A1 (GPIO2)</text>
 <text x="515" y="150" class="s">optional 100 nF from each</text><text x="515" y="164" class="s">wiper to GND (calmer reading)</text>
 
 <!-- USB -->

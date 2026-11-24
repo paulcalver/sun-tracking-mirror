@@ -5,6 +5,9 @@
  *   - 1 motor : the 150 mm single test rig
  *   - 2 motors: the 100 mm wall piece (one motor at each rail end)
  *
+ * Board: Seeed XIAO ESP32-S3. In the Arduino IDE choose "XIAO_ESP32S3" and set
+ * Tools > USB CDC On Boot > Enabled, or Serial will not appear on the USB-C port.
+ *
  * NOT RUN ON HARDWARE, NOT EVEN COMPILED. Written against the ESP32 Arduino
  * core 3.x API (timerBegin(freq) / timerAttachInterrupt / timerAlarm).
  * Read README.md first.
@@ -51,13 +54,20 @@
 // Number of motors: 1 = 150 mm test rig, 2 = 100 mm wall piece, max 3.
 #define NUM_MOTORS 1
 
-// Pins (from docs/spinning-mirror-150-nema17-wiring-and-order.md).
+// Pins for the Seeed XIAO ESP32-S3 (D-number = GPIO in brackets).
 // STEP and DIR pins must be GPIO 0..31 (the fast register write used below).
-// Avoid the strapping pins 0, 2, 5, 12, 15.
-const uint8_t STEP_PIN[3] = {25, 26, 27};
-const uint8_t DIR_PIN[3]  = {16, 17, 18};
-const uint8_t EN_PIN      = 19;      // shared, active LOW. Fit a 10k pull-up to 3.3 V.
-// const uint8_t HALL_PIN = 35;      // reserved for the optional phase check (see hook below)
+// D6 and D7 (GPIO43, 44) are 32 or above, and D2 (GPIO3) is a boot strapping
+// pin, so none of those is used for STEP, DIR or EN.
+//   motor 1: STEP D0 (GPIO1), DIR D1 (GPIO2)
+//   motor 2: STEP D3 (GPIO4), DIR D4 (GPIO5)
+//   motor 3: STEP D8 (GPIO7), DIR D9 (GPIO8)   (only if NUM_MOTORS is 3)
+//   EN (shared, active LOW): D5 (GPIO6), with a 10k pull-up to 3V3
+//   reserved for the optional Hall inputs: D10 (GPIO9) and D7 (GPIO44)
+// If you use a different ESP32 board, change these numbers (and the diagrams).
+const uint8_t STEP_PIN[3] = {1, 4, 7};
+const uint8_t DIR_PIN[3]  = {2, 5, 8};
+const uint8_t EN_PIN      = 6;
+// const uint8_t HALL_PIN[2] = {9, 44};   // see the phaseCheck() hook
 
 // 1 = drive only STEP_PIN[0] and wire every driver's STEP input to it
 // (identical edges by construction; no independent patterns). DIR pins stay separate.
@@ -197,7 +207,13 @@ static float  jCurrentRpm  = 0.0f;
 // briefly, as in the simulator; with jRev off it is held at zero or above.
 // Mode 0 ("walk") is the earlier scheme: a uniform random target in jrange at
 // random intervals.
-static int    jMode        = 0;       // 0 walk, 1 ou
+// Mode 2 ("kick"): bang-bang. Every jtime seconds the target jumps to near one
+// END of jrange (lo or hi, chosen at random, with a little spread), and with
+// jrev on it also flips direction at random. Every change is as sharp as the
+// acceleration limit allows and as big as the range (up to lo+hi when it flips).
+static const char *const JMODE_NAME[3] = {"walk", "ou", "kick"};
+static int    jMode        = 0;       // 0 walk, 1 ou, 2 kick
+static float  jKickSign    = 1.0f;    // +1 or -1, used by kick mode
 static float  jSigma       = 0.45f;
 static float  jTau         = 0.2f;
 static bool   jRev         = true;
@@ -283,12 +299,18 @@ static void scheduleJitter(uint32_t now) {
 }
 
 static void pickJitterTarget() {
-  jCurrentRpm = capRpm(randomFloat(jRpmLo, jRpmHi), nullptr);
+  if (jMode == 2) {
+    float end = (esp_random() & 1) ? jRpmHi : jRpmLo;
+    jCurrentRpm = capRpm(end * randomFloat(0.85f, 1.0f), nullptr);
+    jKickSign = (jRev && (esp_random() & 1)) ? -1.0f : 1.0f;
+  } else {
+    jCurrentRpm = capRpm(randomFloat(jRpmLo, jRpmHi), nullptr);
+    jKickSign = 1.0f;
+  }
 }
 
 // ---- Hall / phase-check hook (NOT IMPLEMENTED) ------------------------------
-// Optional later: one Hall sensor + magnet on one ring per wall half (e.g. pin 35
-// and a second input pin). Attach an interrupt per sensor that stores micros()
+// Optional later: one Hall sensor + magnet on one ring per wall half (D10 / GPIO9 and D7 / GPIO44). Attach an interrupt per sensor that stores micros()
 // of each revolution, compare the two once per revolution, and nudge one motor's
 // phase (add or skip a few steps in its accumulator, inside stepMux) to correct
 // drift. Open-loop steppers with identical pulses should not drift unless a
@@ -329,7 +351,7 @@ static void rampStep() {
       if (!jRev && f < 0.0f) f = 0.0f;
       targetRad = dirSign * manualRpm * f * RPM_TO_RAD;   // capped below
     } else {
-      targetRad = dirSign * jCurrentRpm * RPM_TO_RAD;
+      targetRad = dirSign * jKickSign * jCurrentRpm * RPM_TO_RAD;
     }
   } else {
     targetRad = dirSign * manualRpm * RPM_TO_RAD;
@@ -403,7 +425,7 @@ static void printStatus() {
 #endif
                 enabled, stopping, NUM_MOTORS, dirSign, manualRpm,
                 velRad / RPM_TO_RAD, targetRad / RPM_TO_RAD, accelLimit,
-                jitterOn, jMode ? "ou" : "walk", jSigma, jTau, jRev, jRpmLo, jRpmHi, jTMin, jTMax
+                jitterOn, JMODE_NAME[jMode], jSigma, jTau, jRev, jRpmLo, jRpmHi, jTMin, jTMax
 #if ENABLE_REMOTE_DIAL
                 , remoteEnabled, remoteSeen, remoteSeen ? (long)(millis() - rxAtMs) : -1L
 #endif
@@ -423,7 +445,8 @@ static void printHelp() {
     "  jitter 0|1        random speed shifts on/off\n"
     "  jrange <lo> <hi>  jitter speed range in rpm\n"
     "  jtime <min> <max> jitter interval range in seconds (walk mode)\n"
-    "  jmode walk|ou     walk = random targets in jrange; ou = simulator-style wobble around rpm\n"
+    "  jmode walk|ou|kick walk = random targets in jrange; ou = simulator-style wobble around rpm;\n"
+    "                    kick = sharp jumps to the ends of jrange (flips direction if jrev 1)\n"
     "  jit <0..0.8>      ou mode: speed jitter, fraction of rpm (simulator slider /100)\n"
     "  jtau <0.02..5>    ou mode: correlation time, seconds (simulator uses 0.2)\n"
     "  jrev 0|1          ou mode: allow brief reversals (1) or hold speed at 0 or above (0)\n"
@@ -488,16 +511,17 @@ static void handleLine(char *line) {
     Serial.printf("ok jrange %.0f %.0f%s\n", jRpmLo, jRpmHi, clamped ? " CLAMPED (cap applied)" : "");
   } else if (!strcmp(cmd, "jtime")) {
     if (!a1 || !a2) { Serial.println("err jtime needs min max"); return; }
-    float lo = max(0.1f, atof(a1));
-    float hi = max(0.1f, atof(a2));
+    float lo = max(0.1f, (float)atof(a1));
+    float hi = max(0.1f, (float)atof(a2));
     if (hi < lo) { float t = lo; lo = hi; hi = t; }
     jTMin = lo; jTMax = hi;
     Serial.printf("ok jtime %.1f %.1f\n", jTMin, jTMax);
   } else if (!strcmp(cmd, "jmode")) {
     if (!a1) { Serial.println("err jmode needs walk or ou"); return; }
-    jMode = (!strcasecmp(a1, "ou") || !strcmp(a1, "1")) ? 1 : 0;
+    jMode = (!strcasecmp(a1, "ou") || !strcmp(a1, "1")) ? 1 : (!strcasecmp(a1, "kick") || !strcmp(a1, "2")) ? 2 : 0;
+    jKickSign = 1.0f;
     ouState = 0.0f;
-    Serial.printf("ok jmode %s\n", jMode ? "ou" : "walk");
+    Serial.printf("ok jmode %s\n", JMODE_NAME[jMode]);
   } else if (!strcmp(cmd, "jit")) {
     if (!a1) { Serial.println("err jit needs 0..0.8"); return; }
     jSigma = constrain(atof(a1), 0.0f, 0.8f);
@@ -602,6 +626,8 @@ void setup() {
   digitalWrite(EN_PIN, HIGH);
 
   Serial.begin(115200);
+  // USB CDC: wait briefly for the host so the boot banner is not lost.
+  { uint32_t t0 = millis(); while (!Serial && millis() - t0 < 2000) delay(10); }
 
   for (int i = 0; i < NUM_MOTORS; i++) {
     pinMode(STEP_PIN[i], OUTPUT);

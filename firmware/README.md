@@ -4,19 +4,21 @@
 
 Sketch: `spinning_mirror/spinning_mirror.ino`. It drives 1 to 3 NEMA 17 steppers through TMC2209 drivers on plain STEP/DIR (no UART), with acceleration-limited speed, a random-speed-shift mode, and USB serial text control for Max/MSP.
 
-## Wiring (38-pin ESP32 dev board, from `docs/spinning-mirror-150-nema17-wiring-and-order.md`)
+## Wiring (Seeed XIAO ESP32-S3)
+
+The board is now the **Seeed XIAO ESP32-S3**, so the pin map differs from the 38-pin ESP32 in `docs/spinning-mirror-150-nema17-wiring-and-order.md` (GPIO 25/26/16/17/19). Why these pins: STEP and DIR must be GPIO 0 to 31 for the fast register write, D6/D7 (GPIO 43/44) are above that, and D2 (GPIO3) is a boot strapping pin, so D2 is left free.
 
 | ESP32 | Goes to | Notes |
 |---|---|---|
-| GPIO 25 | driver 1 STEP | motor 1 |
-| GPIO 16 | driver 1 DIR | |
-| GPIO 26 | driver 2 STEP | motor 2 (wall piece) |
-| GPIO 17 | driver 2 DIR | |
-| GPIO 27 / 18 | driver 3 STEP / DIR | spare, only if `NUM_MOTORS` is 3 |
-| GPIO 19 | EN on every driver | active low; 10k pull-up to 3.3 V so drivers are off at boot |
-| 3.3 V | each driver's VDD | |
+| D0 (GPIO1) | driver 1 STEP | motor 1 |
+| D1 (GPIO2) | driver 1 DIR | |
+| D3 (GPIO4) | driver 2 STEP | motor 2 (wall piece) |
+| D4 (GPIO5) | driver 2 DIR | |
+| D8 / D9 (GPIO7 / 8) | driver 3 STEP / DIR | spare, only if `NUM_MOTORS` is 3 |
+| D5 (GPIO6) | EN on every driver | active low; 10k pull-up to 3.3 V so drivers are off at boot |
+| 3V3 | each driver's VDD | |
 | GND | each driver's GND | common ground with the 24 V supply |
-| 35 | (Hall sensor) | reserved, not used |
+| D10 (GPIO9), D7 (GPIO44) | (Hall sensors) | reserved, not used |
 
 MS1, MS2, DIAG, INDEX, UART and SPRD stay open (1/8 microstepping, StealthChop). 24 V supply to each driver's + and GND, with a 100 uF capacitor at each. The 5 V buck converter feeds the ESP32.
 
@@ -25,8 +27,8 @@ MS1, MS2, DIAG, INDEX, UART and SPRD stay open (1/8 microstepping, StealthChop).
 ## Flash from the Mac (Arduino IDE)
 
 1. Install Arduino IDE 2.x. In Boards Manager install **esp32 by Espressif Systems, version 3.x** (the timer calls need 3.x).
-2. Open `firmware/spinning_mirror/spinning_mirror.ino`. Board: "ESP32 Dev Module". Pick the USB port.
-3. Edit the config block at the top if needed (below), then Upload. If upload stalls at "Connecting...", hold BOOT while it starts.
+2. Open `firmware/spinning_mirror/spinning_mirror.ino`. Board: **XIAO_ESP32S3**. Set Tools > **USB CDC On Boot: Enabled** (otherwise Serial does not show on the USB-C port). Pick the USB port.
+3. Edit the config block at the top if needed (below), then Upload. If the port does not appear, hold the XIAO's B (boot) button while plugging it in, then upload.
 4. Open Serial Monitor at **115200 baud**, line ending "Newline". You should see "drivers DISABLED".
 
 ## Serial commands
@@ -45,7 +47,7 @@ One command per line (or separated by `;`). In Max use `[serial]` at 115200 and 
 | `jitter 0` / `jitter 1` | random speed shifts off / on |
 | `jrange <lo> <hi>` | jitter speed range in rpm (default 60 to 300) |
 | `jtime <min> <max>` | seconds between shifts (default 2 to 8) |
-| `jmode walk` / `jmode ou` | `walk`: random targets in `jrange` at random intervals. `ou`: the tumble simulator's jitter, a random wobble around the `rpm` value |
+| `jmode walk` / `jmode ou` / `jmode kick` | `walk`: random targets in `jrange` at random intervals. `ou`: the tumble simulator's jitter, a random wobble around the `rpm` value. `kick`: sharp bang-bang jumps to the lo or hi end of `jrange` every `jtime` seconds, flipping direction at random if `jrev 1` (the biggest speed changes the acceleration limit allows) |
 | `jit <0..0.8>` | ou mode: jitter size as a fraction of `rpm` (simulator slider 45 = 0.45) |
 | `jtau <0.02..5>` | ou mode: correlation time in seconds (simulator 0.2); bigger = slower, longer swells |
 | `jrev 0` / `jrev 1` | ou mode: 1 lets the speed dip below zero (brief reversals, as in the simulator); 0 holds it at zero or above |
@@ -57,9 +59,9 @@ Typical first run: `rpm 60`, `enable 1`, then `rpm 120`, `stop`. Boot state is d
 ## Tuning knobs (top of the `.ino`)
 
 - `NUM_MOTORS`: 1 for the 150 mm test rig (default), 2 for the wall piece.
-- `STEP_PIN`, `DIR_PIN`, `EN_PIN`: pin map. STEP and DIR must be GPIO 0 to 31.
+- `STEP_PIN`, `DIR_PIN`, `EN_PIN`: pin map. STEP and DIR must be GPIO 0 to 31 (see the XIAO note above).
 - `DIR_INVERT[]`: per-motor physical direction. Both wall motors must turn the same way in the room, and they sit at opposite rail ends, so one probably needs inverting. Check with `dir 1` on each motor alone.
-- `TIE_STEP_PINS`: 1 drives only GPIO 25 and you wire both drivers' STEP inputs to it.
+- `TIE_STEP_PINS`: 1 drives only D0 (GPIO1) and you wire both drivers' STEP inputs to it.
 - `MICROSTEPS` (8) and `FULL_STEPS_PER_REV` (200): must match the driver's MS pins.
 - `MAX_SPINDLE_RPM` (300): hard speed cap in spindle rpm, converted with the actual steps/rev, microstepping and `PULLEY_RATIO` (1.0). Every path is held to it: ramp target, jitter picks, `rpm`/`jrange` commands (clamped, and the reply says `CLAMPED`) and a final clamp before the step-rate conversion; all motors share the one capped value. It is printed at boot. Keep it below the speed the bench test has proved (a mirror letting go is about 1 J at 600 rpm, 3 J at 1000 rpm).
 - `ACCEL_DEFAULT` (100 rad/s2), `ACCEL_MAX` (300 rad/s2, acceleration is always limited by the ramp and `accel` is clamped to this): from the torque budget in the docs. 100 rad/s2 is about 0.06 N m on the wall piece, 300 is about 0.19 N m of roughly 0.25 N m available at 24 V.
@@ -111,6 +113,8 @@ A single HTML page that talks to the ESP32 over USB serial using the browser's W
 
 It has Start, Stop (ramp down) and Emergency stop buttons, sliders for speed, acceleration, jitter size, correlation time, range and interval, direction and reversal switches, a 20 s live speed plot from the firmware's `status` line, and a raw command box. Sliders send their commands as you drag them, and the controls take the firmware's current values on connect. The speed sliders' maximum follows the firmware cap, which is read from the boot line. The page cannot raise the cap; the firmware always clamps.
 
+Tuning features: nine built-in presets (swing, tumble, wild, fast wobble, slow wobble that crosses zero, slow and big kicks, random targets), a **Randomise** button, **Copy as one line** (paste into the Arduino Serial Monitor), and a **Settings that work** section: save the current settings with a name and a note, then Apply, Copy line or Delete each one, plus Copy all as text and Download or Load a file to back them up. All three jitter modes (wobble, random targets, sharp kicks) have sliders, including the reversal switch.
+
 Unverified: only the page's status parsing and layout were checked in a browser pane with fake status lines; the serial connection itself has not been tried.
 
 ## Wiring diagram for the 150 mm test unit
@@ -123,13 +127,13 @@ Unverified: only the page's status parsing and layout were checked in a browser 
 | 24 V supply - | driver GND terminal |
 | ESP32 GND | driver GND (logic pin) and the supply ground: all grounds joined |
 | ESP32 3V3 | driver VDD |
-| ESP32 GPIO 25 | driver STEP |
-| ESP32 GPIO 16 | driver DIR |
-| ESP32 GPIO 19 | driver EN, with a 10k pull-up from EN to 3V3 |
+| XIAO D0 (GPIO1) | driver STEP |
+| XIAO D1 (GPIO2) | driver DIR |
+| XIAO D5 (GPIO6) | driver EN, with a 10k pull-up from EN to 3V3 |
 | Motor coil A (one wire pair, about 1.65 ohm) | driver 1A / 1B |
 | Motor coil B (the other pair) | driver 2A / 2B |
 | ESP32 USB | the laptop (5 V power and programming) |
-| (later) dial wiper | GPIO 34, dial ends to 3V3 and GND |
+| (later) dial wiper | D10 (GPIO9, an ADC pin); dial ends to 3V3 and GND |
 
 Leave MS1, MS2, DIAG, INDEX, UART and SPRD open. Set the driver current pot to about half way (1.2 to 1.5 A). Never unplug the motor with 24 V on.
 
@@ -141,14 +145,14 @@ Layout in the box: both TMC2209s and the ESP32 on one 70 x 90 mm perfboard. Left
 
 **Lock-step, and what is shared**
 - STEP and DIR are on separate ESP32 pins, one pair per driver, not one shared wire. The firmware writes both STEP pins in one register write from one timer, so the edges are identical (set `TIE_STEP_PINS 1` and join both STEP inputs to GPIO 25 if you would rather have one physical wire). DIR is kept separate so a motor mounted at the opposite end can be reversed in firmware (`DIR_INVERT`) instead of re-soldering; check on the bench that both rings turn the same way in the room.
-- EN is shared on GPIO 19 with one 10k pull-up to 3V3: both drivers must start, stop and fail off together, and a single pull-up keeps both off while the ESP32 boots.
+- EN is shared on D5 (GPIO6) with one 10k pull-up to 3V3: both drivers must start, stop and fail off together, and a single pull-up keeps both off while the ESP32 boots.
 - MS1 and MS2 are left open on both drivers, so both run 1/8 step. They are not wired to the ESP32. If you ever change one, change both, or the motors will run at different speeds.
 - All grounds join: ESP32 GND to each driver's logic GND, supply GND to each driver's power GND.
 
 **Open points, answered**
 - **Wire gauge:** 22 AWG for 24 V and GND (the 5 A fuse protects it, and the real draw is about 2 A with both motors at 1.2 to 1.5 A). 26 AWG for STEP, DIR, EN and 3V3. Keep the 3V3 and GND logic runs short and twisted with the signal where you can.
 - **Motor lead connector:** the Pi Hut's motor has a short cable with a small plug (listed as 4-pin, 2.54 mm pitch; check the listing photo and your cable before ordering). Plug the 0.5 m extension onto the motor, strip the other end and clamp it in the driver's screw terminal with ferrules (Adafruit's TMC2209 motor terminals are screws). That way no connector has to pass through the 14 mm grommet holes. Extension wire order may not match the driver, so find the two coil pairs with a multimeter (about 1.65 ohm within a pair, open between pairs) before connecting.
-- **Hall sensor:** left out of the build. GPIO 35 (half 1) and GPIO 34 (half 2) are reserved, both input only, so each needs its own 10k pull-up to 3V3 if a Hall sensor is added. The firmware has only an empty `phaseCheck()` hook.
+- **Hall sensor:** left out of the build. D10 (GPIO9, half 1) and D7 (GPIO44, half 2) are reserved. These GPIOs have internal pull-ups, but add 10k to 3V3 if the sensor is open-collector. The firmware has only an empty `phaseCheck()` hook.
 - **Power-up order:** (1) with everything off, check coil pairs, wiring and that no wire touches another; (2) set the bench supply to 24 V with the current limit at 3 A, output off; (3) plug in USB so the ESP32 boots with drivers disabled; (4) switch the 24 V output on; (5) `enable 1`, then bring `rpm` up. Power down with `stop`, wait for the ring to stop, switch the 24 V off, then unplug USB.
 - **Bench supply cautions:** do not cut the 24 V while the rings are spinning, and do not rely on a supply with no current sink to absorb regenerated energy; use `stop` first. A current limit set too low makes the rail sag on acceleration peaks and the motors skip steps silently. Never hot-plug a motor with 24 V on. Power the ESP32 from USB only (no buck, and never both). If the laptop and bench supply both have earth, the USB ground and 24 V negative are joined by the driver boards; if you hear mains hum or the USB drops out, power the laptop from its battery or add a USB isolator.
 
@@ -161,18 +165,22 @@ A second ESP32 with two 10k linear pots sends their positions to the main unit o
 | Remote ESP32 | Goes to |
 |---|---|
 | 3V3 / GND | both pots' outer ends |
-| GPIO 34 | SPEED pot wiper |
-| GPIO 35 | JITTER pot wiper |
+| XIAO A0 (GPIO1) | SPEED pot wiper |
+| XIAO A1 (GPIO2) | JITTER pot wiper |
 | USB | power bank or wall adapter |
 
-Parts: one ESP32 dev board (a spare of the main one is fine), two 10k linear (B) pots with knobs, an enclosure, optionally 2 x 100 nF capacitors, a USB cable and power source.
+Parts: a second XIAO ESP32-S3 (or any ESP32 with the two `SPEED_PIN`/`JITTER_PIN` numbers changed), two 10k linear (B) pots with knobs, an enclosure, optionally 2 x 100 nF capacitors, a USB cable and power source.
 
 - **Flash:** open `remote_dial/remote_dial.ino` the same way as the main sketch (esp32 core 3.x). The main sketch has `ENABLE_REMOTE_DIAL 1` by default and needs no wiring; both units use WiFi channel 1 and the same `REMOTE_KEY`.
 - **Mapping:** the speed pot gives 0 to `REMOTE_RPM_MAX` (200 rpm, bottom 4 % = zero, always under the speed cap); the jitter pot gives wobble size 0 to `REMOTE_JIT_MAX` (0.8). Moving the jitter pot switches the main unit to `ou` jitter mode and turns jitter on.
 - **Takes over only when moved:** each pot is ignored until it has moved about 4 % from its reading when the main unit first heard it. Switching the remote on never changes a running setting, and serial or the laptop panel can still set values; a dial change then overrides them. `remote 0` makes the main unit ignore the dial, `remote 1` re-baselines it. `status` shows `remote`, `remote_seen` and `remote_age_ms` (milliseconds since the last packet).
 - **Does not start the motors:** drivers are still enabled from serial or the panel. Set `REMOTE_CAN_ENABLE 1` in the main sketch for a standalone installation: the speed dial above zero then enables the drivers and turning it to zero does a `stop`.
 - **Link loss:** the main unit keeps the last setting. Safe limits (speed cap, acceleration cap) apply to everything the dial can ask for.
-- **Pin note:** the wall piece's Hall hook reserved GPIO 34 and 35 on the main unit; the dial does not use those pins on the main unit (they are on the remote), so there is no conflict.
+- **Pin note:** the dial's pots sit on the remote board only, so there is no pin conflict with the main unit.
 - **Not secure:** broadcast ESP-NOW is not encrypted and the key is a constant, so anyone nearby who knew it could send values. The caps still bound what they could do. Unicast with encryption would need the main unit's MAC address.
 
 Unverified: neither sketch has been compiled (no ESP32 toolchain here), so the ESP-NOW callback signature and `analogSetPinAttenuation` calls need checking against core 3.x on first build; range and pot noise untested.
+
+## Solderable breadboard layout (wall piece)
+
+`electronics/spinning-mirrors/wall-row-100/breadboard-layout.svg` shows the two-motor build on a half-size solderable breadboard with the XIAO ESP32-S3: a wire list by column and row, what stays off the board (24 V and the motor leads go straight to each driver's screw terminals), and a check list. Its dimensions, the driver header order and the XIAO orientation are drawn from the docs and the Seeed pin chart and were not measured on real parts.

@@ -11,7 +11,7 @@ shaft up, and drives the first loop through a single GT2 pulley. All rings are f
 
 World frame (mm): wall plane at Y = 0, the viewer on +Y, X along the row, Z up with the rail bottom at Z = 0. Spindle line at Y = 45.
 Usage (from the repo root):
-  python3 cad/src/spinning_mirror_wall_row_50.py [--single10] [--mirror100] [--check] [--up y|z] [--seed N]
+  python3 cad/src/spinning_mirror_wall_row_50.py [--single10] [--mirror100 [--eight]] [--check] [--up y|z] [--seed N]
 Writes cad/out/spinning-mirror/spinning-mirror-wall-row-50/ (assembly STEP, parts/<print|print_ready|purchase>/),
 bom/spinning-mirrors/archive/bom-spinning-mirror-wall-row-50.csv and previews in cad/media/previews/spinning-mirror-wall-row-50/.
 """
@@ -32,7 +32,9 @@ import spinning_mirror_150_nema17 as u             # noqa: E402  (STEP writer, N
 CAD = HERE.parent
 SINGLE10 = "--single10" in sys.argv                # alternative: one row of ten units on one NEMA 17
 M100 = "--mirror100" in sys.argv                   # alternative: 100 mm mirrors (8 mm spindle, 608ZZ, 4 mm axle on 684ZZ, 140 mm pitch)
-TAG = f"spinning-mirror-wall-row-{'100' if M100 else '50'}" + ("-single10" if SINGLE10 else "")
+EIGHT = M100 and "--eight" in sys.argv             # alt CAD only: the 100 mm piece with eight mirrors (four per motor) on a 1150 mm rail; own output folder, no BOM
+SIX = M100 and not EIGHT                           # the 100 mm piece is now the six-mirror build (three per motor, 870 mm rail)
+TAG = f"spinning-mirror-wall-row-{'100' if M100 else '50'}" + ("-single10" if SINGLE10 else "") + ("-eight" if EIGHT else "")
 OUTD = CAD / "out" / "spinning-mirror" / TAG
 PARTS = OUTD / "parts"
 IMG = CAD / "media" / "previews" / TAG
@@ -44,7 +46,7 @@ ALU, BELT_C, WALL_C = "#a9b0b8", "#3a3a3a", "#e8e4dc"
 
 # ------------------------------------------------------------------ parameters (mm)
 DUAL = M100 and not SINGLE10                   # 100 mm: one rail, a NEMA 17 at each end, each driving half the units
-N = 10 if SINGLE10 else 8                      # mirrors per row
+N = 10 if SINGLE10 else (6 if SIX else 8)                      # mirrors per row
 ROWS = 1 if (SINGLE10 or M100) else 3          # rows
 NM = N // 2 if DUAL else N                     # units driven by each motor
 MOTORS = 2 if DUAL else ROWS                   # one NEMA 17 per row, or one at each end of the single rail
@@ -102,6 +104,8 @@ PAD_W, PAD_D = 20.0, 14.0                      # 100 mm carrier weight pad: widt
 PK_R = BRG[1] / 2 + (0.125 if M100 else 0.05)  # bearing pocket radius: 100 mm 9.25 mm across (a slip fit: a printed hole shrinks 0.1 mm or more and a 684ZZ outer race is only 0.85 mm thick, so a pressed fit squeezes it and adds drag; hold it with a drop of retaining compound)
 PK_CH, PK_TOP = 0.4, 4.9                       # 100 mm: lead-in chamfer at the pocket mouth, and the height of the flat top of the teardrop roof above the pocket axis (the ring prints with +Y up)
 RELIEF_D, RELIEF_DEPTH = (7.2 if M100 else 6.4), 1.5              # 100 mm: counterbore in the pocket floor, wider than the 684ZZ inner race (about 6 mm), so only the outer race touches the floor
+AXLE_EXIT_D = 6.0                               # 100 mm: exit hole for the hinge rod through the ring boss (rod 4 mm, so 1 mm clear each side)
+AXLE_HALF = 57.0 if M100 else None              # 100 mm: rod is 114 mm, ends 2 mm short of the ring outside, 1.1 mm past the bearing faces
 BORE_D = AXLE_D + 0.15 if M100 else AXLE_D     # carrier axle bore: 100 mm gets 0.15 mm of slip (printed holes shrink; glue the rod in)
 ZC = FOOT_Z0 + FOOT_H + R_OUT                  # ring and mirror centre height
 SPIN_TIP = FOOT_Z0 + FOOT_H + 2.5 - 0.5        # rod tip, 0.5 mm short of the end of the bore
@@ -125,6 +129,28 @@ EB_MOUNT_X = (-14.0 + EBX, 52.0 + EBX)                                 # M5 hole
 BOARD_L, BOARD_W, BOARD_T, BOARD_CX = 90.0, 70.0, 1.6, 13.0 + EBX
 BOARD_POST_H = 7.0
 BOARD_HOLES = [(BOARD_CX + sx * 41.0, Y_R + sy * 31.0) for sx in (-1, 1) for sy in (-1, 1)]    # 82 x 62 mm hole spacing
+EB_DC_D, EB_DC_WALL = 11.0, 3.0                          # 100 mm: panel-mount DC socket hole diameter and the wall thickness it passes through (the part is not chosen yet; both are parameters)
+EB_IN_X, EB_IN_Y = 230.0, 55.0                           # 100 mm: wide, shallow interior (the height stays 35 mm)
+if M100:
+    EB_X0, EB_X1 = XSUM / 2 - EB_IN_X / 2 - EB_WALL, XSUM / 2 + EB_IN_X / 2 + EB_WALL
+    EB_Y0, EB_Y1 = Y_R - EB_IN_Y / 2 - EB_WALL, Y_R + EB_IN_Y / 2 + EB_WALL           # interior centred on the rail, 39.5 mm from the wall at the back wall
+    EB_MOUNT_X = (XSUM / 2 - 40.0, XSUM / 2 + 40.0)
+
+
+def ebx(lx):
+    """X of a point lx mm in from the left inside face of the 100 mm box."""
+    return EB_X0 + EB_WALL + lx
+
+
+# 100 mm box layout, mm from the inside left face (lx) and the middle of the depth (y = Y_R); floor items sit on the lid
+EB_DC_LX = 16.0                                          # DC socket hole in the back wall
+EB_BUCK = (32.0, 77.0, 32.0)                             # buck converter 45 x 32, lies flat: lx0, lx1, depth
+EB_WAGO_LX = (92.0, 108.0)                               # two Wago 221-415 standing on their 8.4 x 18.6 end, wires front and back
+WAGO_L, WAGO_H, WAGO_D = 30.0, 8.4, 18.6
+EB_BB = (124.0, 206.0, 45.0)                             # half breadboard minus one power strip: 82 long, 45 wide, 8.5 thick, stuck flat
+BB_T = 8.5
+EB_LEAD_LX = (8.0, EB_IN_X - 8.0)                        # motor lead slots through the top plate
+EB_USB_Z = 14.0                                          # USB-C socket centre above the floor
 EB_CORNERS = [(x, y) for x in (EB_X0 + EB_WALL + EB_POST / 2, EB_X1 - EB_WALL - EB_POST / 2) for y in (EB_Y0 + EB_WALL + EB_POST / 2, EB_Y1 - EB_WALL - EB_POST / 2)]
 EB_CUT_Z = (EB_ZIN0 + EB_ZIN1) / 2                         # connector height, -23.5
 
@@ -199,6 +225,12 @@ def build_unit():
             ring = ring.cut(cylx(RELIEF_D / 2, pk1 - 0.1, pk1 + RELIEF_DEPTH, 0, ZC) if sx > 0 else cylx(RELIEF_D / 2, pk0 - RELIEF_DEPTH, pk0 + 0.1, 0, ZC))
             xf = pk1 if sx > 0 else pk0                                             # floor plane: 0.2 mm chamfer on the relief edge
             ring = ring.cut(cq.Workplane(obj=cq.Solid.makeCone(RELIEF_D / 2 + 0.2, RELIEF_D / 2, 0.2, cq.Vector(xf, 0, ZC), cq.Vector(1 if sx > 0 else -1, 0, 0))))
+            xa, xb = (pk1 - 0.1, R_OUT + 1) if sx > 0 else (-R_OUT - 1, pk0 + 0.1)  # 6 mm exit hole through the boss and ring wall, so the rod end never rubs the ring
+            ring = ring.cut(cylx(AXLE_EXIT_D / 2, xa, xb, 0, ZC))
+            rr, top = AXLE_EXIT_D / 2, AXLE_EXIT_D / 2 + 0.6
+            hw2 = 2 ** 0.5 * rr - top
+            td2 = [(rr * 0.7071, ZC - rr * 0.7071), (top, ZC - hw2), (top, ZC + hw2), (rr * 0.7071, ZC + rr * 0.7071)]
+            ring = ring.cut(cq.Workplane("YZ").workplane(offset=xa).polyline(td2).close().extrude(xb - xa))
     foot_top = ZC - R_OUT + 2
     ring = ring.union(box(-FOOT_X, FOOT_X, -RING_W / 2, RING_W / 2, FOOT_Z0, foot_top))
     ring = ring.cut(cylz(SPIN_BORE_R, FOOT_Z0 - 1, FOOT_Z0 + FOOT_H + 2.5))         # spindle bore, ends 2.5 mm into the ring wall
@@ -224,7 +256,7 @@ def build_unit():
         pts = [(-r_b * 0.7071, ZC + r_b * 0.7071), (-0.48, ZC + 2.45), (0.48, ZC + 2.45), (r_b * 0.7071, ZC + r_b * 0.7071)]
         car = car.cut(cq.Workplane("YZ").workplane(offset=-R_C - 1).polyline(pts).close().extrude(2 * R_C + 2))
     add(UNIT, "print_mirror_carrier", car, PRINT_C, "tilt", "print")
-    add(UNIT, f"axle_{int(AXLE_D)}mm_steel_rod", cylx(AXLE_D / 2, -R_OUT, R_OUT, 0, ZC), STEEL, "tilt", "steel")
+    add(UNIT, f"axle_{int(AXLE_D)}mm_steel_rod", cylx(AXLE_D / 2, -(AXLE_HALF or R_OUT), (AXLE_HALF or R_OUT), 0, ZC), STEEL, "tilt", "steel")
     add(UNIT, f"mirror_front_{MIR_MAT}_{int(2 * MIR_R)}", cylz(MIR_R, ZC + CAR_T / 2, ZC + CAR_T / 2 + MIR_T), MIRROR, "tilt", MIR_MAT)
     add(UNIT, f"mirror_back_{MIR_MAT}_{int(2 * MIR_R)}", cylz(MIR_R, ZC - CAR_T / 2 - MIR_T, ZC - CAR_T / 2), MIRROR, "tilt", MIR_MAT)
 
@@ -291,9 +323,11 @@ def electronics_box():
     for x in EB_MOUNT_X:                                                         # M5 up into the T-nuts in the rail's bottom slot, head recessed
         b = b.cut(cylz(2.75, EB_ZIN1 - 1, 1.0, x, Y_R)).cut(cylz(5.0, EB_ZIN1 - 1, EB_ZIN1 + 3.5, x, Y_R))
     if DUAL:                                                                     # motor leads through the top plate; power in through the back wall, USB-C on the right wall
-        b = b.cut(cyly(6.0, EB_Y0 - 1, EB_Y0 + w + 1, EB_X0 + 28.0, EB_CUT_Z))      # power in: a 12 mm hole in the back wall (the wall side), so the supply cable leaves the box and runs down the wall
-        b = b.cut(box(EB_X1 - w - 1, EB_X1 + 1, Y_R + 18 - 5.5, Y_R + 18 + 5.5, EB_CUT_Z - 2.3, EB_CUT_Z + 2.3))
-        for xc in (EB_X0 + 14.5, EB_X1 - 11.5):                                  # motor leads leave through the top plate, straight up into the rail's bottom slot: a 13 x 7 mm slot hole (the 4-pin plug passes through), clear of the M5 mounts
+        if EB_DC_WALL > w:                                                       # thicker pad inside the back wall around the socket if its thread needs more than the wall
+            b = b.union(box(ebx(EB_DC_LX) - 10, ebx(EB_DC_LX) + 10, EB_Y0 + w - 0.01, EB_Y0 + EB_DC_WALL + 0.01, EB_CUT_Z - 10, EB_CUT_Z + 10))
+        b = b.cut(cyly(EB_DC_D / 2, EB_Y0 - 1, EB_Y0 + max(w, EB_DC_WALL) + 1, ebx(EB_DC_LX), EB_CUT_Z))      # power in: panel-mount DC socket hole in the back wall (the wall side), so the supply cable leaves the box and runs down the wall
+        b = b.cut(box(EB_X1 - w - 1, EB_X1 + 1, Y_R - 5.5, Y_R + 5.5, EB_ZIN0 + EB_USB_Z - 2.3, EB_ZIN0 + EB_USB_Z + 2.3))     # USB-C panel socket at the XIAO, 11 x 4.6
+        for xc in (ebx(EB_LEAD_LX[0]), ebx(EB_LEAD_LX[1])):                                  # motor leads leave through the top plate, straight up into the rail's bottom slot: a 13 x 7 mm slot hole (the 4-pin plug passes through), clear of the M5 mounts
             b = b.cut(cq.Workplane("XY").workplane(offset=EB_ZIN1 - 1).center(xc, Y_R).slot2D(13.0, 7.0).extrude(8.0))
         return b
     b = b.cut(cylx(6.0, EB_X1 - w - 1, EB_X1 + 1, Y_R - 18, EB_CUT_Z))            # DC barrel jack, 12 mm
@@ -307,6 +341,14 @@ def electronics_lid():
     lid = box(EB_X0, EB_X1, EB_Y0, EB_Y1, EB_Z_LID, EB_ZIN0)
     for (x, y) in EB_CORNERS:
         lid = lid.cut(cylz(1.7, EB_Z_LID - 1, EB_ZIN0 + 1, x, y)).cut(cylz(3.2, EB_Z_LID - 1, EB_Z_LID + 1.5, x, y))
+    if M100:                                                                     # Wago cradles: two thin walls either side of each block (the lever face and the back), the wire faces stay open
+        for lx in EB_WAGO_LX:
+            for sgn in (-1, 1):
+                xa = ebx(lx) + sgn * (WAGO_H / 2 + 0.2)
+                lid = lid.union(box(min(xa, xa + sgn * 2.0), max(xa, xa + sgn * 2.0), Y_R - WAGO_D / 2 - 0.2, Y_R + WAGO_D / 2 + 0.2, EB_ZIN0 - 0.01, EB_ZIN0 + 14.0))
+        for lx in (40.0, 48.0, 56.0, 64.0, 72.0):                                # vent slots under the buck converter
+            lid = lid.cut(box(ebx(lx) - 1.5, ebx(lx) + 1.5, Y_R - 15, Y_R + 15, EB_Z_LID - 1, EB_ZIN0 + 1))
+        return lid
     for (x, y) in BOARD_HOLES:                                                   # perfboard posts with M3 heat-set inserts
         lid = lid.union(cylz(3.5, EB_ZIN0, EB_ZIN0 + BOARD_POST_H, x, y)).cut(cylz(INSERT_D / 2, EB_ZIN0 + 0.5, EB_ZIN0 + BOARD_POST_H + 1, x, y))
     for x in [v + EBX for v in (-10.0, 0.0, 10.0, 20.0, 30.0, 40.0)]:             # vent slots
@@ -344,6 +386,18 @@ def build_frame():
 
     add(ELEC, "print_electronics_box", electronics_box(), PRINT_C, "frame", "print")
     add(ELEC, "print_electronics_lid", electronics_lid(), PRINT_C, "frame", "print")
+    if M100:
+        z0 = EB_ZIN0
+        b0, b1, bd = EB_BB
+        add(ELEC, "placeholder_breadboard_82x45", box(ebx(b0), ebx(b1), Y_R - bd / 2, Y_R + bd / 2, z0, z0 + BB_T), "#e8e4d8", "frame", "ph")
+        add(ELEC, "placeholder_xiao_esp32s3_21x17", box(ebx(b1 - 21), ebx(b1), Y_R - 8.75, Y_R + 8.75, z0 + BB_T + 2.5, z0 + BB_T + 6.5), "#2e6f4e", "frame", "ph")
+        for k in range(MOTORS):
+            x0 = ebx(b0 + 4 + k * 28.0)
+            add(ELEC, f"placeholder_tmc2209_25x20x16_{k + 1}", box(x0, x0 + 25, Y_R - 10, Y_R + 10, z0 + BB_T, z0 + BB_T + 16), "#2e6f4e", "frame", "ph")
+        add(ELEC, "placeholder_buck_45x32x14", box(ebx(EB_BUCK[0]), ebx(EB_BUCK[1]), Y_R - EB_BUCK[2] / 2, Y_R + EB_BUCK[2] / 2, z0, z0 + 14.0), "#2e6f4e", "frame", "ph")
+        for k, lx in enumerate(EB_WAGO_LX):
+            add(ELEC, f"placeholder_wago_221_415_{k + 1}", box(ebx(lx) - WAGO_H / 2, ebx(lx) + WAGO_H / 2, Y_R - WAGO_D / 2, Y_R + WAGO_D / 2, z0, z0 + WAGO_L), "#d9d2c0", "frame", "ph")
+        return
     zb = EB_ZIN0 + BOARD_POST_H
     add(ELEC, "placeholder_perfboard_70x90", box(BOARD_CX - BOARD_L / 2, BOARD_CX + BOARD_L / 2, Y_R - BOARD_W / 2, Y_R + BOARD_W / 2, zb, zb + BOARD_T), "#2e6f4e", "frame", "ph")
     add(ELEC, "placeholder_esp32_55x28x22", box(BOARD_CX - 42, BOARD_CX + 13, Y_R - 33, Y_R - 5, zb + BOARD_T, zb + BOARD_T + 22), "#2e6f4e", "frame", "ph")
@@ -460,8 +514,12 @@ def assemble(poses, yup):
     return root
 
 
-def write_bom():
-    U, R = N * ROWS, MOTORS                                    # units, motors (= rows, or 2 for the dual layout)
+def bom_rows(n):
+    """Rows for n mirrors per row (100 mm: 6 is the main build, 8 is the --eight alt, shown as a second quantity column in the BOM)."""
+    U, R = n * ROWS, MOTORS                                    # units, motors (= rows, or 2 for the dual layout)
+    NMn = n // 2 if DUAL else n                                # units per motor
+    RAIL_Ln = ((n - 1) * PITCH + (85.0 if DUAL else 70.0)) - RAIL_X0 if M100 else RAIL_L
+    run_m = ((n - 1) * PITCH / 2 - 16.0 - 46.0 - RAIL_X0) / 1000 if DUAL else 0.0   # cable run from the box end wall to the rail end, m
     SO = len(STANDOFF_X) * ROWS                                # wall standoffs, three per rail
     BLK_L = 5 * -(-int(BLK_Z1 - 18) // 5)                      # M5 screw length for the blocks and brackets (25, or 35 for 100 mm)
     multi = MOTORS > 1
@@ -474,12 +532,12 @@ def write_bom():
     ]
     rows += [("print", "Wall standoff: print with the flange on the bed", SO, f"{len(STANDOFF_X)} per rail; holds the rail off the wall; M5 into a back-slot T-nut")]
     rows += [
-        ("print", "Electronics box: print upside down on the flat top plate; 124 x 78 x 44 mm, hangs under the bottom rail", 1, "inside 118 x 72 x 35 mm"),
-        ("print", "Electronics box lid: print flat; carries the perfboard posts", 1, ""),
-        ("buy", f"Aluminium extrusion 2020 (T-slot, 6 mm slot, 20 x 20 mm), cut to {int(RAIL_L)} mm", ROWS, "one rail per row; deburr the ends" if ROWS > 1 else "the rail; deburr the ends"),
+        ("print", (f"Electronics box: print upside down on the flat top plate; {EB_X1 - EB_X0:.0f} x {EB_Y1 - EB_Y0:.0f} x 44 mm, hangs under the rail" if M100 else "Electronics box: print upside down on the flat top plate; 124 x 78 x 44 mm, hangs under the bottom rail"), 1, (f"inside {EB_IN_X:.0f} x {EB_IN_Y:.0f} x 35 mm" if M100 else "inside 118 x 72 x 35 mm")),
+        ("print", ("Electronics box lid: print flat; two cradles hold the Wagos upright, the breadboard sticks to the floor" if M100 else "Electronics box lid: print flat; carries the perfboard posts"), 1, ""),
+        ("buy", f"Aluminium extrusion 2020 (T-slot, 6 mm slot, 20 x 20 mm), cut to {int(RAIL_Ln)} mm", ROWS, "one rail per row; deburr the ends" if ROWS > 1 else "the rail; deburr the ends"),
     ]
     rows += [
-        ("buy", "NEMA 17 stepper 42/60 (The Pi Hut, 60 mm body): 1.68 A, 0.64 N m holding, 5 mm D shaft, 0.5 kg", R, ("one per motor; " if multi else "") + "check the shaft length (24 mm assumed) and the front-face thread depth" + (f"; each motor drives {NM} units, see the doc" if M100 else "")),
+        ("buy", "NEMA 17 stepper 42/60 (The Pi Hut, 60 mm body): 1.68 A, 0.64 N m holding, 5 mm D shaft, 0.5 kg", R, ("one per motor; " if multi else "") + "check the shaft length (24 mm assumed) and the front-face thread depth" + (f"; each motor drives {NMn} units, see the doc" if M100 else "")),
         ("buy", "Adafruit TMC2209 stepper driver breakout (DigiKey 1528-6121-ND); set the current about 1.2 to 1.5 A", R + 1, "one per motor plus a spare" if multi else "one plus a spare"),
         ("buy", "Aluminium SMT heat sink 6.35 x 6.35 x 3.8 mm (0.25 x 0.25 x 0.15 in), 10 pack, stuck on each TMC2209 chip", R + 1, "one per driver; check it fits the chip"),
         ("buy", f"ESP32 dev board (38-pin); {str(MOTORS) + ' step/dir outputs' if multi else 'one step/dir output'} from the RMT or timers, acceleration limited", 1, "serial or OSC control from Max is possible"),
@@ -494,41 +552,51 @@ def write_bom():
         ]
     rows += [
         ("buy", "Wire 22 AWG silicone red/black and 26 AWG logic, ferrules, heat shrink, cable ties", 1, "set"),
-        ("buy", "Perfboard 70 x 90 mm, mounting holes 82 x 62 mm, with female header sockets for the ESP32 and drivers", 1, "check the hole spacing of your board"),
-        ("buy", "Female DC power adapter, 2.1 mm jack to screw terminal block (The Pi Hut)", 1, "no panel flange: it sits behind the 12 mm hole in the " + ("back (wall side)" if DUAL else "right-hand") + " wall, so glue or clip it in; check the socket diameter" + ("; the box is only 31 mm from the wall, so a long barrel plug will not fit: use a right-angle plug, or cut the plug off the supply lead and wire it to the terminal directly" if DUAL else "")),
+        *([("buy", "Solderless breadboard, half size with one power strip removed (82 x 45 mm), adhesive back", 1, "stuck flat to the box floor; carries the XIAO ESP32-S3, two TMC2209 drivers and a 10k resistor"),
+           ("buy", "DC-DC buck converter 24 V to 5 V, 45 x 32 mm", 1, "feeds the XIAO 5V pin; lies flat in the box, wires on a long side")] if M100 else
+          [("buy", "Perfboard 70 x 90 mm, mounting holes 82 x 62 mm, with female header sockets for the ESP32 and drivers", 1, "check the hole spacing of your board")]),
+        *([("buy", "Panel-mount DC socket for a 5.5 x 2.1 mm plug (24 V in)", 1, f"part not chosen yet; the hole is {EB_DC_D:g} mm through a {EB_DC_WALL:g} mm back wall (both parameters in the script, EB_DC_D and EB_DC_WALL); room behind it for the nut")] if M100 else
+          [("buy", "Female DC power adapter, 2.1 mm jack to screw terminal block (The Pi Hut)", 1, "no panel flange: it sits behind the 12 mm hole in the " + ("back (wall side)" if DUAL else "right-hand") + " wall, so glue or clip it in; check the socket diameter" + ("; the box is only 31 mm from the wall, so a long barrel plug will not fit: use a right-angle plug, or cut the plug off the supply lead and wire it to the terminal directly" if DUAL else ""))]),
         ("buy", "USB-C panel-mount extension cable (11 x 4.6 mm slot)", 1, "right-hand end wall of the box"),
         *([] if M100 else [("buy", "Rubber grommet for a 14 mm hole", R, "one per motor lead, " + ("one in each end wall of the box" if DUAL else "left-hand wall of the box"))]),
         ("buy", f"GT2 20T {int(SPIN_D)} mm bore double-head pulley for 6 mm belt" + (" (Technobots 6001-073)" if M100 else " (Technobots 6001-071)"), U + 2, "two toothed bands, set screw in the centre boss, about 28 mm long (check on arrival); 2 spare"),
         ("buy", "GT2 20T 5 mm bore single pulley for 6 mm belt (Technobots 6001-002)", R + 1, "motor pulleys plus a spare" if multi else "motor pulley plus a spare"),
-        ("buy", f"GT2 6 mm closed belt, {320 if M100 else 200} mm" + (" (Technobots 6001-442)" if M100 else " (Technobots 6001-376)"), U + 2, f"{NM} loops per motor; 2 spare"),
+        ("buy", f"GT2 6 mm closed belt, {320 if M100 else 200} mm" + (" (Technobots 6001-442)" if M100 else " (Technobots 6001-376)"), U + 2, f"{NMn} loops per motor; 2 spare"),
         ("buy", f"Bearing {BRG_S_NAME.upper()} ({BRG_S[0]:g} x {BRG_S[1]:g} x {BRG_S[2]:g}), spindles", 2 * U + 4, "2 per unit plus 4 spare"),
         ("buy", f"Bearing {BRG_H_NAME.upper()} ({BRG[0]:g} x {BRG[1]:g} x {BRG[2]:g}), mirror hinges", 2 * U + 4, "2 per unit plus 4 spare"),
         ("buy", (f"Stainless rod 8 mm x 300 mm (OFFCUP, pack of 2), each cut into 3 spindles of {round(SPIN_LEN)} mm" if M100 else "Stainless rod 5 mm x 300 mm (AOOSU, pack of 4), each cut into 4 spindles of 67 mm"), (-(-U // 3) if M100 else -(-U // 4)), "flat ground for the grub screws; drawn rod can run oversize, test-fit a bearing"),
-        ("buy", f"Stainless rod {int(AXLE_D)} mm, cut into {U} hinge axles of {round(2 * R_OUT)} mm", (-(-U // (1000 // (round(2 * R_OUT) + 2))) if M100 else (2 if multi else 1)), "glue into the carrier" + ("; already owned, about 950 mm needed" if M100 else "")),
+        ("buy", f"Stainless rod {int(AXLE_D)} mm, cut into {U} hinge axles of {round(2 * (AXLE_HALF or R_OUT))} mm", (-(-U // (1000 // (round(2 * (AXLE_HALF or R_OUT)) + 2))) if M100 else (2 if multi else 1)), "glue into the carrier" + ("; already owned, about 950 mm needed" if M100 else "")),
         ("buy", ("Acrylic mirror 100 mm round, 1.5 mm thick (cut from sheet or bought as discs)" if M100 else "Glass mirror 50 mm round, 1 mm thick, seamed edges, rear silvered"), 2 * U + 4, "2 per unit plus 4 spare; " + ("glued flat to the carrier faces, protective film left on until the end" if M100 else "mount with mirror-safe tape or neutral silicone")),
         ("buy", "M5 slide-in T-nut for a 6 mm slot (20 series, zinc plated)", 2 * U + 2 * R + SO + 2 + 4,
          "2 per unit, 2 per motor bracket, 1 per standoff (rail back slot), 2 for the box, spares; load them into the slot from the rail end before building"),
         ("buy", f"M5 x {BLK_L} button head screw, stainless", 2 * U + 2 * R + 6 + (SO + 1 if BLK_L == 35 and not M100 else 0), "2 per unit (block into the T-nuts) plus 2 per motor bracket, spares" + ("; also 1 per standoff and 1 spare" if BLK_L == 35 and not M100 else "")),
         *([] if BLK_L == 35 and not M100 else [("buy", "M5 x 50 button head screw, stainless" if M100 else "M5 x 35 screw, stainless", SO + 1, "1 per standoff, from the wall side into the back-slot T-nut (head 15 mm deep in the standoff); 1 spare")]),
         ("buy", f"M5 x {8 if M100 else 12} button head screw, stainless", 2 + 4, "2 hold the electronics box to the rail; 4 spare" + ("; 8 mm, not 12: the head seats 2.5 mm below the rail and a longer screw bottoms on the slot floor before it clamps" if M100 else "")),
-        *([("buy", "Slot cover strip, black PVC, 20 series, 1000 mm (Ooznest SCO-20-B-1000)", 1, "press into the rail's bottom slot over the two motor cables: about 0.51 m each side from the box to the rail ends, 1.03 m in all, so one 1000 mm length cut in two leaves a small gap in the middle under the box; check the cover's depth against the cable")] if M100 else []),
+        *([("buy", "Slot cover strip, black PVC, 20 series, 1000 mm (Ooznest SCO-20-B-1000)", 1, f"press into the rail's bottom slot over the two motor cables: about {run_m:.2f} m each side from the box to the rail ends, {2 * run_m:.2f} m in all, so one 1000 mm length cut in two " + ("leaves a small gap in the middle under the box" if 2 * run_m > 1.0 else "covers both runs") + "; check the cover's depth against the cable")] if M100 else []),
         *([("buy", "M8 shim washer 8 x 12 x 1 mm, stainless (DIN 988 or similar)", U + 2, "1 per spindle as a spacer on the inner race of the upper bearing; spares; 12 mm OD sits on the inner race only, clear of the 608ZZ shield and outer race; price TBC")] if M100 else
           [("buy", "M5 panel/slot washer 12.5 x 5.3 x 1 mm, stainless", 2 * U + 2, "2 per spindle as a 2 mm spacer on the inner race of the upper bearing; spares; 12.5 mm just clears the bearing's outer-race shoulder (about 13 mm), so check it does not rub")]),
         ("buy", "M3 x 6 socket cap head screw, stainless", 4 * R + 2, "4 per motor into the front face; check the thread depth first"),
         ("buy", f"M{4 if M100 else 3} x {10 if M100 else 5} cup-point grub screw, stainless", U + 2, "1 per ring foot, clamps the ring to the spindle on a flat; thread-lock" + ("; 10 mm so it passes the 6 mm insert and the open hole to reach the rod (a 6 mm grub would not reach)" if M100 else "")),
         ("buy", "M3 x 8 pan head screw, stainless", 6, "4 hold the electronics box lid; 2 spare"),
-        ("buy", "M3 x 6 pan head screw, stainless", 6, "4 hold the perfboard to the lid posts; 2 spare"),
+        *([] if M100 else [("buy", "M3 x 6 pan head screw, stainless", 6, "4 hold the perfboard to the lid posts; 2 spare")]),
         ("buy", "M4 x 40 wall screw with plug to suit your wall", 2 * SO + 2, "2 per standoff flange; choose the plug for the wall type"),
-        *([("buy", "Heat-set insert M4 x 6", U + 2, "1 per ring foot, spares"), ("buy", "Heat-set insert M3 x 5.7", 8 + 4, "4 box corners, 4 perfboard posts, spares")] if M100 else
+        *([("buy", "Heat-set insert M4 x 6", U + 2, "1 per ring foot, spares"), ("buy", "Heat-set insert M3 x 5.7", 4 + 2, "4 box corners, spares")] if M100 else
           [("buy", "Heat-set insert M3 x 5.7", U + 8 + 4, "1 per ring foot, 4 box corners, 4 perfboard posts, spares")]),
         ("buy", "Thread-locking compound (medium)", 1, "grub screws and pulley set screws"),
         ("buy", "Cyanoacrylate glue or retaining compound", 1, "glue the hinge axles into the carriers"),
-        *([("buy", "Double-sided foam mounting tape 1 mm and neutral-cure silicone", 1, "mirrors onto the carriers")] if not M100 else [("buy", "Double-sided acrylic foam tape (VHB type) 1 mm thick x 3 mm wide, 5 m", 1, "for the 3 mm carrier rims: about 4.8 m for 16 faces; a 6 mm tape would hang over the rim"),
-           ("buy", "Double-sided acrylic foam tape (VHB type) 1 mm thick x 6 mm wide, 2 m", 1, "for the cross bars: about 1.5 m for 16 faces"),
+        *([("buy", "Double-sided foam mounting tape 1 mm and neutral-cure silicone", 1, "mirrors onto the carriers")] if not M100 else [("buy", "Double-sided acrylic foam tape (VHB type) 1 mm thick x 3 mm wide, 5 m", 1, f"for the 3 mm carrier rims: about {0.3 * 2 * U:.1f} m for {2 * U} faces; a 6 mm tape would hang over the rim"),
+           ("buy", "Double-sided acrylic foam tape (VHB type) 1 mm thick x 6 mm wide, 2 m", 1, f"for the cross bars: about {0.094 * 2 * U:.1f} m for {2 * U} faces"),
            ("buy", "Clear 2-part epoxy (5 minute, syringe)", 1, "a few spots to make the disc bond permanent; test on a scrap disc first, CA glue can craze acrylic")]),
-        *([("buy", "Filament PLA, grams used", 550, "estimate from the STEP volumes (rings, carriers, standoffs, box, lid) with a 0.6 wall and infill factor; not a slicer figure"),
-           ("buy", "Filament PLA-CF, grams used", 370, "estimate: spindle blocks and motor brackets; if only the brackets are PLA-CF it is about 120 g and the blocks move to PLA (about 800 g)")] if M100 else []),
+        *([("buy", "Filament PLA, grams used", 550 if n == 8 else 470, "estimate from the STEP volumes (rings, carriers, standoffs, box, lid) with a 0.6 wall and infill factor; not a slicer figure"),
+           ("buy", "Filament PLA-CF, grams used", 370 if n == 8 else 305, "estimate: spindle blocks and motor brackets; if only the brackets are PLA-CF it is about 120 g and the blocks move to PLA (about 800 g)")] if M100 else []),
     ]
+    return rows
+
+
+def write_bom():
+    rows = bom_rows(N)
+    rows6 = bom_rows(8) if M100 and DUAL else None                  # 100 mm: a second quantity column for the eight-mirror alt (name kept from the old layout)
+    assert rows6 is None or len(rows6) == len(rows)
     VAT = 1.2
     # (substring of the item, unit price per piece ex VAT, quantity in the 3x8 baskets, pack size, supplier). Technobots and the extrusion shop show ex VAT; Amazon UK
     # and the Pi Hut show inc VAT, so those are divided by 1.2. For the single-row variant the quantity bought is the need rounded up to whole packs.
@@ -577,8 +645,12 @@ def write_bom():
             ("Thread-locking compound", 0.0, 1, 1, "owned"),
             ("Cyanoacrylate glue", 0.0, 1, 1, "owned"),
         ]
-    out, total = [], 0.0
-    for pr, item, qty, note in rows:
+    out, total, six = [], 0.0, []
+    for idx, (pr, item, qty, note) in enumerate(rows):
+        q6, n6 = "", ""
+        if rows6:
+            q6 = rows6[idx][2]
+            n6 = rows6[idx][1] if rows6[idx][1] != item else (rows6[idx][3] if rows6[idx][3] != note else "")
         hit = next((x for x in prices if x[0] in item), None)
         if hit:
             _, unit, bought3, pack, sup = hit
@@ -588,18 +660,26 @@ def write_bom():
             if bought < qty:
                 note += f"; basket covers {bought} of {qty}, order {qty - bought} more"
             out.append((pr, item, qty, f"{unit:.3f}", bought, f"{cost:.2f}", sup, note))
+            six.append((q6, n6))
         else:
-            if M100 and item.startswith(("4-pin 2.54 mm motor extension", "Wire 22 AWG", "Perfboard", "USB-C panel", "Rubber grommet")):
+            if M100 and item.startswith(("4-pin 2.54 mm motor extension", "Wire 22 AWG", "Perfboard", "Panel-mount DC", "Solderless breadboard", "DC-DC buck", "USB-C panel", "Rubber grommet")):
                 note += "; price TBC (£0 in the total for now)"
             out.append((pr, item, qty, "", "", "", "", note))
+            six.append((q6, n6))
     out.append(("shipping", "Technobots UK shipping, zone 1 (ex VAT, from the 3 x 8 cart; assumed the same)", "", "", "", "5.95", "Technobots", "other shops' delivery not included"))
     total += 5.95
+    six.append(("", ""))
     out.append(("total", "Priced lines above, ex VAT, with Technobots shipping", "", "", "", f"{total:.2f}", "", "lines with no price are not in this total; owned items counted at 0"))
+    six.append(("", ""))
     BOMF.parent.mkdir(exist_ok=True)
     with open(BOMF, "w", newline="") as f:
         w = csv.writer(f)
-        w.writerow(["process", "item", "qty_needed", "unit_ex_vat_gbp", "qty_bought", "cost_ex_vat_gbp", "supplier", "note"])
-        w.writerows(out)
+        if rows6:                                               # extra columns: quantities for the eight-mirror alt (qty_needed is the six-mirror build), and what else differs
+            w.writerow(["process", "item", "qty_needed", "qty_needed_8_mirror", "unit_ex_vat_gbp", "qty_bought", "cost_ex_vat_gbp", "supplier", "note", "eight_mirror_change"])
+            w.writerows([(o[0], o[1], o[2], q, *o[3:], c) for o, (q, c) in zip(out, six)])
+        else:
+            w.writerow(["process", "item", "qty_needed", "unit_ex_vat_gbp", "qty_bought", "cost_ex_vat_gbp", "supplier", "note"])
+            w.writerows(out)
     print("Wrote", BOMF, f"(priced lines total {total:.2f} GBP ex VAT)")
 
 
@@ -610,6 +690,7 @@ def main():
     ap.add_argument("--seed", type=int, default=3)
     ap.add_argument("--single10", action="store_true")
     ap.add_argument("--mirror100", action="store_true")
+    ap.add_argument("--eight", action="store_true")
     a = ap.parse_args()
     build()
     i_lo, i_hi = inertia_unit(0), inertia_unit(90)
@@ -651,7 +732,8 @@ def main():
     OUTD.mkdir(parents=True, exist_ok=True)
     IMG.mkdir(parents=True, exist_ok=True)
     export_all(a.up == "y")
-    write_bom()
+    if not EIGHT:
+        write_bom()
     P0 = poses_same_angle(a.seed)
     assemble(P0, a.up == "y").save(str(OUTD / f"{TAG}-assembly.step"))
     print("Wrote", OUTD / f"{TAG}-assembly.step")

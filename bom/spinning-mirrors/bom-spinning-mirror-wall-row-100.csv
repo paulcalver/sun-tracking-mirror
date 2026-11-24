@@ -1,52 +1,52 @@
-process,item,qty_needed,unit_ex_vat_gbp,qty_bought,cost_ex_vat_gbp,supplier,note
-print,"Ring with foot: matt PLA, print flat with the +Y face up, 4 walls",8,,,,,ream the two 9.25 mm bearing pockets (slip fit; a drop of retaining compound on the outer race holds each bearing) and the 8.1 mm spindle bore
-print,"Mirror carrier: print flat, 4 walls",8,,,,,"rimless: the rim edge is 0.5 mm inside the disc; discs are glued on, see the doc; a solid 20 x 14 mm weight pad on one edge makes the mirror hang flat at rest; axle bore is 4.15 mm with a teardrop roof, glue the 4 mm rod in, ream with a 4.0 mm drill if it is tight"
-print,"Spindle bearing block: print upright, 4 walls (matt PLA, or PLA-CF for less creep under belt tension)",8,,,,,ream the two 22 mm pockets so a 608ZZ presses in
-print,"Motor bracket: print upside down on its flat top face in PLA-CF (stiffer, creeps less; it carries the motor and belt pull and sits against the warm motor face)",2,,,,,one per motor; the right-hand one (print_motor_bracket_2) is the mirror image
-print,Wall standoff: print with the flange on the bed,3,,,,,3 per rail; holds the rail off the wall; M5 into a back-slot T-nut
-print,"Electronics box: print upside down on the flat top plate; 124 x 78 x 44 mm, hangs under the bottom rail",1,,,,,inside 118 x 72 x 35 mm
-print,Electronics box lid: print flat; carries the perfboard posts,1,,,,,
-buy,"Aluminium extrusion 2020 (T-slot, 6 mm slot, 20 x 20 mm), cut to 1150 mm",1,12.890,1,12.89,"extrusion shop, AEP-TV-2020-B-CTS (12.89 is the basket price for 1180 mm, so 1150 should be slightly less)",the rail; deburr the ends
-buy,"NEMA 17 stepper 42/60 (The Pi Hut, 60 mm body): 1.68 A, 0.64 N m holding, 5 mm D shaft, 0.5 kg",2,15.000,2,30.00,"The Pi Hut (3 for 54.00 inc VAT, divided by 1.2)","one per motor; check the shaft length (24 mm assumed) and the front-face thread depth; each motor drives 4 units, see the doc"
-buy,Adafruit TMC2209 stepper driver breakout (DigiKey 1528-6121-ND); set the current about 1.2 to 1.5 A,3,6.690,3,20.07,DigiKey UK 1528-6121-ND (ex VAT),one per motor plus a spare
-buy,"Aluminium SMT heat sink 6.35 x 6.35 x 3.8 mm (0.25 x 0.25 x 0.15 in), 10 pack, stuck on each TMC2209 chip",3,0.400,10,4.00,The Pi Hut (10-pack 4.80 inc VAT),one per driver; check it fits the chip
-buy,"ESP32 dev board (38-pin); 2 step/dir outputs from the RMT or timers, acceleration limited",1,0.000,1,0.00,owned,serial or OSC control from Max is possible
-buy,"24 V 5 A DC supply, 5.5 x 2.1 mm plug",1,0.000,1,0.00,owned (bench supply),2 motors at 1.2 to 1.5 A
-buy,Inline fuse holder with 5 A blade fuses,1,0.000,1,0.00,owned,fuse in the 24 V lead
-buy,"Electrolytic capacitor 100 uF, 35 V or higher",3,0.000,3,0.00,owned,"one across each driver's + and GND terminals, plus a spare"
-buy,Lever connectors 5-way (Wago 221-415) for 24 V and GND distribution,2,0.000,2,0.00,owned,
-buy,4-pin 2.54 mm motor extension cable: 0.5 m (x2): the leads must reach the box from each end,3,,,,,the motor leads are short; run extensions up the wall; price TBC (£0 in the total for now)
-buy,"Wire 22 AWG silicone red/black and 26 AWG logic, ferrules, heat shrink, cable ties",1,,,,,set; price TBC (£0 in the total for now)
-buy,"Perfboard 70 x 90 mm, mounting holes 82 x 62 mm, with female header sockets for the ESP32 and drivers",1,,,,,check the hole spacing of your board; price TBC (£0 in the total for now)
-buy,"Female DC power adapter, 2.1 mm jack to screw terminal block (The Pi Hut)",1,1.250,1,1.25,The Pi Hut (3 for 4.50 inc VAT),"no panel flange: it sits behind the 12 mm hole in the back (wall side) wall, so glue or clip it in; check the socket diameter; the box is only 31 mm from the wall, so a long barrel plug will not fit: use a right-angle plug, or cut the plug off the supply lead and wire it to the terminal directly"
-buy,USB-C panel-mount extension cable (11 x 4.6 mm slot),1,,,,,right-hand end wall of the box; price TBC (£0 in the total for now)
-buy,GT2 20T 8 mm bore double-head pulley for 6 mm belt (Technobots 6001-073),10,1.470,10,14.70,Technobots 6001-073,"two toothed bands, set screw in the centre boss, about 28 mm long (check on arrival); 2 spare"
-buy,GT2 20T 5 mm bore single pulley for 6 mm belt (Technobots 6001-002),3,1.480,3,4.44,Technobots 6001-002,motor pulleys plus a spare
-buy,"GT2 6 mm closed belt, 320 mm (Technobots 6001-442)",10,1.840,10,18.40,Technobots 6001-442,4 loops per motor; 2 spare
-buy,"Bearing 608ZZ (8 x 22 x 7), spindles",20,0.691,20,13.82,"Amazon UK, sourcing map 10-packs (inc VAT, divided by 1.2)",2 per unit plus 4 spare
-buy,"Bearing 684ZZ (4 x 9 x 4), mirror hinges",20,0.362,20,7.24,"Amazon UK, sourcing map 20-pack (inc VAT, divided by 1.2)",2 per unit plus 4 spare
-buy,"Stainless rod 8 mm x 300 mm (OFFCUP, pack of 2), each cut into 3 spindles of 79 mm",3,2.913,4,11.65,"Amazon UK, OFFCUP 2-packs (inc VAT, divided by 1.2)","flat ground for the grub screws; drawn rod can run oversize, test-fit a bearing"
-buy,"Stainless rod 4 mm, cut into 8 hinge axles of 118 mm",1,,,,,"glue into the carrier; already owned, about 950 mm needed"
-buy,"Acrylic mirror 100 mm round, 1.5 mm thick (cut from sheet or bought as discs)",20,0.500,20,10.00,"owner's quote, 20 discs for 10.00 (VAT treatment not stated, counted as ex VAT)","2 per unit plus 4 spare; glued flat to the carrier faces, protective film left on until the end"
-buy,"M5 slide-in T-nut for a 6 mm slot (20 series, zinc plated)",29,0.653,32,20.90,"extrusion shop, SIN-20-M5 (the 32-off price)","2 per unit, 2 per motor bracket, 1 per standoff (rail back slot), 2 for the box, spares; load them into the slot from the rail end before building"
-buy,"M5 x 35 button head screw, stainless",26,0.505,33,16.67,"extrusion shop, BHB-M5-35","2 per unit (block into the T-nuts) plus 2 per motor bracket, spares"
-buy,"M5 x 50 button head screw, stainless",4,,,,,"1 per standoff, from the wall side into the back-slot T-nut (head 15 mm deep in the standoff); 1 spare"
-buy,"M5 x 8 button head screw, stainless",6,,,,,"2 hold the electronics box to the rail; 4 spare; 8 mm, not 12: the head seats 2.5 mm below the rail and a longer screw bottoms on the slot floor before it clamps"
-buy,"Slot cover strip, black PVC, 20 series, 1000 mm (Ooznest SCO-20-B-1000)",1,1.370,1,1.37,"Ooznest SCO-20-B-1000 (1000 mm, black; check whether the 1.37 is ex VAT)","press into the rail's bottom slot over the two motor cables: about 0.51 m each side from the box to the rail ends, 1.03 m in all, so one 1000 mm length cut in two leaves a small gap in the middle under the box; check the cover's depth against the cable"
-buy,"M8 shim washer 8 x 12 x 1 mm, stainless (DIN 988 or similar)",10,,,,,"1 per spindle as a spacer on the inner race of the upper bearing; spares; 12 mm OD sits on the inner race only, clear of the 608ZZ shield and outer race; price TBC"
-buy,"M3 x 6 socket cap head screw, stainless",10,0.154,10,1.54,"extrusion shop, CHB-M3-6",4 per motor into the front face; check the thread depth first
-buy,"M4 x 10 cup-point grub screw, stainless",10,,,,,"1 per ring foot, clamps the ring to the spindle on a flat; thread-lock; 10 mm so it passes the 6 mm insert and the open hole to reach the rod (a 6 mm grub would not reach)"
-buy,"M3 x 8 pan head screw, stainless",6,,,,,4 hold the electronics box lid; 2 spare
-buy,"M3 x 6 pan head screw, stainless",6,,,,,4 hold the perfboard to the lid posts; 2 spare
-buy,M4 x 40 wall screw with plug to suit your wall,8,,,,,2 per standoff flange; choose the plug for the wall type
-buy,Heat-set insert M4 x 6,10,0.069,60,4.14,"Amazon UK, mawmuaw M4x4x6 60-pack (inc VAT, divided by 1.2)","1 per ring foot, spares"
-buy,Heat-set insert M3 x 5.7,12,,,,,"4 box corners, 4 perfboard posts, spares"
-buy,Thread-locking compound (medium),1,0.000,1,0.00,owned,grub screws and pulley set screws
-buy,Cyanoacrylate glue or retaining compound,1,0.000,1,0.00,owned,glue the hinge axles into the carriers
-buy,"Double-sided acrylic foam tape (VHB type) 1 mm thick x 3 mm wide, 5 m",1,,,,,for the 3 mm carrier rims: about 4.8 m for 16 faces; a 6 mm tape would hang over the rim
-buy,"Double-sided acrylic foam tape (VHB type) 1 mm thick x 6 mm wide, 2 m",1,,,,,for the cross bars: about 1.5 m for 16 faces
-buy,"Clear 2-part epoxy (5 minute, syringe)",1,,,,,"a few spots to make the disc bond permanent; test on a scrap disc first, CA glue can craze acrylic"
-buy,"Filament PLA, grams used",550,0.009,550,5.13,"11.19 per kg inc VAT, divided by 1.2; cost of the weight used, not the spool","estimate from the STEP volumes (rings, carriers, standoffs, box, lid) with a 0.6 wall and infill factor; not a slicer figure"
-buy,"Filament PLA-CF, grams used",370,0.025,370,9.25,"29.99 per kg inc VAT, divided by 1.2; cost of the weight used, not the spool",estimate: spindle blocks and motor brackets; if only the brackets are PLA-CF it is about 120 g and the blocks move to PLA (about 800 g)
-shipping,"Technobots UK shipping, zone 1 (ex VAT, from the 3 x 8 cart; assumed the same)",,,,5.95,Technobots,other shops' delivery not included
-total,"Priced lines above, ex VAT, with Technobots shipping",,,,213.41,,lines with no price are not in this total; owned items counted at 0
+process,item,qty_needed,qty_needed_8_mirror,unit_ex_vat_gbp,qty_bought,cost_ex_vat_gbp,supplier,note,eight_mirror_change
+print,"Ring with foot: matt PLA, print flat with the +Y face up, 4 walls",6,8,,,,,ream the two 9.25 mm bearing pockets (slip fit; a drop of retaining compound on the outer race holds each bearing) and the 8.1 mm spindle bore,
+print,"Mirror carrier: print flat, 4 walls",6,8,,,,,"rimless: the rim edge is 0.5 mm inside the disc; discs are glued on, see the doc; a solid 20 x 14 mm weight pad on one edge makes the mirror hang flat at rest; axle bore is 4.15 mm with a teardrop roof, glue the 4 mm rod in, ream with a 4.0 mm drill if it is tight",
+print,"Spindle bearing block: print upright, 4 walls (matt PLA, or PLA-CF for less creep under belt tension)",6,8,,,,,ream the two 22 mm pockets so a 608ZZ presses in,
+print,"Motor bracket: print upside down on its flat top face in PLA-CF (stiffer, creeps less; it carries the motor and belt pull and sits against the warm motor face)",2,2,,,,,one per motor; the right-hand one (print_motor_bracket_2) is the mirror image,
+print,Wall standoff: print with the flange on the bed,3,3,,,,,3 per rail; holds the rail off the wall; M5 into a back-slot T-nut,
+print,"Electronics box: print upside down on the flat top plate; 236 x 61 x 44 mm, hangs under the rail",1,1,,,,,inside 230 x 55 x 35 mm,
+print,"Electronics box lid: print flat; two cradles hold the Wagos upright, the breadboard sticks to the floor",1,1,,,,,,
+buy,"Aluminium extrusion 2020 (T-slot, 6 mm slot, 20 x 20 mm), cut to 870 mm",1,1,,,,,the rail; deburr the ends,"Aluminium extrusion 2020 (T-slot, 6 mm slot, 20 x 20 mm), cut to 1150 mm"
+buy,"NEMA 17 stepper 42/60 (The Pi Hut, 60 mm body): 1.68 A, 0.64 N m holding, 5 mm D shaft, 0.5 kg",2,2,15.000,2,30.00,"The Pi Hut (3 for 54.00 inc VAT, divided by 1.2)","one per motor; check the shaft length (24 mm assumed) and the front-face thread depth; each motor drives 3 units, see the doc","one per motor; check the shaft length (24 mm assumed) and the front-face thread depth; each motor drives 4 units, see the doc"
+buy,Adafruit TMC2209 stepper driver breakout (DigiKey 1528-6121-ND); set the current about 1.2 to 1.5 A,3,3,6.690,3,20.07,DigiKey UK 1528-6121-ND (ex VAT),one per motor plus a spare,
+buy,"Aluminium SMT heat sink 6.35 x 6.35 x 3.8 mm (0.25 x 0.25 x 0.15 in), 10 pack, stuck on each TMC2209 chip",3,3,0.400,10,4.00,The Pi Hut (10-pack 4.80 inc VAT),one per driver; check it fits the chip,
+buy,"ESP32 dev board (38-pin); 2 step/dir outputs from the RMT or timers, acceleration limited",1,1,0.000,1,0.00,owned,serial or OSC control from Max is possible,
+buy,"24 V 5 A DC supply, 5.5 x 2.1 mm plug",1,1,0.000,1,0.00,owned (bench supply),2 motors at 1.2 to 1.5 A,
+buy,Inline fuse holder with 5 A blade fuses,1,1,0.000,1,0.00,owned,fuse in the 24 V lead,
+buy,"Electrolytic capacitor 100 uF, 35 V or higher",3,3,0.000,3,0.00,owned,"one across each driver's + and GND terminals, plus a spare",
+buy,Lever connectors 5-way (Wago 221-415) for 24 V and GND distribution,2,2,0.000,2,0.00,owned,,
+buy,4-pin 2.54 mm motor extension cable: 0.5 m (x2): the leads must reach the box from each end,3,3,,,,,the motor leads are short; run extensions up the wall; price TBC (£0 in the total for now),
+buy,"Wire 22 AWG silicone red/black and 26 AWG logic, ferrules, heat shrink, cable ties",1,1,,,,,set; price TBC (£0 in the total for now),
+buy,"Solderless breadboard, half size with one power strip removed (82 x 45 mm), adhesive back",1,1,,,,,"stuck flat to the box floor; carries the XIAO ESP32-S3, two TMC2209 drivers and a 10k resistor; price TBC (£0 in the total for now)",
+buy,"DC-DC buck converter 24 V to 5 V, 45 x 32 mm",1,1,,,,,"feeds the XIAO 5V pin; lies flat in the box, wires on a long side; price TBC (£0 in the total for now)",
+buy,Panel-mount DC socket for a 5.5 x 2.1 mm plug (24 V in),1,1,,,,,"part not chosen yet; the hole is 11 mm through a 3 mm back wall (both parameters in the script, EB_DC_D and EB_DC_WALL); room behind it for the nut; price TBC (£0 in the total for now)",
+buy,USB-C panel-mount extension cable (11 x 4.6 mm slot),1,1,,,,,right-hand end wall of the box; price TBC (£0 in the total for now),
+buy,GT2 20T 8 mm bore double-head pulley for 6 mm belt (Technobots 6001-073),8,10,1.470,8,11.76,Technobots 6001-073,"two toothed bands, set screw in the centre boss, about 28 mm long (check on arrival); 2 spare",
+buy,GT2 20T 5 mm bore single pulley for 6 mm belt (Technobots 6001-002),3,3,1.480,3,4.44,Technobots 6001-002,motor pulleys plus a spare,
+buy,"GT2 6 mm closed belt, 320 mm (Technobots 6001-442)",8,10,1.840,8,14.72,Technobots 6001-442,3 loops per motor; 2 spare,4 loops per motor; 2 spare
+buy,"Bearing 608ZZ (8 x 22 x 7), spindles",16,20,0.691,20,13.82,"Amazon UK, sourcing map 10-packs (inc VAT, divided by 1.2)",2 per unit plus 4 spare,
+buy,"Bearing 684ZZ (4 x 9 x 4), mirror hinges",16,20,0.362,20,7.24,"Amazon UK, sourcing map 20-pack (inc VAT, divided by 1.2)",2 per unit plus 4 spare,
+buy,"Stainless rod 8 mm x 300 mm (OFFCUP, pack of 2), each cut into 3 spindles of 79 mm",2,3,2.913,2,5.83,"Amazon UK, OFFCUP 2-packs (inc VAT, divided by 1.2)","flat ground for the grub screws; drawn rod can run oversize, test-fit a bearing",
+buy,"Stainless rod 4 mm, cut into 6 hinge axles of 114 mm",1,1,,,,,"glue into the carrier; already owned, about 950 mm needed","Stainless rod 4 mm, cut into 8 hinge axles of 114 mm"
+buy,"Acrylic mirror 100 mm round, 1.5 mm thick (cut from sheet or bought as discs)",16,20,0.500,16,8.00,"owner's quote, 20 discs for 10.00 (VAT treatment not stated, counted as ex VAT)","2 per unit plus 4 spare; glued flat to the carrier faces, protective film left on until the end",
+buy,"M5 slide-in T-nut for a 6 mm slot (20 series, zinc plated)",25,29,0.653,32,20.90,"extrusion shop, SIN-20-M5 (the 32-off price)","2 per unit, 2 per motor bracket, 1 per standoff (rail back slot), 2 for the box, spares; load them into the slot from the rail end before building",
+buy,"M5 x 35 button head screw, stainless",22,26,0.505,33,16.67,"extrusion shop, BHB-M5-35","2 per unit (block into the T-nuts) plus 2 per motor bracket, spares",
+buy,"M5 x 50 button head screw, stainless",4,4,,,,,"1 per standoff, from the wall side into the back-slot T-nut (head 15 mm deep in the standoff); 1 spare",
+buy,"M5 x 8 button head screw, stainless",6,6,,,,,"2 hold the electronics box to the rail; 4 spare; 8 mm, not 12: the head seats 2.5 mm below the rail and a longer screw bottoms on the slot floor before it clamps",
+buy,"Slot cover strip, black PVC, 20 series, 1000 mm (Ooznest SCO-20-B-1000)",1,1,1.370,1,1.37,"Ooznest SCO-20-B-1000 (1000 mm, black; check whether the 1.37 is ex VAT)","press into the rail's bottom slot over the two motor cables: about 0.37 m each side from the box to the rail ends, 0.75 m in all, so one 1000 mm length cut in two covers both runs; check the cover's depth against the cable","press into the rail's bottom slot over the two motor cables: about 0.51 m each side from the box to the rail ends, 1.03 m in all, so one 1000 mm length cut in two leaves a small gap in the middle under the box; check the cover's depth against the cable"
+buy,"M8 shim washer 8 x 12 x 1 mm, stainless (DIN 988 or similar)",8,10,,,,,"1 per spindle as a spacer on the inner race of the upper bearing; spares; 12 mm OD sits on the inner race only, clear of the 608ZZ shield and outer race; price TBC",
+buy,"M3 x 6 socket cap head screw, stainless",10,10,0.154,10,1.54,"extrusion shop, CHB-M3-6",4 per motor into the front face; check the thread depth first,
+buy,"M4 x 10 cup-point grub screw, stainless",8,10,,,,,"1 per ring foot, clamps the ring to the spindle on a flat; thread-lock; 10 mm so it passes the 6 mm insert and the open hole to reach the rod (a 6 mm grub would not reach)",
+buy,"M3 x 8 pan head screw, stainless",6,6,,,,,4 hold the electronics box lid; 2 spare,
+buy,M4 x 40 wall screw with plug to suit your wall,8,8,,,,,2 per standoff flange; choose the plug for the wall type,
+buy,Heat-set insert M4 x 6,8,10,0.069,60,4.14,"Amazon UK, mawmuaw M4x4x6 60-pack (inc VAT, divided by 1.2)","1 per ring foot, spares",
+buy,Heat-set insert M3 x 5.7,6,6,,,,,"4 box corners, spares",
+buy,Thread-locking compound (medium),1,1,0.000,1,0.00,owned,grub screws and pulley set screws,
+buy,Cyanoacrylate glue or retaining compound,1,1,0.000,1,0.00,owned,glue the hinge axles into the carriers,
+buy,"Double-sided acrylic foam tape (VHB type) 1 mm thick x 3 mm wide, 5 m",1,1,,,,,for the 3 mm carrier rims: about 3.6 m for 12 faces; a 6 mm tape would hang over the rim,for the 3 mm carrier rims: about 4.8 m for 16 faces; a 6 mm tape would hang over the rim
+buy,"Double-sided acrylic foam tape (VHB type) 1 mm thick x 6 mm wide, 2 m",1,1,,,,,for the cross bars: about 1.1 m for 12 faces,for the cross bars: about 1.5 m for 16 faces
+buy,"Clear 2-part epoxy (5 minute, syringe)",1,1,,,,,"a few spots to make the disc bond permanent; test on a scrap disc first, CA glue can craze acrylic",
+buy,"Filament PLA, grams used",470,550,0.009,470,4.38,"11.19 per kg inc VAT, divided by 1.2; cost of the weight used, not the spool","estimate from the STEP volumes (rings, carriers, standoffs, box, lid) with a 0.6 wall and infill factor; not a slicer figure",
+buy,"Filament PLA-CF, grams used",305,370,0.025,305,7.62,"29.99 per kg inc VAT, divided by 1.2; cost of the weight used, not the spool",estimate: spindle blocks and motor brackets; if only the brackets are PLA-CF it is about 120 g and the blocks move to PLA (about 800 g),
+shipping,"Technobots UK shipping, zone 1 (ex VAT, from the 3 x 8 cart; assumed the same)",,,,,5.95,Technobots,other shops' delivery not included,
+total,"Priced lines above, ex VAT, with Technobots shipping",,,,,182.45,,lines with no price are not in this total; owned items counted at 0,

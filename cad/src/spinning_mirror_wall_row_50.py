@@ -101,7 +101,7 @@ CAR_T, RIM_W, BAR_W = (6.0, 3.5, 6.0) if M100 else (4.0, 2.5, 5.0)  # carrier th
 R_C = MIR_R - 0.5 if M100 else MIR_R             # carrier radius
 POCKET_BACK = 0.4 if M100 else 0.1               # pocket depth beyond the bearing width (100 mm: 0.4, so the bearing never bottoms on the first layers)
 PAD_W, PAD_D = 20.0, 14.0                      # 100 mm carrier weight pad: width along the axle, depth in from the rim (solid PLA; keep it to one side)
-PK_R = BRG[1] / 2 + (0.125 if M100 else 0.05)  # bearing pocket radius: 100 mm 9.25 mm across (a slip fit: a printed hole shrinks 0.1 mm or more and a 684ZZ outer race is only 0.85 mm thick, so a pressed fit squeezes it and adds drag; hold it with a drop of retaining compound)
+PK_R = BRG[1] / 2 + (0.07 if M100 else 0.05)  # bearing pocket radius: 100 mm 9.14 mm across (a firmer friction fit; 9.1 was too tight, 9.25 too loose in the PLA test prints; a slip fit before: a printed hole shrinks 0.1 mm or more and a 684ZZ outer race is only 0.85 mm thick, so a pressed fit squeezes it and adds drag; hold it with a drop of retaining compound)
 PK_CH, PK_TOP = 0.4, 4.9                       # 100 mm: lead-in chamfer at the pocket mouth, and the height of the flat top of the teardrop roof above the pocket axis (the ring prints with +Y up)
 RELIEF_D, RELIEF_DEPTH = (7.2 if M100 else 6.4), 1.5              # 100 mm: counterbore in the pocket floor, wider than the 684ZZ inner race (about 6 mm), so only the outer race touches the floor
 AXLE_EXIT_D = 6.0                               # 100 mm: exit hole for the hinge rod through the ring boss (rod 4 mm, so 1 mm clear each side)
@@ -130,27 +130,35 @@ BOARD_L, BOARD_W, BOARD_T, BOARD_CX = 90.0, 70.0, 1.6, 13.0 + EBX
 BOARD_POST_H = 7.0
 BOARD_HOLES = [(BOARD_CX + sx * 41.0, Y_R + sy * 31.0) for sx in (-1, 1) for sy in (-1, 1)]    # 82 x 62 mm hole spacing
 EB_DC_D, EB_DC_WALL = 11.0, 3.0                          # 100 mm: panel-mount DC socket hole diameter and the wall thickness it passes through (the part is not chosen yet; both are parameters)
-EB_IN_X, EB_IN_Y = 230.0, 55.0                           # 100 mm: wide, shallow interior (the height stays 35 mm)
+# 100 mm electronics box = a tray (bottom, holds everything) that slides forward off a shallow lid plate (top, screwed to the rail). Closed, the two make one plain cuboid: a dovetail ridge on the plate underside runs in a dovetail groove cut into the top of each thick end wall, so nothing shows outside.
+EB_OVERALL_X = 225.0                                     # outside width of the closed box (tray and plate)
+EB_WX = 8.0                                              # end walls (carry the dovetail grooves); front and back walls are EB_WALL
+EB_RIB_W, EB_RIB_H = 4.0, 9.0                            # inner rib along the top of each end wall: the wall is EB_WX + EB_RIB_W thick there, so the groove keeps 3 mm of PLA each side; the interior is only that narrower in the top EB_RIB_H mm
+EB_IN_X, EB_IN_Y = EB_OVERALL_X - 2 * EB_WX, 55.0       # tray interior
+DT_D, DT_MOUTH, DT_ANG = 2.5, 2.4, 30.0                  # dovetail depth, ridge width at the plate, flank angle from vertical (30 degrees prints without support)
+DT_CL = 0.18                                             # sliding clearance on each flank (tune after a test print: a friction fit, no catch)
+EB_ZTOP = EB_ZIN1 - 0.3                                  # tray top edge, 0.3 under the plate
 if M100:
-    EB_X0, EB_X1 = XSUM / 2 - EB_IN_X / 2 - EB_WALL, XSUM / 2 + EB_IN_X / 2 + EB_WALL
-    EB_Y0, EB_Y1 = Y_R - EB_IN_Y / 2 - EB_WALL, Y_R + EB_IN_Y / 2 + EB_WALL           # interior centred on the rail, 39.5 mm from the wall at the back wall
-    EB_MOUNT_X = (XSUM / 2 - 40.0, XSUM / 2 + 40.0)
+    EB_X0, EB_X1 = XSUM / 2 - EB_OVERALL_X / 2, XSUM / 2 + EB_OVERALL_X / 2
+    EB_Y0, EB_Y1 = Y_R - EB_IN_Y / 2 - EB_WALL, Y_R + EB_IN_Y / 2 + EB_WALL           # tray interior centred on the rail
+    EB_MOUNT_X = (XSUM / 2 - 40.0, XSUM / 2 + 40.0)                       # rail screws through the lid plate, reached from below with the tray off
 
 
 def ebx(lx):
-    """X of a point lx mm in from the left inside face of the 100 mm box."""
-    return EB_X0 + EB_WALL + lx
+    """X of a point lx mm in from the left inside face of the 100 mm tray."""
+    return EB_X0 + EB_WX + lx
 
 
-# 100 mm box layout, mm from the inside left face (lx) and the middle of the depth (y = Y_R); floor items sit on the lid
-EB_DC_LX = 16.0                                          # DC socket hole in the back wall
-EB_BUCK = (32.0, 77.0, 32.0)                             # buck converter 45 x 32, lies flat: lx0, lx1, depth
-EB_WAGO_LX = (92.0, 108.0)                               # two Wago 221-415 standing on their 8.4 x 18.6 end, wires front and back
+# 100 mm tray layout, mm from the inside left face (lx) and the middle of the depth (y = Y_R); everything sits on the tray floor
+EB_DC_LX = EB_IN_X / 2                                   # DC socket hole in the back wall, in the middle for symmetry
+EB_DC_Z = 21.0                                           # socket height above the floor, so its body clears the breadboard
+EB_BUCK = (150.0, 195.0, 32.0)                           # buck converter 45 x 32, lies flat: lx0, lx1, depth
+EB_WAGO_LX = (122.0, 138.0)                              # two Wago 221-415 standing on their 8.4 x 18.6 end (30 mm tall), wires front and back
 WAGO_L, WAGO_H, WAGO_D = 30.0, 8.4, 18.6
-EB_BB = (124.0, 206.0, 45.0)                             # half breadboard minus one power strip: 82 long, 45 wide, 8.5 thick, stuck flat
+EB_BB = (18.0, 100.0, 45.0)                              # half breadboard minus one power strip: 82 long, 45 wide, 8.5 thick, stuck flat to the tray floor, XIAO at the left end
 BB_T = 8.5
-EB_LEAD_LX = (8.0, EB_IN_X - 8.0)                        # motor lead slots through the top plate
-EB_USB_Z = 14.0                                          # USB-C socket centre above the floor
+EB_LEAD_LX = (48.0, 84.0)                                # motor lead slots through the lid plate, over the two drivers
+EB_USB_Z = 14.0                                          # USB-C socket centre above the floor (left wall, at the XIAO)
 EB_CORNERS = [(x, y) for x in (EB_X0 + EB_WALL + EB_POST / 2, EB_X1 - EB_WALL - EB_POST / 2) for y in (EB_Y0 + EB_WALL + EB_POST / 2, EB_Y1 - EB_WALL - EB_POST / 2)]
 EB_CUT_Z = (EB_ZIN0 + EB_ZIN1) / 2                         # connector height, -23.5
 
@@ -313,7 +321,58 @@ def belt(xa, xb, zc):
     return outer.cut(inner)
 
 
+def _tan30():
+    import math
+    return math.tan(math.radians(DT_ANG))
+
+
+def _dovetail(half_top, depth, z_top, ang):
+    """Dovetail section (x, z) about x = 0: half-width half_top at z_top, widening downward at ang degrees from vertical."""
+    import math
+    t = math.tan(math.radians(ang))
+    return [(-half_top, z_top), (half_top, z_top), (half_top + depth * t, z_top - depth), (-(half_top + depth * t), z_top - depth)]
+
+
+def eb_tray():
+    w = EB_WALL
+    b = box(EB_X0, EB_X1, EB_Y0, EB_Y1, EB_Z_LID, EB_ZTOP)
+    b = b.cut(box(EB_X0 + EB_WX, EB_X1 - EB_WX, EB_Y0 + w, EB_Y1 - w, EB_ZIN0, EB_ZTOP + 1))
+    gy1 = EB_Y1 - 2.0                                                            # groove stops 2 mm in from the FRONT face (closed end = the stop) and is open at the back, the wall side, so the front shows no joint
+    for xr0, xr1 in ((EB_X0 + EB_WX, EB_X0 + EB_WX + EB_RIB_W), (EB_X1 - EB_WX - EB_RIB_W, EB_X1 - EB_WX)):      # inner ribs under the grooves
+        b = b.union(box(xr0, xr1, EB_Y0 + w - 0.01, EB_Y1 - w + 0.01, EB_ZTOP - EB_RIB_H, EB_ZTOP))
+    for xc in (EB_X0 + (EB_WX + EB_RIB_W) / 2, EB_X1 - (EB_WX + EB_RIB_W) / 2):                           # dovetail groove in the top of each end wall, centred in the thickened wall
+        pts = [(xc + x, z) for x, z in _dovetail(DT_MOUTH / 2 + (-EB_TOP_T - EB_ZTOP) * _tan30() + DT_CL, DT_D + 0.3, EB_ZTOP + 0.01, DT_ANG)]
+        b = b.cut(cq.Workplane("XZ", origin=(0, gy1, 0)).polyline(pts).close().extrude(gy1 - EB_Y0 + 1.0))
+    if EB_DC_WALL > w:                                                           # thicker pad inside the back wall around the socket if its thread needs more than the wall
+        b = b.union(box(ebx(EB_DC_LX) - 10, ebx(EB_DC_LX) + 10, EB_Y0 + w - 0.01, EB_Y0 + EB_DC_WALL + 0.01, EB_ZIN0 + EB_DC_Z - 10, EB_ZIN0 + EB_DC_Z + 10))
+    b = b.cut(cyly(EB_DC_D / 2, EB_Y0 - 1, EB_Y0 + max(w, EB_DC_WALL) + 1, ebx(EB_DC_LX), EB_ZIN0 + EB_DC_Z))   # power in: panel-mount DC socket hole in the middle of the back wall (the wall side)
+    b = b.cut(box(EB_X0 - 1, EB_X0 + EB_WX + 1, Y_R - 5.5, Y_R + 5.5, EB_ZIN0 + EB_USB_Z - 2.3, EB_ZIN0 + EB_USB_Z + 2.3))     # USB-C panel socket in the left wall, at the XIAO: 11 x 4.6
+    for lx in EB_WAGO_LX:                                                        # Wago cradles: two thin walls either side of each block (lever face and back), the wire faces stay open
+        for sgn in (-1, 1):
+            xa = ebx(lx) + sgn * (WAGO_H / 2 + 0.2)
+            b = b.union(box(min(xa, xa + sgn * 2.0), max(xa, xa + sgn * 2.0), Y_R - WAGO_D / 2 - 0.2, Y_R + WAGO_D / 2 + 0.2, EB_ZIN0 - 0.01, EB_ZIN0 + 14.0))
+    for lx in (156.0, 163.0, 170.0, 177.0, 184.0, 191.0):                        # vent slots in the floor under the buck converter
+        b = b.cut(box(ebx(lx) - 1.5, ebx(lx) + 1.5, Y_R - 12, Y_R + 12, EB_Z_LID - 1, EB_ZIN0 + 1))
+    return b
+
+
+def eb_plate():
+    cx = XSUM / 2
+    p = box(EB_X0, EB_X1, EB_Y0, EB_Y1, -EB_TOP_T, 0.0)
+    ry1 = EB_Y1 - 2.0 - 0.1                                                      # ridge front end stops against the closed (front) end of the groove
+    for xc in (EB_X0 + (EB_WX + EB_RIB_W) / 2, EB_X1 - (EB_WX + EB_RIB_W) / 2):                           # dovetail ridge under each end wall
+        pts = [(xc + x, z) for x, z in _dovetail(DT_MOUTH / 2 - 0.1 * _tan30(), DT_D + 0.1, -EB_TOP_T + 0.1, DT_ANG)]
+        p = p.union(cq.Workplane("XZ", origin=(0, ry1, 0)).polyline(pts).close().extrude(ry1 - EB_Y0))
+    for x in EB_MOUNT_X:                                                         # M5 up into the T-nuts in the rail's bottom slot, head recessed
+        p = p.cut(cylz(2.75, -EB_TOP_T - 1, 1.0, x, Y_R)).cut(cylz(5.0, -EB_TOP_T - 1, -EB_TOP_T + 3.5, x, Y_R))
+    for lx in EB_LEAD_LX:                                                        # motor leads up into the rail's bottom slot: 13 x 7 mm slot holes
+        p = p.cut(cq.Workplane("XY").workplane(offset=-EB_TOP_T - 1).center(ebx(lx), Y_R).slot2D(13.0, 7.0).extrude(8.0))
+    return p
+
+
 def electronics_box():
+    if M100:
+        return eb_tray()
     w = EB_WALL
     b = box(EB_X0, EB_X1, EB_Y0, EB_Y1, EB_ZIN0, 0.0)
     b = b.cut(box(EB_X0 + w, EB_X1 - w, EB_Y0 + w, EB_Y1 - w, EB_ZIN0 - 1, EB_ZIN1))
@@ -326,9 +385,13 @@ def electronics_box():
         if EB_DC_WALL > w:                                                       # thicker pad inside the back wall around the socket if its thread needs more than the wall
             b = b.union(box(ebx(EB_DC_LX) - 10, ebx(EB_DC_LX) + 10, EB_Y0 + w - 0.01, EB_Y0 + EB_DC_WALL + 0.01, EB_CUT_Z - 10, EB_CUT_Z + 10))
         b = b.cut(cyly(EB_DC_D / 2, EB_Y0 - 1, EB_Y0 + max(w, EB_DC_WALL) + 1, ebx(EB_DC_LX), EB_CUT_Z))      # power in: panel-mount DC socket hole in the back wall (the wall side), so the supply cable leaves the box and runs down the wall
-        b = b.cut(box(EB_X1 - w - 1, EB_X1 + 1, Y_R - 5.5, Y_R + 5.5, EB_ZIN0 + EB_USB_Z - 2.3, EB_ZIN0 + EB_USB_Z + 2.3))     # USB-C panel socket at the XIAO, 11 x 4.6
+        b = b.cut(box(EB_X1 - w - 1, EB_X1 + 1, Y_R - 5.5, Y_R + 5.5, EB_ZIN1 - EB_USB_Z - 2.3, EB_ZIN1 - EB_USB_Z + 2.3))     # USB-C panel socket at the XIAO, 11 x 4.6
         for xc in (ebx(EB_LEAD_LX[0]), ebx(EB_LEAD_LX[1])):                                  # motor leads leave through the top plate, straight up into the rail's bottom slot: a 13 x 7 mm slot hole (the 4-pin plug passes through), clear of the M5 mounts
             b = b.cut(cq.Workplane("XY").workplane(offset=EB_ZIN1 - 1).center(xc, Y_R).slot2D(13.0, 7.0).extrude(8.0))
+        for lx in EB_WAGO_LX:                                                    # Wago cradles hang from the top plate: two thin walls either side of each block (lever face and back), the wire faces stay open
+            for sgn in (-1, 1):
+                xa = ebx(lx) + sgn * (WAGO_H / 2 + 0.2)
+                b = b.union(box(min(xa, xa + sgn * 2.0), max(xa, xa + sgn * 2.0), Y_R - WAGO_D / 2 - 0.2, Y_R + WAGO_D / 2 + 0.2, EB_ZIN1 - 14.0, EB_ZIN1 + 0.01))
         return b
     b = b.cut(cylx(6.0, EB_X1 - w - 1, EB_X1 + 1, Y_R - 18, EB_CUT_Z))            # DC barrel jack, 12 mm
     b = b.cut(box(EB_X1 - w - 1, EB_X1 + 1, Y_R + 18 - 5.5, Y_R + 18 + 5.5, EB_CUT_Z - 2.3, EB_CUT_Z + 2.3))   # USB-C panel socket, 11 x 4.6
@@ -338,14 +401,12 @@ def electronics_box():
 
 
 def electronics_lid():
+    if M100:
+        return eb_plate()
     lid = box(EB_X0, EB_X1, EB_Y0, EB_Y1, EB_Z_LID, EB_ZIN0)
     for (x, y) in EB_CORNERS:
         lid = lid.cut(cylz(1.7, EB_Z_LID - 1, EB_ZIN0 + 1, x, y)).cut(cylz(3.2, EB_Z_LID - 1, EB_Z_LID + 1.5, x, y))
-    if M100:                                                                     # Wago cradles: two thin walls either side of each block (the lever face and the back), the wire faces stay open
-        for lx in EB_WAGO_LX:
-            for sgn in (-1, 1):
-                xa = ebx(lx) + sgn * (WAGO_H / 2 + 0.2)
-                lid = lid.union(box(min(xa, xa + sgn * 2.0), max(xa, xa + sgn * 2.0), Y_R - WAGO_D / 2 - 0.2, Y_R + WAGO_D / 2 + 0.2, EB_ZIN0 - 0.01, EB_ZIN0 + 14.0))
+    if M100:
         for lx in (40.0, 48.0, 56.0, 64.0, 72.0):                                # vent slots under the buck converter
             lid = lid.cut(box(ebx(lx) - 1.5, ebx(lx) + 1.5, Y_R - 15, Y_R + 15, EB_Z_LID - 1, EB_ZIN0 + 1))
         return lid
@@ -390,9 +451,9 @@ def build_frame():
         z0 = EB_ZIN0
         b0, b1, bd = EB_BB
         add(ELEC, "placeholder_breadboard_82x45", box(ebx(b0), ebx(b1), Y_R - bd / 2, Y_R + bd / 2, z0, z0 + BB_T), "#e8e4d8", "frame", "ph")
-        add(ELEC, "placeholder_xiao_esp32s3_21x17", box(ebx(b1 - 21), ebx(b1), Y_R - 8.75, Y_R + 8.75, z0 + BB_T + 2.5, z0 + BB_T + 6.5), "#2e6f4e", "frame", "ph")
+        add(ELEC, "placeholder_xiao_esp32s3_21x17", box(ebx(b0), ebx(b0 + 21), Y_R - 8.75, Y_R + 8.75, z0 + BB_T + 2.5, z0 + BB_T + 6.5), "#2e6f4e", "frame", "ph")
         for k in range(MOTORS):
-            x0 = ebx(b0 + 4 + k * 28.0)
+            x0 = ebx(b0 + 25 + k * 28.0)
             add(ELEC, f"placeholder_tmc2209_25x20x16_{k + 1}", box(x0, x0 + 25, Y_R - 10, Y_R + 10, z0 + BB_T, z0 + BB_T + 16), "#2e6f4e", "frame", "ph")
         add(ELEC, "placeholder_buck_45x32x14", box(ebx(EB_BUCK[0]), ebx(EB_BUCK[1]), Y_R - EB_BUCK[2] / 2, Y_R + EB_BUCK[2] / 2, z0, z0 + 14.0), "#2e6f4e", "frame", "ph")
         for k, lx in enumerate(EB_WAGO_LX):
@@ -532,8 +593,8 @@ def bom_rows(n):
     ]
     rows += [("print", "Wall standoff: print with the flange on the bed", SO, f"{len(STANDOFF_X)} per rail; holds the rail off the wall; M5 into a back-slot T-nut")]
     rows += [
-        ("print", (f"Electronics box: print upside down on the flat top plate; {EB_X1 - EB_X0:.0f} x {EB_Y1 - EB_Y0:.0f} x 44 mm, hangs under the rail" if M100 else "Electronics box: print upside down on the flat top plate; 124 x 78 x 44 mm, hangs under the bottom rail"), 1, (f"inside {EB_IN_X:.0f} x {EB_IN_Y:.0f} x 35 mm" if M100 else "inside 118 x 72 x 35 mm")),
-        ("print", ("Electronics box lid: print flat; two cradles hold the Wagos upright, the breadboard sticks to the floor" if M100 else "Electronics box lid: print flat; carries the perfboard posts"), 1, ""),
+        ("print", ("Electronics box (tray): print open side up, 4 walls; slides forward off the lid plate" if M100 else "Electronics box: print upside down on the flat top plate; 124 x 78 x 44 mm, hangs under the bottom rail"), 1, (f"{EB_X1 - EB_X0:.0f} x {EB_Y1 - EB_Y0:.0f} x 38 mm, inside {EB_IN_X:.0f} x {EB_IN_Y:.0f} x 35 mm; dovetail grooves in the end walls; holds everything: breadboard, buck, Wagos on cradles" if M100 else "inside 118 x 72 x 35 mm")),
+        ("print", ("Electronics lid plate: print upside down (outer face on the bed), 4 walls" if M100 else "Electronics box lid: print flat; carries the perfboard posts"), 1, (f"{EB_X1 - EB_X0:.0f} x {EB_Y1 - EB_Y0:.0f} x 6 mm, screwed to the rail; two dovetail ridges run in the tray's grooves, friction fit (clearance {DT_CL} mm each flank, tune after a test print), no catch" if M100 else "")),
         ("buy", f"Aluminium extrusion 2020 (T-slot, 6 mm slot, 20 x 20 mm), cut to {int(RAIL_Ln)} mm", ROWS, "one rail per row; deburr the ends" if ROWS > 1 else "the rail; deburr the ends"),
     ]
     rows += [
@@ -552,7 +613,7 @@ def bom_rows(n):
         ]
     rows += [
         ("buy", "Wire 22 AWG silicone red/black and 26 AWG logic, ferrules, heat shrink, cable ties", 1, "set"),
-        *([("buy", "Solderless breadboard, half size with one power strip removed (82 x 45 mm), adhesive back", 1, "stuck flat to the box floor; carries the XIAO ESP32-S3, two TMC2209 drivers and a 10k resistor"),
+        *([("buy", "Solderless breadboard, half size with one power strip removed (82 x 45 mm), adhesive back", 1, "stuck flat to the tray floor at the left end of the box; carries the XIAO ESP32-S3, two TMC2209 drivers and a 10k resistor"),
            ("buy", "DC-DC buck converter 24 V to 5 V, 45 x 32 mm", 1, "feeds the XIAO 5V pin; lies flat in the box, wires on a long side")] if M100 else
           [("buy", "Perfboard 70 x 90 mm, mounting holes 82 x 62 mm, with female header sockets for the ESP32 and drivers", 1, "check the hole spacing of your board")]),
         *([("buy", "Panel-mount DC socket for a 5.5 x 2.1 mm plug (24 V in)", 1, f"part not chosen yet; the hole is {EB_DC_D:g} mm through a {EB_DC_WALL:g} mm back wall (both parameters in the script, EB_DC_D and EB_DC_WALL); room behind it for the nut")] if M100 else
@@ -577,10 +638,10 @@ def bom_rows(n):
           [("buy", "M5 panel/slot washer 12.5 x 5.3 x 1 mm, stainless", 2 * U + 2, "2 per spindle as a 2 mm spacer on the inner race of the upper bearing; spares; 12.5 mm just clears the bearing's outer-race shoulder (about 13 mm), so check it does not rub")]),
         ("buy", "M3 x 6 socket cap head screw, stainless", 4 * R + 2, "4 per motor into the front face; check the thread depth first"),
         ("buy", f"M{4 if M100 else 3} x {10 if M100 else 5} cup-point grub screw, stainless", U + 2, "1 per ring foot, clamps the ring to the spindle on a flat; thread-lock" + ("; 10 mm so it passes the 6 mm insert and the open hole to reach the rod (a 6 mm grub would not reach)" if M100 else "")),
-        ("buy", "M3 x 8 pan head screw, stainless", 6, "4 hold the electronics box lid; 2 spare"),
+        *([] if M100 else [("buy", "M3 x 8 pan head screw, stainless", 6, "4 hold the electronics box lid; 2 spare")]),
         *([] if M100 else [("buy", "M3 x 6 pan head screw, stainless", 6, "4 hold the perfboard to the lid posts; 2 spare")]),
         ("buy", "M4 x 40 wall screw with plug to suit your wall", 2 * SO + 2, "2 per standoff flange; choose the plug for the wall type"),
-        *([("buy", "Heat-set insert M4 x 6", U + 2, "1 per ring foot, spares"), ("buy", "Heat-set insert M3 x 5.7", 4 + 2, "4 box corners, spares")] if M100 else
+        *([("buy", "Heat-set insert M4 x 6", U + 2, "1 per ring foot, spares"), ] if M100 else
           [("buy", "Heat-set insert M3 x 5.7", U + 8 + 4, "1 per ring foot, 4 box corners, 4 perfboard posts, spares")]),
         ("buy", "Thread-locking compound (medium)", 1, "grub screws and pulley set screws"),
         ("buy", "Cyanoacrylate glue or retaining compound", 1, "glue the hinge axles into the carriers"),

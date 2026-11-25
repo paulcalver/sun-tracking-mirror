@@ -6,15 +6,13 @@
  * pairing, no WiFi password. Both units use WiFi channel 1.
  *
  * Extras on the desk unit (cad/src/spinning_mirror_remote.py):
- *   STOP/GO switch a 16 mm latching on/off switch with an LED ring (LATCHING_SWITCH 1):
- *                   switch on = "send the dials", off = "send speed 0". With a momentary
- *                   button set LATCHING_SWITCH 0 and each press toggles instead.
+ *   STOP/GO button  toggles between "send the dials" and "send speed 0".
  *                   The packet format is unchanged: stopping just sends speed 0,
  *                   which the main sketch already treats as 0 rpm (bottom 4 % of the
  *                   dial). Going again ramps the speed back up over about 2 s.
  *                   The drivers stay enabled (holding torque) unless the main
  *                   sketch has REMOTE_CAN_ENABLE 1, which also disables them at 0 rpm.
- *   SEND LED        (the switch's LED ring, or a 5 mm LED) heartbeat blink while running, steady glow while stopped,
+ *   SEND LED        heartbeat blink while running, steady glow while stopped,
  *                   fast flicker when the battery is low. NOTE: ESP-NOW broadcast has
  *                   no acknowledgement, so the LED shows that this unit is sending,
  *                   NOT that the main unit hears it.
@@ -27,9 +25,8 @@
  *   A0  GPIO1  SPEED pot wiper         (10k linear, ends on 3V3 and GND)
  *   A1  GPIO2  JITTER pot wiper
  *   A2  GPIO3  battery divider middle  (optional)
- *   D3  GPIO4  STOP/GO switch, common to GND, normally-open to the pin (internal pull-up)
- *   D4  GPIO5  LED ring + direct (it has its own resistor, 3 to 6 V), ring - to GND.
- *              For a plain 5 mm LED use 330 ohm in series.
+ *   D3  GPIO4  STOP/GO button to GND   (internal pull-up)
+ *   D4  GPIO5  LED via 330 ohm to GND
  * Board: XIAO ESP32-S3 (set USB CDC On Boot to Enabled to see the serial prints).
  *
  * The main unit ignores each pot until it has moved a little from its reading
@@ -45,7 +42,6 @@ const uint8_t JITTER_PIN = 2;     // XIAO A1 / D1
 const uint8_t BATT_PIN   = 3;     // XIAO A2 / D2
 const uint8_t BUTTON_PIN = 4;     // XIAO D3
 const uint8_t LED_PIN    = 5;     // XIAO D4
-#define LATCHING_SWITCH 1         // 1 = latching on/off switch (closed = go), 0 = momentary button that toggles
 #define BATT_SENSE 1              // 1 = divider fitted (two 100k from BAT+ to GND, middle to A2)
 constexpr uint16_t REMOTE_KEY = 0x5A3C;      // must equal REMOTE_KEY in spinning_mirror.ino
 constexpr uint32_t SEND_EVERY_MS = 50;       // 20 packets a second (also the heartbeat)
@@ -65,7 +61,7 @@ struct __attribute__((packed)) DialPacket {  // identical in spinning_mirror.ino
 
 static const uint8_t BROADCAST[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 static uint8_t seqNo = 0;
-static bool running = true;       // false = stopped: speed 0 is sent
+static bool running = true;       // false = STOP pressed: speed 0 is sent
 static int  outSpeed = 0;         // what is actually sent as speed (ramps up after GO)
 static bool radioOk = false;
 
@@ -89,22 +85,14 @@ static int batteryMv() {
 #endif
 }
 
-// STOP/GO input with a 30 ms debounce. Latching: returns the new running state when the switch
-// changes. Momentary: toggles running on each press. Returns -1 when nothing changed.
-static int stopGoChange() {
+// STOP/GO button with a 30 ms debounce; returns true once per press.
+static bool buttonPressed() {
   static bool stable = HIGH, last = HIGH;
   static uint32_t changed = 0;
   bool now = digitalRead(BUTTON_PIN);
   if (now != last) { last = now; changed = millis(); }
-  if (millis() - changed > 30 && now != stable) {
-    stable = now;
-#if LATCHING_SWITCH
-    return stable == LOW ? 1 : 0;                   // closed = go
-#else
-    if (stable == LOW) return running ? 0 : 1;
-#endif
-  }
-  return -1;
+  if (millis() - changed > 30 && now != stable) { stable = now; if (stable == LOW) return true; }
+  return false;
 }
 
 // LED: boot = 3 flashes, running = 60 ms blink each second, stopped = steady dim, battery low = 5 Hz flicker.
@@ -127,9 +115,6 @@ void setup() {
   analogSetPinAttenuation(JITTER_PIN, ADC_11db);
   analogSetPinAttenuation(BATT_PIN, ADC_11db);
 
-#if LATCHING_SWITCH
-  running = (digitalRead(BUTTON_PIN) == LOW);       // follow the switch position at power-up
-#endif
   for (int i = 0; i < 3; i++) { digitalWrite(LED_PIN, HIGH); delay(80); digitalWrite(LED_PIN, LOW); delay(80); }
 
   WiFi.mode(WIFI_STA);
@@ -148,9 +133,8 @@ void setup() {
 void loop() {
   static uint32_t last = 0;
   static int battMv = 4000;
-  int chg = stopGoChange();
-  if (chg >= 0 && (bool)chg != running) {
-    running = chg;
+  if (buttonPressed()) {
+    running = !running;
     if (running) outSpeed = 0;                      // GO: ramp up from zero to the pot
     Serial.println(running ? "GO" : "STOP");
   }

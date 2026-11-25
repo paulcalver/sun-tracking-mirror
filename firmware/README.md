@@ -183,18 +183,18 @@ Unverified: both sketches compile for the XIAO ESP32-S3 (core 3.3.x) but neither
 
 ### Desk remote controller (enclosure, stop/go button, LED, LiPo)
 
-The remote is now a printed desk wedge: `cad/src/spinning_mirror_remote.py` (previews in `cad/media/previews/spinning-mirror-remote/`), parts in `bom/spinning-mirrors/bom-spinning-mirror-remote.csv`, wiring in `electronics/spinning-mirrors/remote-dial/wiring.svg`. 120 x 76 mm, 15 degree panel, two 36 mm knobs, a 16 mm latching STOP/GO switch with an LED ring (also the SEND light), USB-C in the back wall for charging and programming, a slide switch that breaks the LiPo lead.
+The remote is now a printed desk wedge: `cad/src/spinning_mirror_remote.py` (previews in `cad/media/previews/spinning-mirror-remote/`), parts in `bom/spinning-mirrors/bom-spinning-mirror-remote.csv`, wiring in `electronics/spinning-mirrors/remote-dial/wiring.svg`. 120 x 76 mm, 15 degree panel, two 36 mm knobs, a 12 mm STOP/GO button, a SEND LED, USB-C in the back wall for charging and programming, a slide switch that breaks the LiPo lead.
 
 | XIAO ESP32-S3 | Goes to |
 |---|---|
 | A0 (GPIO1) | SPEED pot wiper (outer ends on 3V3 and GND) |
 | A1 (GPIO2) | JITTER pot wiper |
 | A2 (GPIO3) | middle of two 100k resistors from BAT+ to GND (battery level; optional, `BATT_SENSE 0` if left out) |
-| D3 (GPIO4) | STOP/GO switch: common to GND, normally-open to the pin (internal pull-up) |
-| D4 (GPIO5) | LED ring + (built-in resistor, 3 to 6 V, no external resistor); ring - to GND |
+| D3 (GPIO4) | STOP/GO button to GND (internal pull-up) |
+| D4 (GPIO5) | 330 ohm, then the LED, then GND |
 | BAT+ / BAT- pads (underside) | LiPo through the slide switch in the + lead |
 
-- **Stop/go needs no change to the main sketch.** The packet format is unchanged (key 0x5A3C, version 1, 8 bytes). The switch is latching: off sends speed 0 (`LATCHING_SWITCH 0` makes a momentary button toggle instead), which the main sketch already treats as 0 rpm; GO ramps back up to the dial over about 2 s. The drivers stay enabled (holding torque) unless `REMOTE_CAN_ENABLE 1`, which also disables them at 0 rpm. A hard stop that always disables the drivers would need a spare bit in the packet and a handler in the main sketch (not requested).
+- **Stop/go needs no change to the main sketch.** The packet format is unchanged (key 0x5A3C, version 1, 8 bytes). STOP sends speed 0, which the main sketch already treats as 0 rpm; GO ramps back up to the dial over about 2 s. The drivers stay enabled (holding torque) unless `REMOTE_CAN_ENABLE 1`, which also disables them at 0 rpm. A hard stop that always disables the drivers would need a spare bit in the packet and a handler in the main sketch (not requested).
 - **LED:** one blink a second = running, steady dim = stopped, 5 Hz flicker = battery below 3.5 V or the radio failed to start. It shows that this unit is sending. ESP-NOW broadcast has no acknowledgement, so it cannot show that the main unit hears it; `status` on the main unit (`remote_age_ms`) is the check for that.
 - **Charging:** the XIAO charges the cell from USB-C at about 100 mA by default, so a 1000 mAh cell takes around 10 hours; the radio draws roughly 80 to 120 mA, so expect 6 to 10 hours per charge (estimate). Switch off to save the cell; USB also powers the unit with the switch on.
 - **Compiled, not run on hardware:** `arduino-cli compile --fqbn esp32:esp32:XIAO_ESP32S3:CDCOnBoot=cdc firmware/remote_dial` builds. Not tested: pot and ADC readings, the button, LED patterns, range, battery life, charging, the printed case fit (USB-C cutout, switch cutout, pot and button hole sizes, screw posts).

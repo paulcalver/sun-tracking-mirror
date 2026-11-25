@@ -2,8 +2,8 @@ process,item,qty_needed,unit_inc_vat_gbp,qty_bought,cost_inc_vat_gbp,supplier,no
 print,"Remote tray: print as modelled (floor on the bed), 3 walls, no supports",1,,,,,"120 x 76 x 42 mm; M3 heat-set insert holes in the four corner posts (4.1 mm)"
 print,"Remote panel plate: print with the outer face on the bed (use the print_ready STEP), 3.4 mm, no supports",1,,,,,"labels and dot scales are 0.5 mm recesses; swap filament at the last layers if you want them coloured"
 buy,"Seeed XIAO ESP32-S3 (pre-soldered headers not needed, wire to the pads)",1,7.50,1,7.50,"Pimoroni, The Pi Hut or Seeed UK","price from memory, check; or use the one already owned"
-buy,"10k linear (B10K) 16 mm panel pot, 6 mm shaft, M7 bushing, about 15 mm shaft",2,0.80,2,1.60,"Amazon UK or eBay (Alpha RV16 or generic)","price from memory, check; bushing 7 mm long; one hole is 7.4 mm"
-buy,"Aluminium knob, 36 mm, 6 mm shaft (grub screw), skirted, about 17 mm tall",2,4.00,2,8.00,"Amazon UK / eBay","price from memory, check; a 34 to 38 mm knob fits; check the shaft is D or knurled to match the pot"
+buy,"Panel Mount 10K potentiometer (Breadboard Friendly), 10K LINEAR not Log, 16 mm body",2,,2,,"The Pi Hut thepihut.com/products/panel-mount-10k-potentiometer-breadboard-friendly","price not checked; confirm the shaft is 6 mm and the bushing M7 (the panel hole is 7.4 mm)"
+buy,"Anodized aluminium machined knob, 20 mm x 12.5 mm, 6 mm shaft hole with set screw",2,,2,,"The Pi Hut (black, silver, red, blue or gold)","price not checked; needs a 2 mm hex key; the shaft should stick up about 11 mm from the nut"
 buy,"12 mm panel-mount momentary push button, metal, no latch",1,2.00,1,2.00,"Amazon UK / eBay","price from memory, check; the hole is 12.2 mm; the sketch toggles stop/go in software"
 buy,"LED 5 mm, any colour, with 330 ohm resistor",1,0.20,1,0.20,owned or any kit,pressed into a 5.2 mm hole
 buy,"Slide switch SPDT, SS12D00 type, 4 mm lever",1,0.30,1,0.30,"Amazon UK / eBay","in the BAT+ lead; the back-wall hole is 9.2 x 4.0 mm, glue it in from inside; check the body size on arrival"
@@ -16,4 +16,4 @@ buy,"M3 x 10 countersunk screw, stainless",4,0.10,4,0.40,owned or any kit,panel 
 buy,"Self-adhesive rubber feet, 10 mm round x 3 mm",4,0.20,4,0.80,Amazon UK,sit in 0.8 mm recesses under the tray
 buy,"USB-C cable, data and charge",1,0.00,1,0.00,owned,"charging and programming; a USB-C power bank or phone charger at the desk is optional"
 buy,"Wire 26 AWG silicone, heat shrink, hot-melt glue or double-sided tape",1,0.00,1,0.00,owned,"glue the XIAO into its rails and the cell into the pocket"
-total,"Priced lines above, inc VAT, prices are guesses from memory and not checked",,,,27.45,,"owned items counted at 0; UK shops, check before ordering"
+total,"Priced lines above, inc VAT, WITHOUT the Pi Hut pots and knobs (not priced yet); prices are guesses from memory",,,,17.85,,"owned items counted at 0; check before ordering"

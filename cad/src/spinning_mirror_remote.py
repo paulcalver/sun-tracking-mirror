@@ -2,7 +2,7 @@
 """CAD: desk remote controller for the spinning mirrors (CadQuery). Draft, nothing printed or tested.
 
 A sloped desk wedge, 120 x 76 mm in plan, 22 mm high at the front and 42 mm at the back, with a 15 degree control panel:
-two 16 mm panel pots (SPEED and JITTER) with 36 mm knobs, a 12 mm STOP/GO push button between them and a 5 mm SEND LED above it.
+two 16 mm panel pots (SPEED and JITTER) with 20 mm knobs, a 12 mm STOP/GO push button between them and a 5 mm SEND LED above it.
 Inside: a Seeed XIAO ESP32-S3 at the back with its USB-C port in the back wall (charging and programming), a 3.7 V LiPo
 (503450 class, 50 x 34 x 5 mm) in a pocket under the left pot, and a slide switch in the back wall that breaks the battery lead.
 Radio is ESP-NOW (firmware/remote_dial/remote_dial.ino); no cable to the sculpture.
@@ -55,10 +55,10 @@ SCREW_D, SCREW_HEAD = 3.4, 6.4           # M3 countersunk screw: clearance hole,
 
 POT_X, POT_V = 30.0, 6.0                 # pot axes at x = +/-30, v along the panel from its centre
 POT_HOLE = 7.4                           # 16 mm Alpha-type pot, M7 bushing, 6 mm shaft
-KNOB_D, KNOB_H = 36.0, 17.0
+KNOB_D, KNOB_H = 20.0, 12.5               # Pi Hut anodised aluminium knob, 20 mm x 12.5 mm, 6 mm hole with a set screw
 BTN_V, BTN_D = -4.0, 12.2                # 12 mm panel push button
 LED_V, LED_D = 17.0, 5.2                 # 5 mm LED pressed in
-TICKS, TICK_R, TICK_D, TICK_DEPTH = 11, 21.5, 1.4, 0.5   # dot scale over 270 degrees round each knob
+TICKS, TICK_R, TICK_D, TICK_DEPTH = 11, 13.5, 1.4, 0.5   # dot scale over 270 degrees round each knob
 TEXT_DEPTH = 0.5
 
 # inside the tray
@@ -165,9 +165,9 @@ def purchased():
     out = []
     for sx, nm in ((-1, "speed"), (1, "jitter")):
         x = sx * POT_X
-        out.append((f"pot_{nm}", to_world(lcyl(8.0, -19.4, -0.4, x, POT_V).union(lcyl(3.5, -0.4, 6.6, x, POT_V)).union(lcyl(3.0, 6.6, 21.6, x, POT_V))), STEEL))
+        out.append((f"pot_{nm}", to_world(lcyl(8.0, -19.4, -0.4, x, POT_V).union(lcyl(3.5, -0.4, 6.6, x, POT_V)).union(lcyl(3.0, 6.6, 18.0, x, POT_V))), STEEL))
         out.append((f"nut_{nm}", to_world(lcyl(5.0, PT, PT + 2.0, x, POT_V).cut(lcyl(3.6, PT - 1, PT + 3, x, POT_V))), "#a9b0b8"))
-        out.append((f"knob_{nm}", to_world(lcyl(KNOB_D / 2, 7.2, 7.2 + KNOB_H, x, POT_V).cut(lcyl(3.0, 7.0, 21.7, x, POT_V))), "#d9dde1"))
+        out.append((f"knob_{nm}", to_world(lcyl(KNOB_D / 2, 7.2, 7.2 + KNOB_H, x, POT_V).cut(lcyl(3.0, 7.0, 18.1, x, POT_V))), "#d9dde1"))
     out.append(("button", to_world(lcyl(5.9, -25.0, PT + 0.5, 0, BTN_V).union(lcyl(7.0, PT, PT + 3.0, 0, BTN_V))), "#c9a24a"))
     out.append(("led", to_world(lcyl(2.5, -8.0, PT + 0.5, 0, LED_V)), "#e03a2a"))
     y0 = XIAO_Y1 - XIAO_L

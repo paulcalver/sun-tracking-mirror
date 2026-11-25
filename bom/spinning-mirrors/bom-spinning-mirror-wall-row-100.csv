@@ -19,7 +19,7 @@ buy,4-pin 2.54 mm motor extension cable: 0.5 m (x2): the leads must reach the bo
 buy,"Wire 22 AWG silicone red/black and 26 AWG logic, ferrules, heat shrink, cable ties",1,1,,,,,set; price TBC (£0 in the total for now),
 buy,"Solderless breadboard, half size with one power strip removed (82 x 45 mm), adhesive back",1,1,,,,,"stuck flat to the tray floor at the left end of the box; carries the XIAO ESP32-S3, two TMC2209 drivers and a 10k resistor; price TBC (£0 in the total for now)",
 buy,"DC-DC buck converter 24 V to 5 V, 45 x 32 mm",1,1,,,,,"feeds the XIAO 5V pin; lies flat in the box, wires on a long side; price TBC (£0 in the total for now)",
-buy,Panel-mount DC socket for a 5.5 x 2.1 mm plug (24 V in),1,1,,,,,"part not chosen yet; the hole is 11 mm through a 3 mm back wall (both parameters in the script, EB_DC_D and EB_DC_WALL); room behind it for the nut; price TBC (£0 in the total for now)",
+buy,Panel-mount DC socket for a 5.5 x 2.1 mm plug (24 V in),1,1,,,,,"part not chosen yet; the hole is 7.8 mm through a 3 mm back wall (both parameters in the script, EB_DC_D and EB_DC_WALL); room behind it for the nut; price TBC (£0 in the total for now)",
 buy,USB-C panel-mount extension cable (11 x 4.6 mm slot),1,1,,,,,right-hand end wall of the box; price TBC (£0 in the total for now),
 buy,GT2 20T 8 mm bore double-head pulley for 6 mm belt (Technobots 6001-073),8,10,1.470,8,11.76,Technobots 6001-073,"two toothed bands, set screw in the centre boss, about 28 mm long (check on arrival); 2 spare",
 buy,GT2 20T 5 mm bore single pulley for 6 mm belt (Technobots 6001-002),3,3,1.480,3,4.44,Technobots 6001-002,motor pulleys plus a spare,

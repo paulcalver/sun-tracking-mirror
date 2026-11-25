@@ -183,13 +183,16 @@ def cone(r0, r1, z0, z1, x=0.0, y=0.0):
 # ------------------------------------------------------------------ one unit, spindle at X = Y = 0 (local)
 def build_unit():
     UNIT.clear()
-    rp = BRG_S[1] / 2 + 0.05
+    rp = BRG_S[1] / 2 + (0.07 if M100 else 0.05)                                                       # 100 mm: 22.14 mm pocket, the same +0.14 mm over the bearing OD as the ring's 9.14 mm hinge pockets (friction fit; 22.1 not yet tested)
     blk = box(-BLK_X, BLK_X, -BLK_Y, BLK_Y, RAIL_TOP, BLK_Z1).edges("|Z").chamfer(4.0)
     ledge = 0.5 if M100 else 0.0                                                                       # 100 mm: the lower bearing is pressed up against the cone, 0.5 mm clear of the rail, so its turning inner race cannot touch it
     blk = blk.cut(cylz(rp, RAIL_TOP - 1, RAIL_TOP + ledge + BRG_S[2]))                                 # lower bearing pocket, opens onto the rail (the bearing goes in from below)
     blk = blk.cut(cone(rp, ROD_CLR, RAIL_TOP + ledge + BRG_S[2], RAIL_TOP + ledge + BRG_S[2] + (rp - ROD_CLR)))        # 45 degree ceiling, so it prints without a bridge
     blk = blk.cut(cylz(ROD_CLR, RAIL_TOP - 1, BLK_Z1 + 1))                                             # rod clearance
     blk = blk.cut(cylz(rp, BLK_Z1 - BRG_S[2], BLK_Z1 + 1))                                             # upper bearing pocket, opens upward
+    if M100:                                                                                           # lead-in chamfer 0.4 mm at both pocket mouths, as on the ring, so the bearings start straight and the first-layer flare cannot catch them
+        blk = blk.cut(cq.Workplane(obj=cq.Solid.makeCone(rp, rp + PK_CH, PK_CH, cq.Vector(0, 0, BLK_Z1 - PK_CH), cq.Vector(0, 0, 1))).translate((0, 0, 0)))
+        blk = blk.cut(cq.Workplane(obj=cq.Solid.makeCone(rp + PK_CH, rp, PK_CH, cq.Vector(0, 0, RAIL_TOP), cq.Vector(0, 0, 1))))
     if M100:
         blk = blk.cut(cylz(7.0, BLK_Z1 - BRG_S[2] - 1.5, BLK_Z1 - BRG_S[2] + 0.1))                     # relief in the pocket floor, wider than the 608ZZ inner race, so only the outer race touches PLA
     for sx in (-1, 1):                                                                                 # M5 through the block into the T-nuts

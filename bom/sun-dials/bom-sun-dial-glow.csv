@@ -3,12 +3,17 @@ laser,Opal (milk-white) cast acrylic 3 mm: disc 100 mm with a 3 mm radial slot,2
 laser,"Black acrylic 3 mm: strip 3 x 50, pressed into the slot",2,own cutter
 print,PETG-CF: hub 2,1,
 print,"PETG-CF black: frame tub and lid (with 16 pinholes each), arm and tray; keep them opaque so the sides do not glow",3,"Bambu P1S, hardened nozzle"
+print,"PETG-CF black: peak LED carrier arc, one per face (16 pockets and light wells, stops light leaking between holes)",2,glue to the inside of the face plate over the pinholes
 print,"PETG-CF: turntable (5 mm), base shell with the cable spool (140 mm, USB-C slot, 3 mm sensor window), az adapter, elevation adapter",4,"Bambu P1S, hardened nozzle"
 buy,"RGBW addressable LED strip (SK6812 RGBW), 10 mm wide, about 60 per metre: three runs of about 114 mm, 100 mm and 100 mm",1,"about 20 LEDs, LEDs facing in"
 buy,"Small flex PCB arc or hand-wired 2 x 2 mm RGB LEDs: 16 per face on a 55.5 mm radius, every 6 degrees from 0 to 90",2,"32 LEDs, one data chain with the strip; check the minimum bend radius"
 buy,"Ambient light sensor breakout (VEML7700 or TEMT6000), about 6 x 6 mm",1,in the base behind the 3 mm wall hole; I2C on the ESP32
 buy,"Matt white paint for the frame interior (no thickness modelled), black masking for the pinholes if needed",1,diffuse reflector
-buy,"Thin silicone wire, 4 cores (12 V, 5 V, ground, serial), about 400 mm",1,"winds round the spool; LED data shares the serial wire pair via the RP2040, no extra core"
+buy,"Silicone cable, 4 cores 24 AWG, about 3.5 mm round: 12 V, ground, serial, one spare",1,"about 300 mm; winds one layer round the spool, tied at both ends; 5 V is made in the frame"
+buy,"Mini buck 12 V to 5 V, 2 A or more (frame), and a small 12 V to 5 V for the XIAO ESP32 (base)",2,frame one feeds the RP2040 and all LEDs
+buy,"74AHCT1G125 level shifter, 330 ohm resistor, 1000 uF 10 V capacitor, perfboard about 18 x 11 mm",1,"LED data 3.3 V to 5 V, on the frame hub board"
+buy,"JST-XH 4-pin plug and socket (cable at both ends), JST-SH or XH 3-pin plug (lid arc)",3,"cable is removable at the frame, the lid comes off"
+buy,"Cable ties 2.5 mm wide, 6 (2 per tie point and spare)",1,strain relief at the frame floor and the spool
 buy,iPower GM2804 gimbal motor with AS5048A encoder (35 x 26.15 mm),2,elevation and azimuth; confirm torque and screw size
 buy,SimpleFOC Mini driver (26.1 x 21 x 7.6 mm),2,"one in the base, one in the frame"
 buy,XIAO ESP32-S3 (base) and XIAO RP2040 (frame),2,ESP32 supplied

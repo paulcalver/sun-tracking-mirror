@@ -119,10 +119,10 @@ BR_X0, BR_X1 = X_MOTOR - 26.0, RAIL_X0 + (40.0 if M100 else 28.0)     # bracket 
 BR_THICK_X0 = RAIL_X0                          # the thick part sits on the rail from here to BR_X1
 BR_TNUT = (RAIL_X0 + 6.0, RAIL_X0 + 22.0)
 
-# desk option (--desk): two feet bolted into the rail's bottom T-slot under units 2 and 5 (X = 140 and 560, either side of the electronics box), instead of the wall standoffs
+# desk option (--desk): two feet bolted into the rail's bottom T-slot under units 1 and 6 (X = 0 and 700, the widest span, well clear of the electronics box), instead of the wall standoffs
 DF_W, DF_D, DF_T = 2 * BLK_X, 100.0, 6.0                  # footprint along the rail (the same 54 mm as the spindle blocks, so the feet line up with them from the front), front to back, and plate thickness
 DF_H = 75.0                                             # rail bottom above the desk: the box hangs 44 mm below the rail, so 31 mm clear; the screw seat stays 45 mm below the rail (heads in a deep counterbore from the underside), so the same M5 x 50 as the standoffs fits
-DF_X = (PITCH, (N - 2) * PITCH)                        # under the spindles of units 2 and 5
+DF_X = (0.0, (N - 1) * PITCH)                        # under the spindles of units 1 and 6, the outermost
 DF_SCREW_DX = 20.0                                      # the two M5 sit 20 mm either side of the foot centre, like the unit blocks
 DF_PAD_D, DF_PAD_DEPTH, DF_PAD_OFF, DF_PAD_OFF_Y = 15.0, 1.0, 17.0, DF_D / 2 - 15.0   # recess for a 15 mm self-adhesive rubber pad in each corner of the underside
 

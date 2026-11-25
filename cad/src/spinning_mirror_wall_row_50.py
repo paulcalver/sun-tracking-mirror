@@ -120,11 +120,11 @@ BR_THICK_X0 = RAIL_X0                          # the thick part sits on the rail
 BR_TNUT = (RAIL_X0 + 6.0, RAIL_X0 + 22.0)
 
 # desk option (--desk): two feet bolted into the rail's bottom T-slot under units 2 and 5 (X = 140 and 560, either side of the electronics box), instead of the wall standoffs
-DF_W, DF_D, DF_T = 60.0, 60.0, 6.0                  # footprint along the rail, front to back, and plate thickness
-DF_H = 50.0                                             # rail bottom above the desk: the box hangs 44 mm below the rail, so 6 mm clear; also puts the screw seat 45 mm below the rail, so the same M5 x 50 as the standoffs fits
+DF_W, DF_D, DF_T = 60.0, 100.0, 6.0                  # footprint along the rail, front to back, and plate thickness
+DF_H = 75.0                                             # rail bottom above the desk: the box hangs 44 mm below the rail, so 31 mm clear; the screw seat stays 45 mm below the rail (heads in a deep counterbore from the underside), so the same M5 x 50 as the standoffs fits
 DF_X = (PITCH, (N - 2) * PITCH)                        # under the spindles of units 2 and 5
 DF_SCREW_DX = 20.0                                      # the two M5 sit 20 mm either side of the foot centre, like the unit blocks
-DF_PAD_D, DF_PAD_DEPTH, DF_PAD_OFF = 15.0, 1.0, 19.0   # recess for a 15 mm self-adhesive rubber pad in each corner of the underside
+DF_PAD_D, DF_PAD_DEPTH, DF_PAD_OFF, DF_PAD_OFF_Y = 15.0, 1.0, 19.0, DF_D / 2 - 15.0   # recess for a 15 mm self-adhesive rubber pad in each corner of the underside
 
 
 # electronics box, hung under the rail by two M5 screws into slide-in T-nuts in the bottom slot; the lid carries a 7 x 9 cm perfboard
@@ -432,18 +432,18 @@ def electronics_lid():
 
 
 def desk_foot():
-    """Desk foot at X = 0, centred under the rail: a 60 x 60 plate with a 20 mm web up to the rail bottom, 45 degree gussets (print plate down, no supports),
+    """Desk foot at X = 0, centred under the rail: a plate (60 along the rail, 100 front to back) with a 20 mm web up to the rail bottom, 45 degree gussets (print plate down, no supports),
     two M5 holes up into T-nuts in the bottom slot with the heads in 10 mm counterbores in the underside, a short key rib in the slot opening, and four recesses for rubber pads."""
     z0 = -DF_H
-    pts = [(Y_R - DF_D / 2, z0), (Y_R + DF_D / 2, z0), (Y_R + DF_D / 2, z0 + DF_T), (Y_R + 10, z0 + DF_T + 20), (Y_R + 10, 0),
-           (Y_R - 10, 0), (Y_R - 10, z0 + DF_T + 20), (Y_R - DF_D / 2, z0 + DF_T)]
+    pts = [(Y_R - DF_D / 2, z0), (Y_R + DF_D / 2, z0), (Y_R + DF_D / 2, z0 + DF_T), (Y_R + 10, z0 + DF_T + DF_D / 2 - 10), (Y_R + 10, 0),
+           (Y_R - 10, 0), (Y_R - 10, z0 + DF_T + DF_D / 2 - 10), (Y_R - DF_D / 2, z0 + DF_T)]
     f = cq.Workplane("YZ").workplane(offset=-DF_W / 2).polyline(pts).close().extrude(DF_W)
     f = f.intersect(box(-DF_W / 2, DF_W / 2, Y_R - DF_D / 2, Y_R + DF_D / 2, z0, 0).edges("|Z").fillet(8.0))      # rounded plan corners
     f = f.union(box(-14, 14, Y_R - 2.9, Y_R + 2.9, 0, 1.6))                                  # key rib in the slot opening (6.2 wide, 1.8 deep) stops the foot twisting
     for sx in (-1, 1):
         f = f.cut(cylz(2.75, z0 - 1, 3, sx * DF_SCREW_DX, Y_R)).cut(cylz(5.0, z0 - 1, z0 + (DF_H - 45.0), sx * DF_SCREW_DX, Y_R))   # M5 hole, head counterbore down to 45 mm below the rail
         for sy in (-1, 1):
-            f = f.cut(cylz(DF_PAD_D / 2, z0 - 1, z0 + DF_PAD_DEPTH, sx * DF_PAD_OFF, Y_R + sy * DF_PAD_OFF))
+            f = f.cut(cylz(DF_PAD_D / 2, z0 - 1, z0 + DF_PAD_DEPTH, sx * DF_PAD_OFF, Y_R + sy * DF_PAD_OFF_Y))
     return f
 
 

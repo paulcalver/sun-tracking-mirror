@@ -120,11 +120,11 @@ BR_THICK_X0 = RAIL_X0                          # the thick part sits on the rail
 BR_TNUT = (RAIL_X0 + 6.0, RAIL_X0 + 22.0)
 
 # desk option (--desk): two feet bolted into the rail's bottom T-slot under units 2 and 5 (X = 140 and 560, either side of the electronics box), instead of the wall standoffs
-DF_W, DF_D, DF_T = 60.0, 100.0, 6.0                  # footprint along the rail, front to back, and plate thickness
+DF_W, DF_D, DF_T = 2 * BLK_X, 100.0, 6.0                  # footprint along the rail (the same 54 mm as the spindle blocks, so the feet line up with them from the front), front to back, and plate thickness
 DF_H = 75.0                                             # rail bottom above the desk: the box hangs 44 mm below the rail, so 31 mm clear; the screw seat stays 45 mm below the rail (heads in a deep counterbore from the underside), so the same M5 x 50 as the standoffs fits
 DF_X = (PITCH, (N - 2) * PITCH)                        # under the spindles of units 2 and 5
 DF_SCREW_DX = 20.0                                      # the two M5 sit 20 mm either side of the foot centre, like the unit blocks
-DF_PAD_D, DF_PAD_DEPTH, DF_PAD_OFF, DF_PAD_OFF_Y = 15.0, 1.0, 19.0, DF_D / 2 - 15.0   # recess for a 15 mm self-adhesive rubber pad in each corner of the underside
+DF_PAD_D, DF_PAD_DEPTH, DF_PAD_OFF, DF_PAD_OFF_Y = 15.0, 1.0, 17.0, DF_D / 2 - 15.0   # recess for a 15 mm self-adhesive rubber pad in each corner of the underside
 
 
 # electronics box, hung under the rail by two M5 screws into slide-in T-nuts in the bottom slot; the lid carries a 7 x 9 cm perfboard
@@ -432,7 +432,7 @@ def electronics_lid():
 
 
 def desk_foot():
-    """Desk foot at X = 0, centred under the rail: a plate (60 along the rail, 100 front to back) with a 20 mm web up to the rail bottom, 45 degree gussets (print plate down, no supports),
+    """Desk foot at X = 0, centred under the rail: a plate (54 along the rail, 100 front to back) with a 20 mm web up to the rail bottom, 45 degree gussets (print plate down, no supports),
     two M5 holes up into T-nuts in the bottom slot with the heads in 10 mm counterbores in the underside, a short key rib in the slot opening, and four recesses for rubber pads."""
     z0 = -DF_H
     pts = [(Y_R - DF_D / 2, z0), (Y_R + DF_D / 2, z0), (Y_R + DF_D / 2, z0 + DF_T), (Y_R + 10, z0 + DF_T + DF_D / 2 - 10), (Y_R + 10, 0),

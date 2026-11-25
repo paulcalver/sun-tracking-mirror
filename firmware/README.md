@@ -191,7 +191,7 @@ The remote is now a printed desk wedge: `cad/src/spinning_mirror_remote.py` (pre
 | A1 (GPIO2) | JITTER pot wiper |
 | A2 (GPIO3) | middle of two 100k resistors from BAT+ to GND (battery level; optional, `BATT_SENSE 0` if left out) |
 | D3 (GPIO4) | STOP/GO switch: common to GND, normally-open to the pin (internal pull-up) |
-| D4 (GPIO5) | 330 ohm, then the LED ring +; ring - to GND |
+| D4 (GPIO5) | LED ring + (built-in resistor, 3 to 6 V, no external resistor); ring - to GND |
 | BAT+ / BAT- pads (underside) | LiPo through the slide switch in the + lead |
 
 - **Stop/go needs no change to the main sketch.** The packet format is unchanged (key 0x5A3C, version 1, 8 bytes). The switch is latching: off sends speed 0 (`LATCHING_SWITCH 0` makes a momentary button toggle instead), which the main sketch already treats as 0 rpm; GO ramps back up to the dial over about 2 s. The drivers stay enabled (holding torque) unless `REMOTE_CAN_ENABLE 1`, which also disables them at 0 rpm. A hard stop that always disables the drivers would need a spare bit in the packet and a handler in the main sketch (not requested).

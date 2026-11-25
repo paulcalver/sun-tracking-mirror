@@ -28,7 +28,8 @@
  *   A1  GPIO2  JITTER pot wiper
  *   A2  GPIO3  battery divider middle  (optional)
  *   D3  GPIO4  STOP/GO switch, common to GND, normally-open to the pin (internal pull-up)
- *   D4  GPIO5  LED ring + via 330 ohm, ring - to GND (also fine for a plain LED)
+ *   D4  GPIO5  LED ring + direct (it has its own resistor, 3 to 6 V), ring - to GND.
+ *              For a plain 5 mm LED use 330 ohm in series.
  * Board: XIAO ESP32-S3 (set USB CDC On Boot to Enabled to see the serial prints).
  *
  * The main unit ignores each pot until it has moved a little from its reading

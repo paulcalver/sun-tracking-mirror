@@ -83,3 +83,13 @@ The carrier hubs end **0.2 mm past the bearing mouth** (hub length 51.7 mm from 
 ## Spindle block bearing seats, same fixes as the ring (2026-11-25)
 
 The two 608ZZ pockets in the spindle block are now 22.14 mm across (was 22.10), the same +0.14 mm over the bearing OD that gave the friction fit on the ring's 684ZZ pockets, and both pocket mouths have a 0.4 mm lead-in chamfer. Not changed: the relief behind the upper bearing (14 mm, already there), the 45 degree cone ceiling over the lower bearing (already clears the inner race), and the pocket depth (the ring's extra 0.4 mm protected its first printed layers; the block prints upright, and deepening the upper pocket would drop the pulley 0.4 mm). The 22.14 mm figure is untested on a block: print one and report whether it is too tight or too loose.
+
+## Desk option: two printed feet instead of wall standoffs (2026-11-25)
+
+`python3 cad/src/spinning_mirror_wall_row_50.py --mirror100 --desk` builds the six-mirror piece standing on a desk. Own outputs in `cad/out/spinning-mirror/spinning-mirror-wall-row-100-desk/` and `cad/media/previews/spinning-mirror-wall-row-100-desk/`, no BOM. Everything above the rail is identical to the wall build.
+
+**Foot** (`print_desk_foot`, two off, identical): 60 x 60 x 6 mm plate with rounded corners, a 20 mm web up to the rail bottom with 45 degree gussets (prints plate down, no supports). Two M5 x 50 screws go up from the underside into T-nuts in the rail's **bottom** slot, 20 mm either side of the foot centre, heads in 10 mm counterbores; a short key rib sits in the slot opening so the foot cannot twist. Four 15 mm recesses, 1 mm deep, take self-adhesive rubber pads. The feet sit under units 2 and 5 (X = 140 and 560), either side of the electronics box (X 237 to 462), which hangs 44 mm below the rail. The rail is 50 mm above the desk, so the box is 6 mm clear. The screw seat is 45 mm below the rail, the same as the wall standoffs, so the same M5 x 50 fits.
+
+**Stability** (computed from the model): 3.39 kg, centre of mass 88 mm above the desk on the rail centre line. It tips front to back at about 19 degrees and along the rail at about 70 degrees. Keep the rubber pads on; the tumbling mirrors will shake it.
+
+**BOM difference from the wall build:** drop the 3 wall standoffs and the 2 x 3 + 2 M4 x 40 wall screws; M5 slide-in T-nuts +1 (4 for the feet instead of 3 for the standoffs); M5 x 50 screws 2 + 1 spare instead of 3 + 1; add 8 self-adhesive rubber pads (15 mm). The foot dimensions are untested on a printed part: print one and check the rib in the slot opening and the T-nut alignment.

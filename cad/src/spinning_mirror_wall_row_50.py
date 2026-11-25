@@ -11,7 +11,7 @@ shaft up, and drives the first loop through a single GT2 pulley. All rings are f
 
 World frame (mm): wall plane at Y = 0, the viewer on +Y, X along the row, Z up with the rail bottom at Z = 0. Spindle line at Y = 45.
 Usage (from the repo root):
-  python3 cad/src/spinning_mirror_wall_row_50.py [--single10] [--mirror100 [--eight]] [--check] [--up y|z] [--seed N]
+  python3 cad/src/spinning_mirror_wall_row_50.py [--single10] [--mirror100 [--eight | --desk]] [--check] [--up y|z] [--seed N]
 Writes cad/out/spinning-mirror/spinning-mirror-wall-row-50/ (assembly STEP, parts/<print|print_ready|purchase>/),
 bom/spinning-mirrors/archive/bom-spinning-mirror-wall-row-50.csv and previews in cad/media/previews/spinning-mirror-wall-row-50/.
 """
@@ -33,8 +33,9 @@ CAD = HERE.parent
 SINGLE10 = "--single10" in sys.argv                # alternative: one row of ten units on one NEMA 17
 M100 = "--mirror100" in sys.argv                   # alternative: 100 mm mirrors (8 mm spindle, 608ZZ, 4 mm axle on 684ZZ, 140 mm pitch)
 EIGHT = M100 and "--eight" in sys.argv             # alt CAD only: the 100 mm piece with eight mirrors (four per motor) on a 1150 mm rail; own output folder, no BOM
+DESK = M100 and not EIGHT and "--desk" in sys.argv   # alt CAD only: the six-mirror piece standing on two printed desk feet instead of the three wall standoffs; own output folder, no BOM (the doc lists the differences)
 SIX = M100 and not EIGHT                           # the 100 mm piece is now the six-mirror build (three per motor, 870 mm rail)
-TAG = f"spinning-mirror-wall-row-{'100' if M100 else '50'}" + ("-single10" if SINGLE10 else "") + ("-eight" if EIGHT else "")
+TAG = f"spinning-mirror-wall-row-{'100' if M100 else '50'}" + ("-single10" if SINGLE10 else "") + ("-eight" if EIGHT else "") + ("-desk" if DESK else "")
 OUTD = CAD / "out" / "spinning-mirror" / TAG
 PARTS = OUTD / "parts"
 IMG = CAD / "media" / "previews" / TAG
@@ -117,6 +118,14 @@ WEB_Z0, WEB_Z1 = BLK_Z1 - 6.0, BLK_Z1          # web 6 mm, top flush with the be
 BR_X0, BR_X1 = X_MOTOR - 26.0, RAIL_X0 + (40.0 if M100 else 28.0)     # bracket extent along the rail
 BR_THICK_X0 = RAIL_X0                          # the thick part sits on the rail from here to BR_X1
 BR_TNUT = (RAIL_X0 + 6.0, RAIL_X0 + 22.0)
+
+# desk option (--desk): two feet bolted into the rail's bottom T-slot under units 2 and 5 (X = 140 and 560, either side of the electronics box), instead of the wall standoffs
+DF_W, DF_D, DF_T = 60.0, 60.0, 6.0                  # footprint along the rail, front to back, and plate thickness
+DF_H = 50.0                                             # rail bottom above the desk: the box hangs 44 mm below the rail, so 6 mm clear; also puts the screw seat 45 mm below the rail, so the same M5 x 50 as the standoffs fits
+DF_X = (PITCH, (N - 2) * PITCH)                        # under the spindles of units 2 and 5
+DF_SCREW_DX = 20.0                                      # the two M5 sit 20 mm either side of the foot centre, like the unit blocks
+DF_PAD_D, DF_PAD_DEPTH, DF_PAD_OFF = 15.0, 1.0, 19.0   # recess for a 15 mm self-adhesive rubber pad in each corner of the underside
+
 
 # electronics box, hung under the rail by two M5 screws into slide-in T-nuts in the bottom slot; the lid carries a 7 x 9 cm perfboard
 EBX = (XSUM / 2 - 16.0) if DUAL else 0.0                     # dual: the box sits under the middle of the rail, leads leave both ends
@@ -422,12 +431,32 @@ def electronics_lid():
     return lid
 
 
+def desk_foot():
+    """Desk foot at X = 0, centred under the rail: a 60 x 60 plate with a 20 mm web up to the rail bottom, 45 degree gussets (print plate down, no supports),
+    two M5 holes up into T-nuts in the bottom slot with the heads in 10 mm counterbores in the underside, a short key rib in the slot opening, and four recesses for rubber pads."""
+    z0 = -DF_H
+    pts = [(Y_R - DF_D / 2, z0), (Y_R + DF_D / 2, z0), (Y_R + DF_D / 2, z0 + DF_T), (Y_R + 10, z0 + DF_T + 20), (Y_R + 10, 0),
+           (Y_R - 10, 0), (Y_R - 10, z0 + DF_T + 20), (Y_R - DF_D / 2, z0 + DF_T)]
+    f = cq.Workplane("YZ").workplane(offset=-DF_W / 2).polyline(pts).close().extrude(DF_W)
+    f = f.intersect(box(-DF_W / 2, DF_W / 2, Y_R - DF_D / 2, Y_R + DF_D / 2, z0, 0).edges("|Z").fillet(8.0))      # rounded plan corners
+    f = f.union(box(-14, 14, Y_R - 2.9, Y_R + 2.9, 0, 1.6))                                  # key rib in the slot opening (6.2 wide, 1.8 deep) stops the foot twisting
+    for sx in (-1, 1):
+        f = f.cut(cylz(2.75, z0 - 1, 3, sx * DF_SCREW_DX, Y_R)).cut(cylz(5.0, z0 - 1, z0 + (DF_H - 45.0), sx * DF_SCREW_DX, Y_R))   # M5 hole, head counterbore down to 45 mm below the rail
+        for sy in (-1, 1):
+            f = f.cut(cylz(DF_PAD_D / 2, z0 - 1, z0 + DF_PAD_DEPTH, sx * DF_PAD_OFF, Y_R + sy * DF_PAD_OFF))
+    return f
+
+
 def build_frame():
     ROW.clear()
     ELEC.clear()
     add(ROW, f"rail_2020_aluminium_{int(RAIL_L)}mm", rail(), ALU, "frame", "alu")
-    for k, x in enumerate(STANDOFF_X):
-        add(ROW, f"print_wall_standoff_{k + 1}", standoff().translate((x, 0, 0)), PRINT_C, "frame", "print")
+    if DESK:
+        for k, x in enumerate(DF_X):
+            add(ROW, f"print_desk_foot_{k + 1}", desk_foot().translate((x, 0, 0)), PRINT_C, "frame", "print")
+    else:
+        for k, x in enumerate(STANDOFF_X):
+            add(ROW, f"print_wall_standoff_{k + 1}", standoff().translate((x, 0, 0)), PRINT_C, "frame", "print")
     for side in (0, 1) if DUAL else (0,):                                        # motor end: bracket, NEMA 17, shaft, motor pulley, belts; the right-hand one is the mirror image
         sfx = "_2" if side else ""
         xm = X_MOTOR2 if side else X_MOTOR
@@ -557,14 +586,14 @@ def export_all(yup):
     for nm, s, *_ in UNIT:
         put(nm, s)
     for nm, s, *_ in ROW + ELEC:
-        if nm.startswith("print_wall_standoff_") and not nm.endswith("_1"):
-            continue                                                  # the standoffs are identical
+        if nm.startswith(("print_wall_standoff_", "print_desk_foot_")) and not nm.endswith("_1"):
+            continue                                                  # the standoffs (or feet) are identical
         if nm.startswith("belt_gt2") and not nm.endswith("_1"):
             continue
         if nm.startswith("placeholder_tmc2209") and not nm.endswith("_1"):
             continue
-        dx = STANDOFF_X[0] if nm == "print_wall_standoff_1" else 0.0
-        put(nm.replace("print_wall_standoff_1", "print_wall_standoff").replace(f"belt_gt2_6mm_{320 if M100 else 200}_loop_1", f"belt_gt2_6mm_{320 if M100 else 200}_loop"), s.translate((-dx, 0, 0)))
+        dx = (DF_X[0] if DESK else STANDOFF_X[0]) if nm in ("print_wall_standoff_1", "print_desk_foot_1") else 0.0
+        put(nm.replace("print_wall_standoff_1", "print_wall_standoff").replace("print_desk_foot_1", "print_desk_foot").replace(f"belt_gt2_6mm_{320 if M100 else 200}_loop_1", f"belt_gt2_6mm_{320 if M100 else 200}_loop"), s.translate((-dx, 0, 0)))
     print("Wrote part STEP files to", PARTS)
 
 
@@ -749,6 +778,24 @@ def write_bom():
     print("Wrote", BOMF, f"(priced lines total {total:.2f} GBP ex VAT)")
 
 
+def desk_stability():
+    """Centre of mass of the whole desk piece (rings at a mid pose) over the feet: how far it can be tipped before it falls."""
+    import math
+    from OCP.BRepGProp import BRepGProp
+    from OCP.GProp import GProp_GProps
+    m = cx = cy = cz = 0.0
+    for nm, sh, _, _, mat in all_parts(poses_same_angle(3)):
+        p = GProp_GProps()
+        BRepGProp.VolumeProperties_s(sh.wrapped, p)
+        c, w = p.CentreOfMass(), p.Mass() * RHO[mat]
+        m, cx, cy, cz = m + w, cx + w * c.X(), cy + w * c.Y(), cz + w * c.Z()
+    cx, cy, cz = cx / m, cy / m, cz / m + DF_H
+    hx = (DF_X[1] + DF_W / 2 - (DF_X[0] - DF_W / 2)) / 2
+    mid = (DF_X[0] + DF_X[1]) / 2
+    print(f"Desk piece {m / 1000:.2f} kg, centre of mass {cz:.0f} mm above the desk, X {cx:.0f}, {cy - Y_R:+.1f} mm off the rail centre line; "
+          f"tips front/back at {math.degrees(math.atan((DF_D / 2 - abs(cy - Y_R)) / cz)):.1f} degrees, along the rail at {math.degrees(math.atan((hx - abs(cx - mid)) / cz)):.0f} degrees")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--up", choices=("y", "z"), default="y")
@@ -757,6 +804,7 @@ def main():
     ap.add_argument("--single10", action="store_true")
     ap.add_argument("--mirror100", action="store_true")
     ap.add_argument("--eight", action="store_true")
+    ap.add_argument("--desk", action="store_true")
     a = ap.parse_args()
     build()
     i_lo, i_hi = inertia_unit(0), inertia_unit(90)
@@ -768,6 +816,8 @@ def main():
     print(f"One unit: turning mass {unit_mass_g(('spin', 'tilt')):.0f} g (mirror group {unit_mass_g(('tilt',)):.0f} g), spin inertia {i_lo:.2e} to {i_hi:.2e} kg m2; "
           f"{NM} units per motor incl. rotor {row_lo:.2e} to {row_hi:.2e} kg m2; torque for 100 rad/s2 {row_hi * 100:.3f} N m, for 300 rad/s2 {row_hi * 300:.3f} N m (before friction)")
     print(f"Mass: frame and motors about {frame_mass_g() / 1000:.2f} kg, {N * ROWS} units about {N * ROWS * unit_mass_g(('fixed', 'spin', 'tilt')) / 1000:.2f} kg; wall piece about {(ROWS * ROW_PITCH + 150) / 1000:.2f} m tall, {((X_MOTOR2 if DUAL else RAIL_X1) - X_MOTOR + 120) / 1000:.2f} m wide")
+    if DESK:
+        desk_stability()
     if a.check:
         multi = [(nm, len(s.Solids())) for nm, s, *_ in UNIT + ROW + ELEC if nm.startswith("print_") and len(s.Solids()) != 1]
         print("printed parts that are not a single solid:", multi or "none")
@@ -798,7 +848,7 @@ def main():
     OUTD.mkdir(parents=True, exist_ok=True)
     IMG.mkdir(parents=True, exist_ok=True)
     export_all(a.up == "y")
-    if not EIGHT:
+    if not (EIGHT or DESK):
         write_bom()
     P0 = poses_same_angle(a.seed)
     assemble(P0, a.up == "y").save(str(OUTD / f"{TAG}-assembly.step"))
@@ -807,18 +857,18 @@ def main():
     if M100:
         top = (ROWS - 1) * ROW_PITCH + 260
         x_lo, yh = X_MOTOR - 40, Y_R + 100
-        me, eb = (X_MOTOR - 40, X_MOTOR + 3 * PITCH, 0, Y_R + 60, -30, 260), ((EB_X0 - 70, EB_X1 + 70, Y_R - 60, Y_R + 60, -60, 45) if DUAL else (-120, 110, Y_R - 60, Y_R + 60, -60, 45))
+        me, eb = (X_MOTOR - 40, X_MOTOR + 3 * PITCH, 0, Y_R + 60, -60 if DESK else -30, 260), ((EB_X0 - 70, EB_X1 + 70, Y_R - 60, Y_R + 60, -60, 45) if DUAL else (-120, 110, Y_R - 60, Y_R + 60, -60, 45))
     else:
         top = (ROWS - 1) * ROW_PITCH + 190
         x_lo, yh = -130, 160
         me, eb = (-120, 200, 0, 100, -30, 190), (-120, 110, 0, 100, -60, 45)
     x_hi = (X_MOTOR2 if DUAL else RAIL_X1) + 40
-    bx = (x_lo, x_hi, 0, yh, -30, top)
+    bx = (x_lo, x_hi, 0, yh, -60 if DESK else -30, top)
     sm.render(P, IMG / "overview.png", [(14, 62, f"{N * ROWS} mirrors of {int(2 * MIR_R)} mm, " + (f"one rail, a NEMA 17 at each end driving {NM}" if DUAL else f"{ROWS} row{'s' if ROWS > 1 else ''} of {N}, one NEMA 17 per row"))], box_=(x_lo, x_hi, 0, yh - 20, -60, top), zoom=1.55)
     sm.render(P, IMG / "front.png", [(0, 90, "View from the room (X runs right to left)")], box_=bx, zoom=1.7)
     sm.render(P, IMG / "motor-end.png", [(18, 40, "Motor end of the bottom row: bracket, NEMA 17, first units")], box_=me, zoom=1.2, only=("r1", "electronics"))
     sm.render(P, IMG / "unit-section.png", [(4, 90, f"Section through the bottom row (y > {Y_R:g} cut away)")], box_=me, zoom=1.2, cut_y=Y_R, only=("r1",))
-    only = ("r1_rail", "electronics", "placeholder", "r1_motor_", "r1_print_motor", "r1_print_wall")
+    only = ("r1_rail", "electronics", "placeholder", "r1_motor_", "r1_print_motor", "r1_print_wall", "r1_print_desk")
     sm.render(P, IMG / "electronics-box.png", [(-28, 35, "Electronics box under the bottom rail (from below)")], box_=eb, zoom=1.15, only=only)
     sm.render(P, IMG / "electronics-box-open.png", [(-38, 28, "Lid removed: perfboard on the lid posts")], box_=eb, zoom=1.15,
               only=only, hide=("electronics_lid",))

@@ -4,7 +4,7 @@ print,"Remote panel plate: print with the outer face on the bed (use the print_r
 buy,"Seeed XIAO ESP32-S3 (pre-soldered headers not needed, wire to the pads)",1,7.50,1,7.50,"Pimoroni, The Pi Hut or Seeed UK","price from memory, check; or use the one already owned"
 buy,"Potentiometer 10K linear (Type B), 5-pack, 16 mm body, 6 mm knurled shaft 15 mm long, M7 thread (HALJIA)",2,5.99,1,5.99,Amazon UK (Pi Hut panel-mount 10K was sold out),"pack of 5, 3 spares; cut each shaft to about 10 to 11 mm above the bushing so the 12.5 mm knob seats; the panel hole is 7.4 mm"
 buy,"Anodized aluminium machined knob, 20 mm x 12.5 mm, 6 mm shaft hole with set screw",2,,2,,"The Pi Hut (black, silver, red, blue or gold)",price not checked; needs a 2 mm hex key; the shaft should stick up about 11 mm from the nut
-buy,"12 mm panel-mount momentary push button, metal, no latch",1,2.00,1,2.00,Amazon UK / eBay,"price from memory, check; the hole is 12.2 mm; the sketch toggles stop/go in software"
+buy,"12 mm metal momentary push button, flat cap, 3-pack with 150 mm leads (owned)",1,0.00,1,0.00,owned,"12 mm thread, 15 mm hex nut, about 15 mm deep behind the panel, two wires: one to GND, one to D3; the hole is 12.2 mm; the sketch toggles stop/go in software"
 buy,"LED 5 mm, any colour, with 330 ohm resistor",1,0.20,1,0.20,owned or any kit,pressed into a 5.2 mm hole
 buy,"Slide switch SPDT, SS12D00 type, 4 mm lever",1,0.30,1,0.30,Amazon UK / eBay,"in the BAT+ lead; the back-wall hole is 9.2 x 4.0 mm, glue it in from inside; check the body size on arrival"
 buy,"LiPo 3.7 V 1000 mAh, 503450 (5 x 34 x 50 mm), with protection board, JST PH 2.0 lead (cut off the plug)",1,6.00,1,6.00,Pimoroni / The Pi Hut / Amazon UK,"price from memory, check; the pocket is for 34 x 50 x 5 mm, a 3 mm taller cell is fine; avoid cells without a protection board"
@@ -16,4 +16,4 @@ buy,"M3 x 10 countersunk screw, stainless",4,0.10,4,0.40,owned or any kit,panel 
 buy,"Self-adhesive rubber feet, 10 mm round x 3 mm",4,0.20,4,0.80,Amazon UK,sit in 0.8 mm recesses under the tray
 buy,"USB-C cable, data and charge",1,0.00,1,0.00,owned,charging and programming; a USB-C power bank or phone charger at the desk is optional
 buy,"Wire 26 AWG silicone, heat shrink, hot-melt glue or double-sided tape",1,0.00,1,0.00,owned,glue the XIAO into its rails and the cell into the pocket
-total,"Priced lines above, inc VAT, WITHOUT the Pi Hut knobs (not priced yet); prices are guesses from memory",,,,23.84,,owned items counted at 0; check before ordering
+total,"Priced lines above, inc VAT, WITHOUT the Pi Hut knobs (not priced yet); prices are guesses from memory",,,,21.84,,owned items counted at 0; check before ordering

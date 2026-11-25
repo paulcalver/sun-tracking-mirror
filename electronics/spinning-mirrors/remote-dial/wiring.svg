@@ -1,60 +1,84 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 470" width="900" height="470" font-family="system-ui, -apple-system, Segoe UI, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" width="900" height="560" font-family="system-ui, -apple-system, Segoe UI, sans-serif">
 <style>
 text{font-size:13px;fill:#1d232a}
 .s{font-size:11px;fill:#55606b}
 .b{font-weight:600}
 .box{fill:#f3f5f7;stroke:#44505c;stroke-width:1.5}
 .w{fill:none;stroke-width:2.5;stroke-linecap:round}
-.blk{stroke:#111}.org{stroke:#e08a1e}.blu{stroke:#2a6fd6}
+.blk{stroke:#111}.org{stroke:#e08a1e}.blu{stroke:#2a6fd6}.red{stroke:#d33}.grn{stroke:#2a9d4a}
 </style>
-<rect width="900" height="470" fill="#ffffff"/>
-<text x="30" y="32" class="b" style="font-size:16px">Remote dial: two pots on a second ESP32, radio link to the main unit</text>
+<rect width="900" height="560" fill="#ffffff"/>
+<text x="30" y="32" class="b" style="font-size:16px">Desk remote: two pots, stop/go button and LED on a XIAO ESP32-S3, LiPo powered, radio link to the main unit</text>
 <g class="s">
-<line x1="560" y1="26" x2="590" y2="26" class="w blk"/><text x="596" y="30">GND</text>
-<line x1="640" y1="26" x2="670" y2="26" class="w org"/><text x="676" y="30">3.3 V</text>
-<line x1="730" y1="26" x2="760" y2="26" class="w blu"/><text x="766" y="30">signal</text>
+<line x1="560" y1="50" x2="590" y2="50" class="w blk"/><text x="596" y="54">GND</text>
+<line x1="640" y1="50" x2="670" y2="50" class="w org"/><text x="676" y="54">3.3 V</text>
+<line x1="730" y1="50" x2="760" y2="50" class="w blu"/><text x="766" y="54">signal</text>
+<line x1="560" y1="68" x2="590" y2="68" class="w red"/><text x="596" y="72">battery +</text>
 </g>
 
-<!-- wires -->
-<path d="M260 120 H330" class="w org"/><path d="M260 150 H330" class="w blk"/><path d="M260 180 H330" class="w blu"/>
-<path d="M260 235 H330" class="w org"/><path d="M260 265 H330" class="w blk"/><path d="M260 295 H330" class="w blu"/>
-
 <!-- ESP32 -->
-<rect x="40" y="90" width="220" height="230" rx="6" class="box"/>
+<rect x="40" y="90" width="220" height="300" rx="6" class="box"/>
 <text x="52" y="116" class="b">Remote ESP32</text>
-<text x="52" y="132" class="s">XIAO ESP32-S3</text>
-<text x="52" y="270" class="s">radio: ESP-NOW,</text><text x="52" y="284" class="s">WiFi channel 1</text>
+<text x="52" y="132" class="s">XIAO ESP32-S3, USB-C at the back wall</text>
+<text x="52" y="340" class="s">radio: ESP-NOW,</text><text x="52" y="354" class="s">WiFi channel 1</text>
 <text x="252" y="124" text-anchor="end" class="s">3V3</text>
 <text x="252" y="154" text-anchor="end" class="s">GND</text>
 <text x="252" y="184" text-anchor="end" class="s">A0 (GPIO1)</text>
-<text x="252" y="239" text-anchor="end" class="s">3V3</text>
-<text x="252" y="269" text-anchor="end" class="s">GND</text>
-<text x="252" y="299" text-anchor="end" class="s">A1 (GPIO2)</text>
+<text x="252" y="239" text-anchor="end" class="s">A1 (GPIO2)</text>
+<text x="252" y="269" text-anchor="end" class="s">A2 (GPIO3)</text>
+<text x="252" y="299" text-anchor="end" class="s">D3 (GPIO4)</text>
+<text x="252" y="329" text-anchor="end" class="s">D4 (GPIO5)</text>
+<text x="52" y="374" class="s">BAT+ / BAT- pads on the underside</text>
 
+<!-- wires to pots -->
+<path d="M260 120 H330" class="w org"/><path d="M260 150 H330" class="w blk"/><path d="M260 180 H330" class="w blu"/>
+<path d="M260 235 H330" class="w blu"/>
 <!-- pots -->
-<rect x="330" y="95" width="170" height="100" rx="6" class="box"/>
+<rect x="330" y="95" width="190" height="100" rx="6" class="box"/>
 <text x="340" y="116" class="b">SPEED pot, 10k linear</text>
 <text x="340" y="132" class="s">end 1: 3V3</text><text x="340" y="154" class="s">end 2: GND</text><text x="340" y="184" class="s">wiper: A0 (GPIO1)</text>
-<rect x="330" y="210" width="170" height="100" rx="6" class="box"/>
+<rect x="330" y="210" width="190" height="75" rx="6" class="box"/>
 <text x="340" y="231" class="b">JITTER pot, 10k linear</text>
-<text x="340" y="247" class="s">end 1: 3V3</text><text x="340" y="269" class="s">end 2: GND</text><text x="340" y="299" class="s">wiper: A1 (GPIO2)</text>
-<text x="515" y="150" class="s">optional 100 nF from each</text><text x="515" y="164" class="s">wiper to GND (calmer reading)</text>
+<text x="340" y="247" class="s">ends: 3V3 and GND (same rails)</text><text x="340" y="269" class="s">wiper: A1 (GPIO2)</text>
+<text x="535" y="150" class="s">optional 100 nF from each</text><text x="535" y="164" class="s">wiper to GND (calmer reading)</text>
+
+<!-- battery divider -->
+<path d="M260 265 H300 V298 H330" class="w blu"/>
+<rect x="330" y="296" width="190" height="52" rx="6" class="box"/>
+<text x="340" y="316" class="b">Battery level (optional)</text>
+<text x="340" y="332" class="s">100k from BAT+ to A2, 100k from A2 to GND</text>
+
+<!-- button -->
+<path d="M260 295 H280 V380 H330" class="w blu"/>
+<rect x="330" y="362" width="190" height="46" rx="6" class="box"/>
+<text x="340" y="382" class="b">STOP/GO button, 12 mm</text><text x="340" y="398" class="s">D3 to GND when pressed (pull-up in code)</text>
+<!-- LED -->
+<path d="M260 325 H290 V440 H330" class="w blu"/>
+<rect x="330" y="420" width="190" height="46" rx="6" class="box"/>
+<text x="340" y="440" class="b">SEND LED, 5 mm</text><text x="340" y="456" class="s">D4, 330 ohm in series, then GND</text>
+
+<!-- battery and switch -->
+<rect x="40" y="430" width="95" height="60" rx="6" class="box"/>
+<text x="50" y="452" class="b">LiPo 3.7 V</text><text x="50" y="468" class="s">503450, 1000 mAh</text><text x="50" y="482" class="s">with protection</text>
+<rect x="160" y="440" width="100" height="40" rx="6" class="box"/>
+<text x="170" y="458" class="b">Slide switch</text><text x="170" y="472" class="s">in the + lead</text>
+<path d="M135 460 H160" class="w red"/><path d="M260 460 V420 H225 V392" class="w red"/>
+<path d="M88 430 V392" class="w blk" stroke-dasharray="5 4"/><text x="94" y="418" class="s">to BAT-</text>
+<text x="230" y="414" class="s" text-anchor="end"></text>
 
 <!-- USB -->
-<rect x="40" y="350" width="220" height="50" rx="6" class="box"/>
-<text x="52" y="372" class="b">USB power</text><text x="52" y="388" class="s">power bank or wall adapter</text>
-<path d="M150 320 V350" class="w blk" stroke-dasharray="5 4"/>
+<text x="40" y="520" class="s">USB-C (back wall): charges the cell at about 100 mA and powers the unit; also used to flash.</text>
 
 <!-- radio link -->
-<path d="M560 230 q40 -40 80 0 M545 245 q55 -65 110 0" fill="none" stroke="#2a6fd6" stroke-width="2.5" stroke-dasharray="6 5"/>
-<text x="600" y="275" text-anchor="middle" class="s">ESP-NOW, under 3 m here</text>
-<rect x="690" y="200" width="190" height="110" rx="6" class="box"/>
-<text x="702" y="224" class="b">Main ESP32</text>
-<text x="702" y="242" class="s">spinning_mirror.ino</text>
-<text x="702" y="260" class="s">ENABLE_REMOTE_DIAL 1</text>
-<text x="702" y="278" class="s">no extra wiring: it listens</text><text x="702" y="292" class="s">on its built-in radio</text>
+<path d="M650 230 q40 -40 80 0 M635 245 q55 -65 110 0" fill="none" stroke="#2a6fd6" stroke-width="2.5" stroke-dasharray="6 5"/>
+<text x="690" y="275" text-anchor="middle" class="s">ESP-NOW, under 3 m here</text>
+<rect x="640" y="300" width="230" height="110" rx="6" class="box"/>
+<text x="652" y="324" class="b">Main ESP32</text>
+<text x="652" y="342" class="s">spinning_mirror.ino</text>
+<text x="652" y="360" class="s">ENABLE_REMOTE_DIAL 1</text>
+<text x="652" y="378" class="s">no extra wiring: it listens</text><text x="652" y="392" class="s">on its built-in radio</text>
 
-<rect x="30" y="420" width="840" height="40" rx="6" fill="#fafbfc" stroke="#c8d0d8"/>
-<text x="42" y="438" class="s">Speed pot sets base rpm (0 to REMOTE_RPM_MAX), jitter pot sets wobble size (0 to 0.8). Dials do not start the drivers unless REMOTE_CAN_ENABLE is 1.</text>
-<text x="42" y="453" class="s">Nothing here has been built or tested. Check each pin label on your board; flip INVERT_* in the sketch if a pot reads backwards.</text>
+<rect x="30" y="500" width="840" height="48" rx="6" fill="#fafbfc" stroke="#c8d0d8"/>
+<text x="42" y="518" class="s">Speed pot sets base rpm (0 to REMOTE_RPM_MAX), jitter pot sets wobble size (0 to 0.8). STOP sends speed 0; GO ramps back up. Packet format unchanged.</text>
+<text x="42" y="533" class="s">LED: blink = running, steady dim = stopped, fast flicker = battery low. Nothing here has been built or tested; flip INVERT_* in the sketch if a pot reads backwards.</text>
 </svg>

@@ -2,7 +2,7 @@
 """CAD: desk remote controller for the spinning mirrors (CadQuery). Draft, nothing printed or tested.
 
 A sloped desk wedge, 120 x 76 mm in plan, 22 mm high at the front and 42 mm at the back, with a 15 degree control panel:
-two 16 mm panel pots (SPEED and JITTER) with 20 mm knobs, a 12 mm STOP/GO push button between them and a 5 mm SEND LED above it.
+two 16 mm panel pots (SPEED and JITTER) with 20 mm knobs, a 16 mm latching STOP/GO switch with an LED ring (also the SEND light) between them.
 Inside: a Seeed XIAO ESP32-S3 at the back with its USB-C port in the back wall (charging and programming), a 3.7 V LiPo
 (503450 class, 50 x 34 x 5 mm) in a pocket under the left pot, and a slide switch in the back wall that breaks the battery lead.
 Radio is ESP-NOW (firmware/remote_dial/remote_dial.ino); no cable to the sculpture.
@@ -56,8 +56,7 @@ SCREW_D, SCREW_HEAD = 3.4, 6.4           # M3 countersunk screw: clearance hole,
 POT_X, POT_V = 30.0, 6.0                 # pot axes at x = +/-30, v along the panel from its centre
 POT_HOLE = 7.4                           # 16 mm Alpha-type pot, M7 bushing, 6 mm shaft
 KNOB_D, KNOB_H = 20.0, 12.5               # Pi Hut anodised aluminium knob, 20 mm x 12.5 mm, 6 mm hole with a set screw
-BTN_V, BTN_D = -4.0, 12.2                # 12 mm panel push button
-LED_V, LED_D = 17.0, 5.2                 # 5 mm LED pressed in
+BTN_V, BTN_D = -2.0, 16.2                # 16 mm rugged metal latching on/off switch with an LED ring (it is the STOP/GO switch and the SEND light)
 TICKS, TICK_R, TICK_D, TICK_DEPTH = 11, 13.5, 1.4, 0.5   # dot scale over 270 degrees round each knob
 TEXT_DEPTH = 0.5
 
@@ -138,7 +137,6 @@ def build_panel():
     for sx in (-1, 1):
         slab = slab.cut(lcyl(POT_HOLE / 2, -1, PT + 1, sx * POT_X, POT_V))
     slab = slab.cut(lcyl(BTN_D / 2, -1, PT + 1, 0, BTN_V))
-    slab = slab.cut(lcyl(LED_D / 2, -1, PT + 1, 0, LED_V))
     for x, v in POSTS:
         slab = slab.cut(cylz(SCREW_D / 2, -1, PT + 1, x, v))
         slab = slab.cut(cq.Workplane(obj=cq.Solid.makeCone(SCREW_D / 2, SCREW_HEAD / 2, (SCREW_HEAD - SCREW_D) / 2, cq.Vector(x, v, PT - (SCREW_HEAD - SCREW_D) / 2), cq.Vector(0, 0, 1))))
@@ -149,7 +147,7 @@ def build_panel():
             a = math.radians(-135 + 270 * i / (TICKS - 1))
             slab = slab.cut(cylz(TICK_D / 2, PT - TICK_DEPTH, PT + 1, sx * POT_X + TICK_R * math.sin(a), POT_V + TICK_R * math.cos(a)))
     # engraved labels (skipped quietly if the build has no font)
-    labels = [("SPEED", -POT_X, -26.0, 6.0), ("JITTER", POT_X, -26.0, 6.0), ("STOP / GO", 0.0, BTN_V - 11.0, 3.6), ("SEND", 0.0, LED_V + 7.0, 3.0)]
+    labels = [("SPEED", -POT_X, -26.0, 6.0), ("JITTER", POT_X, -26.0, 6.0), ("STOP / GO", 0.0, BTN_V - 15.0, 3.6)]
     for txt, x, v, size in labels:
         try:
             t = cq.Workplane("XY").workplane(offset=PT).center(x, v).text(txt, size, -TEXT_DEPTH, combine=False, halign="center", valign="center", kind="bold")
@@ -168,8 +166,7 @@ def purchased():
         out.append((f"pot_{nm}", to_world(lcyl(8.0, -19.4, -0.4, x, POT_V).union(lcyl(3.5, -0.4, 6.6, x, POT_V)).union(lcyl(3.0, 6.6, 18.0, x, POT_V))), STEEL))
         out.append((f"nut_{nm}", to_world(lcyl(5.0, PT, PT + 2.0, x, POT_V).cut(lcyl(3.6, PT - 1, PT + 3, x, POT_V))), "#a9b0b8"))
         out.append((f"knob_{nm}", to_world(lcyl(KNOB_D / 2, 7.2, 7.2 + KNOB_H, x, POT_V).cut(lcyl(3.0, 7.0, 18.1, x, POT_V))), "#d9dde1"))
-    out.append(("button", to_world(lcyl(5.9, -25.0, PT + 0.5, 0, BTN_V).union(lcyl(7.0, PT, PT + 3.0, 0, BTN_V))), "#c9a24a"))
-    out.append(("led", to_world(lcyl(2.5, -8.0, PT + 0.5, 0, LED_V)), "#e03a2a"))
+    out.append(("button", to_world(lcyl(7.9, -25.0, PT + 0.5, 0, BTN_V).union(lcyl(9.5, PT, PT + 4.0, 0, BTN_V))), "#c4c8cc"))   # body and terminals about 25 mm deep (assumed, check)
     y0 = XIAO_Y1 - XIAO_L
     xiao = box(-XIAO_W / 2, XIAO_W / 2, y0, XIAO_Y1, FLOOR + RAIL_H, FLOOR + RAIL_H + 1.2).union(box(-4.5, 4.5, y0 + 13.0, XIAO_Y1 + 0.8, FLOOR + RAIL_H + 1.2, FLOOR + RAIL_H + 4.4))
     out.append(("xiao_esp32s3", xiao, "#2a6fd6"))
@@ -225,13 +222,13 @@ def main():
         for n, s, *_ in P:
             if n.startswith("print_"):
                 continue
-            if n in ("pot_speed", "pot_jitter", "button", "led", "nut_speed", "nut_jitter", "knob_speed", "knob_jitter"):
+            if n in ("pot_speed", "pot_jitter", "button", "nut_speed", "nut_jitter", "knob_speed", "knob_jitter"):
                 continue
             if abs(s.intersect(pr).Volume() - s.Volume()) > 0.5:
                 outside.append(n)
         print("inside parts outside the tray outline:", outside or "none")
         # pots, button and LED must stay clear of the floor (the battery and XIAO are covered by the clash test)
-        floor_hits = [n for n, s, *_ in P if n in ("pot_speed", "pot_jitter", "button", "led") and s.BoundingBox().zmin < FLOOR + 2.0]
+        floor_hits = [n for n, s, *_ in P if n in ("pot_speed", "pot_jitter", "button") and s.BoundingBox().zmin < FLOOR + 2.0]
         print("panel parts closer than 2 mm to the floor:", floor_hits or "none")
         return
     OUTD.mkdir(parents=True, exist_ok=True)
@@ -243,7 +240,7 @@ def main():
     asm.save(str(OUTD / f"{TAG}-assembly.step"))
     print("Wrote", OUTD / f"{TAG}-assembly.step")
     bb = (-90, 90, -70, 70, 0, 60)
-    sm.render(P, IMG / "overview.png", [(28, -62, "Desk remote: SPEED, JITTER, STOP/GO and a SEND LED")], box_=(-70, 70, -55, 55, -8, 62), zoom=1.7)
+    sm.render(P, IMG / "overview.png", [(28, -62, "Desk remote: SPEED, JITTER, STOP/GO and the LED ring")], box_=(-70, 70, -55, 55, -8, 62), zoom=1.7)
     sm.render(P, IMG / "inside.png", [(55, -70, "Panel and knobs lifted off: XIAO, battery pocket, posts")], box_=(-70, 70, -50, 50, -4, 48), zoom=1.7, hide=("panel", "knob", "nut", "pot_", "button", "led"))
     sm.render(P, IMG / "back.png", [(18, 150, "Back: USB-C (charge and program) and the battery slide switch")], box_=(-70, 70, -50, 50, -4, 48), zoom=1.7)
     sm.render(P, IMG / "panel.png", [(70, -90, "Panel plate, outer face: labels and dot scales")], box_=(-70, 70, -50, 50, -4, 60), zoom=1.7, only=("panel",))

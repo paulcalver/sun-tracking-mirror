@@ -51,11 +51,11 @@ text{font-size:13px;fill:#1d232a}
 <!-- button -->
 <path d="M260 295 H280 V380 H330" class="w blu"/>
 <rect x="330" y="362" width="190" height="46" rx="6" class="box"/>
-<text x="340" y="382" class="b">STOP/GO button, 12 mm</text><text x="340" y="398" class="s">D3 to GND when pressed (pull-up in code)</text>
+<text x="340" y="382" class="b">STOP/GO switch, 16 mm latching</text><text x="340" y="398" class="s">common to GND, NO to D3 (pull-up in code)</text>
 <!-- LED -->
 <path d="M260 325 H290 V440 H330" class="w blu"/>
 <rect x="330" y="420" width="190" height="46" rx="6" class="box"/>
-<text x="340" y="440" class="b">SEND LED, 5 mm</text><text x="340" y="456" class="s">D4, 330 ohm in series, then GND</text>
+<text x="340" y="440" class="b">Same switch: LED ring (3 to 6 V)</text><text x="340" y="456" class="s">D4 via 330 ohm to ring +, ring - to GND</text>
 
 <!-- battery and switch -->
 <rect x="40" y="430" width="95" height="60" rx="6" class="box"/>
@@ -79,6 +79,6 @@ text{font-size:13px;fill:#1d232a}
 <text x="652" y="378" class="s">no extra wiring: it listens</text><text x="652" y="392" class="s">on its built-in radio</text>
 
 <rect x="30" y="500" width="840" height="48" rx="6" fill="#fafbfc" stroke="#c8d0d8"/>
-<text x="42" y="518" class="s">Speed pot sets base rpm (0 to REMOTE_RPM_MAX), jitter pot sets wobble size (0 to 0.8). STOP sends speed 0; GO ramps back up. Packet format unchanged.</text>
+<text x="42" y="518" class="s">Speed pot sets base rpm (0 to REMOTE_RPM_MAX), jitter pot sets wobble size (0 to 0.8). Switch off sends speed 0; on ramps back up. Packet format unchanged.</text>
 <text x="42" y="533" class="s">LED: blink = running, steady dim = stopped, fast flicker = battery low. Nothing here has been built or tested; flip INVERT_* in the sketch if a pot reads backwards.</text>
 </svg>

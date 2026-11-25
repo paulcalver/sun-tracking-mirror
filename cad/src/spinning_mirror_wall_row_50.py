@@ -246,7 +246,8 @@ def build_unit():
     ring = ring.intersect(box(-R_OUT - 5, R_OUT + 5, -RING_W / 2, RING_W / 2, 0, ZC + R_OUT + 5))   # bosses flush with the faces: prints flat
     add(UNIT, "print_ring_with_foot", ring, PRINT_C, "spin", "print")
     for nm, sx in ((f"bearing_{BRG_H_NAME}_a", 1), (f"bearing_{BRG_H_NAME}_b", -1)):
-        x0 = BOSS_X0 if sx > 0 else -BOSS_X0 - BRG[2]
+        fb = POCKET_BACK if M100 else 0.0                                      # 100 mm: the bearing is modelled pressed fully home onto the pocket floor, 0.4 mm in from the mouth
+        x0 = (BOSS_X0 + fb) if sx > 0 else -BOSS_X0 - BRG[2] - fb
         add(UNIT, nm, cylx(BRG[1] / 2, x0, x0 + BRG[2], 0, ZC).cut(cylx(BRG[0] / 2, x0 - 1, x0 + BRG[2] + 1, 0, ZC)), STEEL, "spin", "steel")
 
     rim = cylz(R_C, ZC - CAR_T / 2, ZC + CAR_T / 2).cut(cylz(MIR_R - RIM_W, ZC - CAR_T, ZC + CAR_T))
@@ -256,7 +257,7 @@ def build_unit():
         car = car.union(box(-PAD_W / 2, PAD_W / 2, -(R_C - 1.5), -(R_C - 1.5) + PAD_D, ZC - CAR_T / 2, ZC + CAR_T / 2))
     if not M100:
         car = car.union(box(-BAR_W / 2, BAR_W / 2, -MIR_R + 1, MIR_R - 1, ZC - CAR_T / 2, ZC + CAR_T / 2))   # second bar; the 100 mm carrier needs only the rim and one bar (a 1.5 mm disc glued on a 3 mm rim sags about 0.06 mm at 10 g)
-    hub_len = BOSS_X0 - 0.1
+    hub_len = BOSS_X0 + (0.2 if M100 else -0.1)                                 # 100 mm: hub ends 0.2 mm past the bearing mouth, so 0.2 mm clear of a bearing pressed fully home (its face sits POCKET_BACK = 0.4 mm in); a bearing left flush would jam it, so press them home
     car = car.union(cylx(HUB_D / 2, MIR_R - 1, hub_len, 0, ZC)).union(cylx(HUB_D / 2, -hub_len, -MIR_R + 1, 0, ZC))
     car = car.cut(cylx(BORE_D / 2, -hub_len - 1, hub_len + 1, 0, ZC))
     if M100:                                                                         # teardrop roof (flat-topped, 45 degree sides) through the carrier body so the sideways bore does not sag when printed flat

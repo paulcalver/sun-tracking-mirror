@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """CAD: desk remote controller for the spinning mirrors (CadQuery). Draft, nothing printed or tested.
 
-A sloped desk wedge, 120 x 76 mm in plan, 22 mm high at the front and 42 mm at the back, with a 15 degree control panel:
+A sloped desk wedge, 120 x 76 mm in plan, 31 mm high at the front and 51 mm at the back, with a 15 degree control panel:
 two 16 mm panel pots (SPEED and JITTER) with 20 mm knobs, a 16 mm latching STOP/GO switch with an LED ring (also the SEND light) between them.
 Inside: a Seeed XIAO ESP32-S3 at the back with its USB-C port in the back wall (charging and programming), a 3.7 V LiPo
 (503450 class, 50 x 34 x 5 mm) in a pocket under the left pot, and a slide switch in the back wall that breaks the battery lead.
@@ -43,11 +43,11 @@ PRINT_C, STEEL = sm.PRINT_C, sm.STEEL
 W, D = 120.0, 76.0                       # outer size in plan
 WALL, FLOOR = 2.4, 2.4
 TILT = 15.0                              # panel slope, degrees
-HF = 22.0                                # outer wall height at the front edge, up to the panel underside
+HF = 31.0                                # outer wall height at the front edge, up to the panel underside (raised for the 35 mm deep switch)
 PT = 3.4                                 # panel thickness
 T = math.radians(TILT)
-ZC = HF + (D / 2) * math.tan(T)          # panel underside height above the floor at y = 0 (32.2)
-HB = HF + D * math.tan(T)                # at the back edge (42.4)
+ZC = HF + (D / 2) * math.tan(T)          # panel underside height above the floor at y = 0 (41.2)
+HB = HF + D * math.tan(T)                # at the back edge (51.4)
 
 POST_IN = 5.6                            # post axis distance from the outer faces
 POST_R, INS_D, INS_DEPTH = 3.75, 4.1, 6.0    # post radius, M3 heat-set insert hole (4.0 to 4.2), depth
@@ -56,7 +56,7 @@ SCREW_D, SCREW_HEAD = 3.4, 6.4           # M3 countersunk screw: clearance hole,
 POT_X, POT_V = 30.0, 6.0                 # pot axes at x = +/-30, v along the panel from its centre
 POT_HOLE = 7.4                           # 16 mm Alpha-type pot, M7 bushing, 6 mm shaft
 KNOB_D, KNOB_H = 20.0, 12.5               # Pi Hut anodised aluminium knob, 20 mm x 12.5 mm, 6 mm hole with a set screw
-BTN_V, BTN_D = -2.0, 16.2                # 16 mm rugged metal latching on/off switch with an LED ring (it is the STOP/GO switch and the SEND light)
+BTN_V, BTN_D = -8.0, 16.2                # 16 mm rugged metal latching on/off switch with an LED ring (it is the STOP/GO switch and the SEND light)
 TICKS, TICK_R, TICK_D, TICK_DEPTH = 11, 13.5, 1.4, 0.5   # dot scale over 270 degrees round each knob
 TEXT_DEPTH = 0.5
 
@@ -166,7 +166,7 @@ def purchased():
         out.append((f"pot_{nm}", to_world(lcyl(8.0, -19.4, -0.4, x, POT_V).union(lcyl(3.5, -0.4, 6.6, x, POT_V)).union(lcyl(3.0, 6.6, 18.0, x, POT_V))), STEEL))
         out.append((f"nut_{nm}", to_world(lcyl(5.0, PT, PT + 2.0, x, POT_V).cut(lcyl(3.6, PT - 1, PT + 3, x, POT_V))), "#a9b0b8"))
         out.append((f"knob_{nm}", to_world(lcyl(KNOB_D / 2, 7.2, 7.2 + KNOB_H, x, POT_V).cut(lcyl(3.0, 7.0, 18.1, x, POT_V))), "#d9dde1"))
-    out.append(("button", to_world(lcyl(7.9, -25.0, PT + 0.5, 0, BTN_V).union(lcyl(9.5, PT, PT + 4.0, 0, BTN_V))), "#c4c8cc"))   # body and terminals about 25 mm deep (assumed, check)
+    out.append(("button", to_world(lcyl(7.9, -31.9, PT, 0, BTN_V).union(lcyl(9.0, PT, PT + 1.5, 0, BTN_V))), "#c4c8cc"))   # supplier drawing: bezel 18 x 1.5, body 29.7 + terminals 5.6 behind the head, so about 32 mm below a 3.4 mm panel
     y0 = XIAO_Y1 - XIAO_L
     xiao = box(-XIAO_W / 2, XIAO_W / 2, y0, XIAO_Y1, FLOOR + RAIL_H, FLOOR + RAIL_H + 1.2).union(box(-4.5, 4.5, y0 + 13.0, XIAO_Y1 + 0.8, FLOOR + RAIL_H + 1.2, FLOOR + RAIL_H + 4.4))
     out.append(("xiao_esp32s3", xiao, "#2a6fd6"))

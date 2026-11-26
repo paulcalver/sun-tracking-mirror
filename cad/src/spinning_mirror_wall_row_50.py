@@ -166,6 +166,7 @@ EB_WAGO_LX = (122.0, 138.0)                              # two Wago 221-415 stan
 WAGO_L, WAGO_H, WAGO_D = 30.0, 8.4, 18.6
 EB_BB = (18.0, 100.0, 45.0)                              # half breadboard minus one power strip: 82 long, 45 wide, 8.5 thick, stuck flat to the tray floor, XIAO at the left end
 BB_T = 8.5
+EB_LEAD_DY = -20.0 if DESK else 0.0                      # desk option: the lead holes sit 20 mm behind the rail centre line (10 mm clear of the rail's back face), so the motor cables climb the back of the rail into its free back slot, not the bottom slot the feet use
 EB_LEAD_LX = (48.0, 84.0)                                # motor lead slots through the lid plate, over the two drivers
 EB_USB_Z = 14.0                                          # USB-C socket centre above the floor (left wall, at the XIAO)
 EB_CORNERS = [(x, y) for x in (EB_X0 + EB_WALL + EB_POST / 2, EB_X1 - EB_WALL - EB_POST / 2) for y in (EB_Y0 + EB_WALL + EB_POST / 2, EB_Y1 - EB_WALL - EB_POST / 2)]
@@ -380,7 +381,7 @@ def eb_plate():
     for x in EB_MOUNT_X:                                                         # M5 up into the T-nuts in the rail's bottom slot, head recessed
         p = p.cut(cylz(2.75, -EB_TOP_T - 1, 1.0, x, Y_R)).cut(cylz(5.0, -EB_TOP_T - 1, -EB_TOP_T + 3.5, x, Y_R))
     for lx in EB_LEAD_LX:                                                        # motor leads up into the rail's bottom slot: 13 x 7 mm slot holes
-        p = p.cut(cq.Workplane("XY").workplane(offset=-EB_TOP_T - 1).center(ebx(lx), Y_R).slot2D(13.0, 7.0).extrude(8.0))
+        p = p.cut(cq.Workplane("XY").workplane(offset=-EB_TOP_T - 1).center(ebx(lx), Y_R + EB_LEAD_DY).slot2D(13.0, 7.0).extrude(8.0))
     return p
 
 

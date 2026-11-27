@@ -129,6 +129,23 @@ constexpr int   REMOTE_ENGAGE      = 40;      // permille a pot must move from i
 #define REMOTE_CAN_ENABLE 0
 constexpr uint16_t REMOTE_KEY = 0x5A3C;       // must equal the remote's key; not real security
 
+// Auto-start: with no computer attached, nothing else would start the motors.
+// 1 = a few seconds after power-up the jitter settings below are applied and
+// the drivers are enabled (soft start from zero). Any serial command that
+// enables, stops or emergency-stops cancels a pending auto-start. 0 = motors
+// stay off until you send "enable 1" (the safe bench default).
+#define AUTOSTART 1
+constexpr uint32_t AUTOSTART_DELAY_MS = 5000;   // wait before the motors start
+// Equivalent serial line:
+//   jmode kick;jrange 20 81;jtime 0.5 1.5;jrev 1;accel 200;jitter 1
+constexpr int   AUTO_JMODE   = 2;       // 0 walk, 1 ou, 2 kick
+constexpr float AUTO_RPM_LO  = 20.0f;
+constexpr float AUTO_RPM_HI  = 81.0f;
+constexpr float AUTO_T_MIN   = 0.5f;    // seconds between jumps
+constexpr float AUTO_T_MAX   = 1.5f;
+constexpr bool  AUTO_JREV    = true;
+constexpr float AUTO_ACCEL   = 200.0f;  // rad/s^2, clamped to ACCEL_MAX
+
 // After "stop" the drivers are released this long after the motors reach zero.
 constexpr uint32_t DISABLE_DELAY_MS = 300;
 // Pause between enabling the drivers and the first step (driver power-up).
@@ -387,7 +404,10 @@ static void rampStep() {
 // ----------------------------------------------------------------------------
 // Commands
 // ----------------------------------------------------------------------------
+static bool autoStartPending = false;
+
 static void cmdEnable(bool on) {
+  autoStartPending = false;
   if (on) {
     stopping = false;
     stopDoneAt = 0;
@@ -406,6 +426,7 @@ static void cmdEnable(bool on) {
 }
 
 static void cmdStop() {
+  autoStartPending = false;
   if (enabled) { stopping = true; stopDoneAt = 0; }
 }
 
@@ -654,6 +675,18 @@ void setup() {
 
   remoteBegin();
 
+#if AUTOSTART
+  jMode = AUTO_JMODE;
+  jRpmLo = capRpm(AUTO_RPM_LO, nullptr); jRpmHi = capRpm(AUTO_RPM_HI, nullptr);
+  jTMin = AUTO_T_MIN; jTMax = AUTO_T_MAX; jRev = AUTO_JREV;
+  accelLimit = constrain(AUTO_ACCEL, ACCEL_MIN, ACCEL_MAX);
+  jitterOn = true;
+  pickJitterTarget(); scheduleJitter(millis());
+  autoStartPending = true;
+  Serial.printf("auto-start in %lu ms: jmode %s, %.0f..%.0f rpm every %.1f..%.1f s, accel %.0f\n",
+                (unsigned long)AUTOSTART_DELAY_MS, JMODE_NAME[jMode], jRpmLo, jRpmHi, jTMin, jTMax, accelLimit);
+#endif
+
   lastRampUs = micros();
   jCurrentRpm = JITTER_RPM_LO_DEFAULT;
 
@@ -666,6 +699,9 @@ void setup() {
 void loop() {
   pollSerial();
   remotePoll();
+#if AUTOSTART
+  if (autoStartPending && millis() >= AUTOSTART_DELAY_MS) cmdEnable(true);   // clears the flag
+#endif
   rampStep();
   phaseCheck();
 }
